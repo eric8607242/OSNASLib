@@ -55,7 +55,7 @@ class ConvBNAct(nn.Sequential):
                  bn_momentum,
                  bn_track_running_stats,
                  pad,
-                 group,
+                 group=1,
                  *args,
                  **kwargs):
 
@@ -102,6 +102,158 @@ class SEModule(nn.Module):
         se_output = inputs * feature_excite_act
 
         return se_output
+
+def channel_shuffle(x, groups=2):
+    batch_size, c, w, h = x.shape
+    group_c = c // groups
+    x = x.view(batch_size, group, group_c, w, h)
+    x = torch.transpose(x, 1, 2).contiguous()
+    x = x.view(batch_size, -1, w, h)
+    return x
+
+class ShuffleBlockX(nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 stride,
+                 activation,
+                 se,
+                 bn_momentum,
+                 bn_track_running_stats):
+        super(ShuffleBlockX, self).__init__()
+
+        branch_out_channels = out_channels // 2
+
+        self.stride = stride
+        if self.stride == 2:
+            self.branch_1 = nn.Sequential(ConvBNAct(in_channels=in_channels,
+                                                   out_channels=in_channels,
+                                                   kernel_size=3,
+                                                   stride=stride,
+                                                   activation=None,
+                                                   bn_momentum=bn_momentum,
+                                                   bn_track_running_stats=bn_track_running_stats,
+                                                   pad=(3//2),
+                                                   group=in_channels),
+                                          ConvBNAct(in_channels=in_channels,
+                                                    out_channels=branch_out_channels,
+                                                    kernel_size=1,
+                                                    stride=1,
+                                                    activation=activation,
+                                                    bn_momentum=bn_momentum,
+                                                    bn_track_running_stats=bn_track_running_stats,
+                                                    pad=0))
+        else:
+            self.branch_1 = nn.Sequential()
+
+        branch_2 = []
+        branch_2_out_channels = [[in_channels, branch_out_channels], [branch_out_channels, branch_out_channels], [branch_out_channels, out_channels]]
+        branch_2_in_channels = in_channels
+        for oc1, oc2 in branch_2_out_channels:
+            branch_2.append(
+                            ConvBNAct(in_channels=branch_2_in_channels,
+                                      out_channels=oc1,
+                                      kernel_size=3,
+                                      stride=1,
+                                      activation=None,
+                                      bn_momentum=bn_momentum,
+                                      bn_track_running_stats=bn_track_running_stats,
+                                      pad=(3//2),
+                                      group=branch_2_in_channels))
+            branch_2.append(
+                            ConvBNAct(in_channels=oc1,
+                                      out_channels=oc2,
+                                      kernel_size=1,
+                                      stride=stride,
+                                      activation=activation,
+                                      bn_momentum=bn_momentum,
+                                      bn_track_running_stats=bn_track_running_stats,
+                                      pad=0)
+                            )
+            branch_2_in_channels = oc2
+        self.branch_2 = nn.Sequential(*branch_2)
+            
+        
+
+    def forward(self, x):
+        if self.stride == 1:
+            c = x.size(1) // 2
+            x1, x2 = x[:, :c], x[:, c:]
+        else:
+            x1, x2 = x, x
+        y = torch.cat((self.branch_1(x1), self.branch_2(x2)), 1)
+        return channel_shuffle(y)
+
+class ShuffleBlock(nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 activation,
+                 se,
+                 bn_momentum,
+                 bn_track_running_stats):
+        super(ShuffleBlock, self).__init__()
+
+        branch_out_channels = out_channels // 2
+
+        self.stride = stride
+        if self.stride == 2:
+            self.branch_1 = nn.Sequential(ConvBNAct(in_channels=in_channels,
+                                                    out_channels=in_channels,
+                                                    kernel_size=kernel_size,
+                                                    stride=stride,
+                                                    activation=None,
+                                                    bn_momentum=bn_momentum,
+                                                    bn_track_running_stats=bn_track_running_stats,
+                                                    pad=(kernel_size//2),
+                                                    group=in_channels),
+                                          ConvBNAct(in_channels=in_channels,
+                                                    out_channels=branch_out_channels,
+                                                    kernel_size=1,
+                                                    stride=1,
+                                                    activation=activation,
+                                                    bn_momentum=bn_momentum,
+                                                    bn_track_running_stats=bn_track_running_stats,
+                                                    pad=0))
+        else:
+            self.branch_1 = nn.Sequential()
+
+        self.branch_2 = nn.Sequential(ConvBNAct(in_channels=in_channels if stride > 1 else branch_out_channels,
+                                                out_channels=branch_out_channels,
+                                                kernel_size=1,
+                                                stride=1,
+                                                activation=activation,
+                                                bn_momentum=bn_momentum,
+                                                bn_track_running_stats=bn_track_running_stats,
+                                                pad=0),
+                                      ConvBNAct(in_channels=branch_out_channels,
+                                                out_channels=branch_out_channels,
+                                                kernel_size=kernel_size,
+                                                stride=stride,
+                                                activation=None,
+                                                bn_momentum=bn_momentum,
+                                                bn_track_running_stats=bn_track_running_stats,
+                                                pad=(kernel_size//2),
+                                                group=branch_out_channels),
+                                      ConvBNAct(in_channels=branch_out_channels,
+                                                out_channels=branch_out_channels,
+                                                kernel_size=1,
+                                                stride=1,
+                                                activation=activation,
+                                                bn_momentum=bn_momentum,
+                                                bn_track_running_stats=bn_track_running_stats,
+                                                pad=0))
+
+    def forward(self, x):
+        if self.stride == 1:
+            c = x.size(1) // 2
+            x1, x2 = x[:, :c], x[:, c:]
+        else:
+            x1, x2 = x, x
+        y = torch.cat((self.branch_1(x1), self.branch_2(x2)), 1)
+        return channel_shuffle(y)
 
 class IRBlock(nn.Module):
     def __init__(self, 
@@ -197,7 +349,24 @@ def get_block(block_type,
 
     elif block_type == "Shuffle":
         # Block of ShuffleNet
-        raise NotImplementedError
+        block = ShuffleBlock(in_channels=in_channels,
+                             out_channels=out_channels,
+                             kernel_size=kernel_size,
+                             stride=stride,
+                             activation=activation,
+                             se=se,
+                             bn_momentum=bn_momentum,
+                             bn_track_running_stats=bn_track_running_stats)
+    elif block_type == "ShuffleX":
+        # Block of ShuffleNet
+        block = ShuffleBlockX(in_channels=in_channels,
+                              out_channels=out_channels,
+                              stride=stride,
+                              activation=activation,
+                              se=se,
+                              bn_momentum=bn_momentum,
+                              bn_track_running_stats=bn_track_running_stats)
+
 
     elif block_type == "classifier":
         block = nn.Linear(in_channels, out_channels)
