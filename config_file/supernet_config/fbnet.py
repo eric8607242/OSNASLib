@@ -1,5 +1,5 @@
 # block_type, kernel_size, se, activation, kwargs
-FB_MICRO_CFG = [["Mobile", 3, False, "relu", {"expansion_rate":1, "point_group":1}],
+FBNET_MICRO_CFG = [["Mobile", 3, False, "relu", {"expansion_rate":1, "point_group":1}],
                 ["Mobile", 3, False, "relu", {"expansion_rate":1, "point_group":2}],
                 ["Mobile", 3, False, "relu", {"expansion_rate":3, "point_group":1}],
                 ["Mobile", 3, False, "relu", {"expansion_rate":6, "point_group":1}],
@@ -10,7 +10,7 @@ FB_MICRO_CFG = [["Mobile", 3, False, "relu", {"expansion_rate":1, "point_group":
                 ["Skip"  , 0, False, "relu", {}]]
 
 
-FB_SUPERNET_S_CFG = {
+FBNET_SUPERNET_S_CFG = {
         # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
         "first":[["Conv", 3, 16, 2, 3, "relu", False, {}]],
         # in_channels, out_channels, stride
@@ -42,7 +42,7 @@ FB_SUPERNET_S_CFG = {
                 ["classifier", 1504, 1000, 0, 0, 0, 0, {}]]
         }
 
-FB_SUPERNET_L_CFG = {
+FBNET_SUPERNET_L_CFG = {
         # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
         "first":[["Conv", 3, 16, 2, 3, "relu", False, {}]],
         # in_channels, out_channels, stride

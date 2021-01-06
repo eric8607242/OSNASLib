@@ -15,6 +15,7 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
     * Evolution algorithm
 
 ## TODO
+### Search Space
 * [x] supernet architecture for FBNet
-* [ ] supernet architecture for ProxylessNAS
+* [x] supernet architecture for ProxylessNAS
 * [ ] supernet architecture for SPOS
