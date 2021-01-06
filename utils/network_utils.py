@@ -27,12 +27,23 @@ def conv_1x1_bn(in_channels,
             HSwish()
         )
 
+class GlobalAveragePooling(nn.Module):
+    def forward(self, x):
+        return x.mean(3).mean(2)
 
 class HSwish(nn.Module):
     def forward(self, x):
         out = x * F.relu6(x+3, inplace=True) / 6
         return out
 
+class HSigmoid(nn.Module):
+    def __init__(self, inplace=True):
+        super(HSigmoid, self).__init__()
+        self.inplace = inplace
+
+    def forward(self, x):
+        out = F.relu6(x + 3, inplace=self.inplace) / 6
+        return out
 
 class ConvBNAct(nn.Sequential):
     def __init__(self, 
@@ -102,7 +113,8 @@ class IRBlock(nn.Module):
                  se,
                  expansion_rate, 
                  bn_momentum, 
-                 bn_track_running_stats):
+                 bn_track_running_stats,
+                 point_group):
         super(IRBlock, self).__init__()
         
         self.stride = stride
@@ -120,6 +132,7 @@ class IRBlock(nn.Module):
                                         activation=activation,
                                         bn_momentum=bn_momentum,
                                         bn_track_running_stats=bn_track_running_stats,
+                                        group=point_group,
                                         pad=0)
         
         self.depthwise = ConvBNAct(in_channels=hidden_channel,
@@ -129,7 +142,7 @@ class IRBlock(nn.Module):
                                    activation=activation,
                                    bn_momentum=bn_momentum,
                                    bn_track_running_stats=bn_track_running_stats,
-                                   pad=(kernel//2),
+                                   pad=(kernel_size//2),
                                    group=hidden_channel)
 
         self.point_wise_1 = ConvBNAct(in_channels=hidden_channel,
@@ -139,6 +152,7 @@ class IRBlock(nn.Module):
                                       activation=None,
                                       bn_momentum=bn_momentum,
                                       bn_track_running_stats=bn_track_running_stats,
+                                      group=point_group,
                                       pad=0)
 
         self.se = SEModule(hidden_channel) if se else nn.Sequential()
@@ -160,7 +174,7 @@ def get_block(block_type,
               stride,
               activation,
               se,
-              bn_momentumm
+              bn_momentum,
               bn_track_running_stats,
               *args,
               **kwargs):
@@ -168,6 +182,8 @@ def get_block(block_type,
     if block_type == "Mobile":
         # Inverted Residual Block of MobileNet
         expansion_rate = kwargs["expansion_rate"]
+        point_group = kwargs["point_group"] if "point_group" in kwargs else 1
+
         block = IRBlock(in_channels=in_channels,
                         out_channels=out_channels,
                         kernel_size=kernel_size,
@@ -176,24 +192,34 @@ def get_block(block_type,
                         se=se,
                         expansion_rate=expansion_rate,
                         bn_momentum=bn_momentum,
-                        bn_track_running_stats=bn_track_running_stats)
+                        bn_track_running_stats=bn_track_running_stats,
+                        point_group=point_group)
 
-    elif block_type == "Shuffle"
+    elif block_type == "Shuffle":
         # Block of ShuffleNet
-        pass
+        raise NotImplementedError
 
     elif block_type == "classifier":
         block = nn.Linear(in_channels, out_channels)
 
     elif block_type == "global_average":
-        pass
+        block = GlobalAveragePooling()
     
-    elif block_type == "conv_1x1_bn":
-        block = conv_1x1_bn(in_channels=in_channels, 
-                            out_channels=out_channels, 
-                            activation=activation,
-                            bn_momentum=bn_momentum, 
-                            bn_track_running_stats=bn_track_running_stats)
+    elif block_type == "Conv":
+        block = ConvBNAct(in_channels=in_channels,
+                          out_channels=out_channels,
+                          kernel_size=kernel_size,
+                          stride=stride,
+                          activation=activation,
+                          bn_momentum=bn_momentum,
+                          bn_track_running_stats=bn_track_running_stats,
+                          group=1,
+                          pad=(kernel_size//2))
+
+    elif block_type == "Skip":
+        block = nn.Sequential()
+    else:
+        raise NotImplementedError
 
     return block
     

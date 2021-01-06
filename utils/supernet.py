@@ -1,19 +1,13 @@
-import json
-import random
 import math
-import itertools
-
-import numpy as np
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
-from network_utils import get_block
+from utils.network_utils import get_block
 
-def construct_supernet_layer(micro_cfgs, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
+def construct_supernet_layer(micro_cfg, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
     supernet_layer = nn.ModuleList()
-    for b_cfg in micro_cfgs:
+    for b_cfg in micro_cfg:
         block_type, kernel_size, se, activation, kwargs = b_cfg
         block = get_block(block_type=block_type,
                           in_channels=in_channels,
@@ -30,14 +24,13 @@ def construct_supernet_layer(micro_cfgs, in_channels, out_channels, stride, bn_m
     return supernet_layer
 
 class Supernet(nn.Module):
-    def __init__(self, supernet_cfg, micro_cfg, CONFIG):
+    def __init__(self, supernet_cfg, micro_cfg, classes, dataset, bn_momentum=0.1, bn_track_running_stats=True):
         super(Supernet, self).__init__()
-        self.CONFIG = CONFIG
-        self.classes = CONFIG.classes
-        self.dataset = CONFIG.dataset
+        self.classes = classes
+        self.dataset = dataset
 
-        bn_momentum = self.CONFIG.bn_momentum
-        bn_track_running_stats = self.CONFIG.bn_track_running_stats
+        bn_momentum = bn_momentum
+        bn_track_running_stats = bn_track_running_stats
 
         # First Stage
         self.first_stages = nn.ModuleList()
@@ -61,7 +54,7 @@ class Supernet(nn.Module):
         for l_cfg in supernet_cfg["search"]:
             in_channels, out_channels, stride = l_cfg
 
-            layer = construct_supernet_layer(micro_cfgs=micro_cfgs,
+            layer = construct_supernet_layer(micro_cfg=micro_cfg,
                                              in_channels=in_channels,
                                              out_channels=out_channels,
                                              stride=stride,
