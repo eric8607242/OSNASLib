@@ -5,6 +5,7 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 **The main components of one-shot NAS in this repo**
 * Supernet
     * Search space of ProxylessNAS
+    * Search space of FbNet
 * Supernet training strategy
     * Uniform sampling
     * Strict fairness
@@ -13,4 +14,5 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
     * Random search
     * Evolution algorithm
 
-## Todo
+## Ongoing
+* Supernet architecture for each search space
