@@ -18,4 +18,7 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 ### Search Space
 * [x] supernet architecture for FBNet
 * [x] supernet architecture for ProxylessNAS
-* [ ] supernet architecture for SPOS
+* [x] supernet architecture for SPOS
+
+### Search strategy
+* [x] dataflow(e.g., CIFAR10, CIFAR100, and ImageNet)
