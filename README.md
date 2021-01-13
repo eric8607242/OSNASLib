@@ -6,6 +6,7 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 * Supernet
     * Search space of ProxylessNAS
     * Search space of FbNet
+    * Search space of SPOS
 * Supernet training strategy
     * Uniform sampling
     * Strict fairness
@@ -19,6 +20,10 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 * [x] supernet architecture for FBNet
 * [x] supernet architecture for ProxylessNAS
 * [x] supernet architecture for SPOS
+* [x] supernet forward process(e.g., differentiable and single-path)
+    - gumbel softmax
+    - softmax
+    - specific architecture(for uniform sampling and fairness sampling)
 
 ### Search strategy
 * [x] dataflow(e.g., CIFAR10, CIFAR100, and ImageNet)

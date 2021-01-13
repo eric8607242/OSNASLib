@@ -24,8 +24,12 @@ def construct_supernet_layer(micro_cfg, in_channels, out_channels, stride, bn_mo
     return supernet_layer
 
 class Supernet(nn.Module):
-    def __init__(self, supernet_cfg, micro_cfg, classes, dataset, bn_momentum=0.1, bn_track_running_stats=True):
+    def __init__(self, macro_cfg, micro_cfg, classes, dataset, search_strategy, bn_momentum=0.1, bn_track_running_stats=True):
         super(Supernet, self).__init__()
+        self.micro_cfg = micro_cfg
+        self.macro_cfg = macro_cfg
+        self.search_strategy = search_strategy
+
         self.classes = classes
         self.dataset = dataset
 
@@ -34,7 +38,7 @@ class Supernet(nn.Module):
 
         # First Stage
         self.first_stages = nn.ModuleList()
-        for l_cfg in supernet_cfg["first"]:
+        for l_cfg in macro_cfg["first"]:
             block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
 
             layer = get_block(block_type=block_type,
@@ -51,7 +55,7 @@ class Supernet(nn.Module):
 
         # Search Stage
         self.search_stages= nn.ModuleList()
-        for l_cfg in supernet_cfg["search"]:
+        for l_cfg in macro_cfg["search"]:
             in_channels, out_channels, stride = l_cfg
 
             layer = construct_supernet_layer(micro_cfg=micro_cfg,
@@ -64,7 +68,7 @@ class Supernet(nn.Module):
 
         # Last Stage
         self.last_stages = nn.ModuleList()
-        for l_cfg in supernet_cfg["last"]:
+        for l_cfg in macro_cfg["last"]:
             block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
 
             layer = get_block(block_type=block_type,
@@ -80,18 +84,41 @@ class Supernet(nn.Module):
             self.last_stages.append(layer)
 
         self._initialize_weights() 
+        if self.search_strategy == "differentiable_gumbel" or self.search_strategy == "differentiable":
+            self._initialize_architecture_param()
+        else:
+            self.architecture = None
+
 
     def forward(self, x):
         for i, l in enumerate(self.first_stages):
             x = l(x) 
 
         for i, l in enumerate(self.search_stages):
-            x = l(x)
+            if self.search_strategy == "differentiable_gumbel" or self.search_strategy == "differentiable":
+                weight = F.gumbel_softmax(self.architecture_param, dim=-1) \
+                        if self.search_strategy == "differentiable_gumbel" else F.softmax(self.architecture_param, dim=-1)
+                x = sum(p * b(x) for p, b in zip(weight, l))
+            else:
+                x = l[self.architecture[i]](x)
 
         for i, l in enumerate(self.last_stages):
             x = l(x)
 
         return x
+
+    def set_activate_architecture(self, architecture):
+        """
+        Activate the path based on the passed architecture.
+        """
+        self.architecture = architecture
+
+    def _initialize_architecture_param(self):
+        micro_len = len(self.micro_cfg)
+        macro_len = len(self.macro_cfg)
+
+        self.architecture_param = Variable(1e-3*torch.randn(macro_len, micro_len), requires_grad=True)
+
 
     def _initialize_weights(self):
         for m in self.modules():
