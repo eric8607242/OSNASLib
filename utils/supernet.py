@@ -2,6 +2,7 @@ import math
 
 import torch
 import torch.nn as nn
+from torch.autograd import Variable
 
 from utils.network_utils import get_block
 

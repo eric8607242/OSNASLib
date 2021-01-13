@@ -7,11 +7,14 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
     * Search space of ProxylessNAS
     * Search space of FbNet
     * Search space of SPOS
+    * Search space of Single-path NAS
 * Supernet training strategy
     * Uniform sampling
     * Strict fairness
 * Search Strategy
     * Gradient Descent(Differentiable)
+        - Softmax
+        - Gumbel Softmax
     * Random search
     * Evolution algorithm
 
@@ -24,6 +27,9 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
     - gumbel softmax
     - softmax
     - specific architecture(for uniform sampling and fairness sampling)
+* [x] contruct lookup table 
+    - FLOPs 
+    - Parameter number
 
 ### Search strategy
 * [x] dataflow(e.g., CIFAR10, CIFAR100, and ImageNet)
