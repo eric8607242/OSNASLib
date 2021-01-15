@@ -51,7 +51,7 @@ class TrainingStrategy:
         return architecture
 
     def get_fair_architectures(self):
-        architecture = torch.zeros(self.macro_len)
+        architecture = torch.zeros(self.macro_len, dtype=torch.int)
         for i, a in enumerate(architecture):
             block_index = self.architecture_order[i][self.architecture_index[i]]
             architecture[i] = block_index
