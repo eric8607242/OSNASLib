@@ -21,6 +21,9 @@ class LookUpTable:
 
 
     def get_model_info(self, architecture_parameter, info_metric="flops"):
+        """
+        architecture_parameter(matrix) : one-hot of the architecture
+        """
         model_info = []
         for i, l_ap in enumerate(architecture_parameter):
             model_info.append(p * block_info for p, block_info in zip(l_ap, self.info_table[info_metric][i]))
