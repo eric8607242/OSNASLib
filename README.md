@@ -34,3 +34,10 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 ### Search strategy
 * [x] dataflow(e.g., CIFAR10, CIFAR100, and ImageNet)
 * [x] sample strategy(e.g., uniform sample, strictfairness sample)
+* [x] get optimizer(e.g., rmsprop, sgd, and adam)
+* [x] get scheduler(e.g., cosine and step scheduler)
+
+### Util function
+* [x] Average tracker
+* [x] Get logger, get tensorboard writer
+* [x] Calculate classification accuracy
