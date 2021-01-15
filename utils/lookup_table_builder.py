@@ -91,6 +91,10 @@ def calculate_param_nums(model):
     return total_params
 
 def calculate_flops(model, in_channels, input_size):
+    if sum(p.numel() for p in model.parameters()) == 0:
+        # Do not calculate flops for skip connection
+        return 0
+
     counter = FLOPS_Counter(model, [1, in_channels, input_size, input_size])
     flops = counter.print_summary()["total_gflops"]*1000
     return flops

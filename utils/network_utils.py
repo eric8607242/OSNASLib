@@ -384,7 +384,19 @@ def get_block(block_type,
                           pad=(kernel_size//2))
 
     elif block_type == "Skip":
-        block = nn.Sequential()
+        if in_channels != out_channels:
+            block = ConvBNAct(in_channels=in_channels,
+                              out_channels=out_channels,
+                              kernel_size=3,
+                              stride=stride,
+                              activation="relu",
+                              bn_momentum=bn_momentum,
+                              bn_track_running_stats=bn_track_running_stats,
+                              group=1,
+                              pad=(3//2))
+        else:
+            block = nn.Sequential()
+
     else:
         raise NotImplementedError
 
