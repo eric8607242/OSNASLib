@@ -1,6 +1,6 @@
 import time
 
-from utils.util import AverageMeter, accuracy
+from ..utils import AverageMeter, accuracy
 
 
 class Trainer:

@@ -4,8 +4,8 @@ import json
 import torch
 import torch.nn as nn
 
-from utils.network_utils import get_block
-from utils.countflops import FLOPS_Counter
+from .network_utils import get_block
+from ..utils import FLOPS_Counter
 
 
 class LookUpTable:

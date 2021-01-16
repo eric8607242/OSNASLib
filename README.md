@@ -41,3 +41,4 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 * [x] Average tracker
 * [x] Get logger, get tensorboard writer
 * [x] Calculate classification accuracy
+* [x] Argument parser

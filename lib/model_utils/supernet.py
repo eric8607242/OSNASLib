@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 
-from utils.network_utils import get_block
+from .network_utils import get_block
 
 def construct_supernet_layer(micro_cfg, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
     supernet_layer = nn.ModuleList()

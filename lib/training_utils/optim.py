@@ -60,3 +60,6 @@ def get_optimizer(model, optimizer_type, learning_rate, weight_decay, logger, mo
 
     return optimizer
 
+
+def get_criterion():
+    pass
