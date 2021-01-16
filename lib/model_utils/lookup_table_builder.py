@@ -17,13 +17,19 @@ class LookUpTable:
             self.info_table = self._construct_info_table(macro_cfg, micro_cfg, input_size, info_metric=info_metric)
             with open(table_path, "w") as f:
                 json.dump(self.info_table, f)
-        print(self.info_table)
+
+        self.macro_cfg = macro_cfg
+        self.micro_cfg = micro_cfg
 
 
     def get_model_info(self, architecture_parameter, info_metric="flops"):
         """
         architecture_parameter(matrix) : one-hot of the architecture
         """
+        if len(architecture_parameter.shape) == 1:
+            # Get one dim vector, convert to one-hot architecture parameter
+            architecture_parameter = self._architecture_to_one_hot(architecture_parameter)
+
         model_info = []
         for i, l_ap in enumerate(architecture_parameter):
             model_info.append(p * block_info for p, block_info in zip(l_ap, self.info_table[info_metric][i]))
@@ -84,6 +90,13 @@ class LookUpTable:
                 raise NotImplementedError
 
         return block_info
+
+    def _architecture_to_one_hot(self, architecture):
+        architecture_parameter = torch.zeros(len(self.macro_cfg["search"]), len(self.micro_cfg))
+        for l, a in enumerate(architecture):
+            architecture_parameter[l, a] = 1
+
+        return architecture_parameter
 
 
 def calculate_param_nums(model):

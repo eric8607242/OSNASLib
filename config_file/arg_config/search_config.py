@@ -1,15 +1,22 @@
+import os
 import argparse
 
 def get_init_config():
     parser = argparse.ArgumentParser(description="Searching configuration")
-    parser.add_argument("--title",                 type=str,    help="Experiment title")
+    parser.add_argument("--title",                 type=str,    help="Experiment title", required=True)
     parser.add_argument("--resume",                type=str,    help="Resume path")
-    parser.add_argument("--random-seed",           type=int,    help="Random seed")
+    parser.add_argument("--random-seed",           type=int,    default=42,     help="Random seed")
     parser.add_argument("--device",                type=str,    default="cpu")
+    parser.add_argument("--ngpu",                  type=int,    default=4)
     
+    # Search config
+    parser.add_argument("--search-strategy",       type=str,    default="random_search", help="Search the best architecture under the specific hardware constranit [evolution, random_search, differentiable]")
+    parser.add_argument("--target-hc",             type=int,    default=100,  help="Target hardware constraint")
+
+
     # Supernet config
-    parser.add_argument("--search-space",          type=str,    default="proxylessnas", help="Search spcae of different method")
-    parser.add_argument("--sample-strategy",       type=str,    default="fair", help="Sampling strategy for training supernet")
+    parser.add_argument("--search-space",          type=str,    default="proxylessnas", help="Search spcae of different method [proxylessnas, fbnet_s, fbnet_l, spos]")
+    parser.add_argument("--sample-strategy",       type=str,    default="fair", help="Sampling strategy for training supernet [fair, uniform, differentiable]")
 
     # Supernet training config
     parser.add_argument("-epochs",                 type=int,    default=120)
@@ -23,8 +30,8 @@ def get_init_config():
     parser.add_argument("--decay-step",            type=int)
     parser.add_argument("--decay-ratio",           type=float)
 
-    parser.add_argument("--alpha",           type=float)
-    parser.add_argument("--beta",           type=float)
+    parser.add_argument("--alpha",                 type=float)
+    parser.add_argument("--beta",                  type=float)
 
     # Datset config
     parser.add_argument("--dataset",               type=str,    default="cifar100", help="Name of dataset")
@@ -38,14 +45,32 @@ def get_init_config():
     parser.add_argument("--train-portion",         type=float,  default=0.8)
 
     # Path config
+    parser.add_argument("--root-path",             type=str,    default="./logs/")
     parser.add_argument("--logger-path",           type=str,    default="./logs/")
-    parser.add_argument("--writer-path",           type=str,    default="./logs/")
+    parser.add_argument("--writer-path",           type=str,    default="./logs/tb/")
 
-    parser.add_argument("--lookup-table-path",     type=str,    default="./logs/lookup_table.json")
+    parser.add_argument("--lookup-table-path",     type=str,    default="./lookup_table.json")
 
-    parser.add_argument("--supernet-model-path",   type=str)
-    parser.add_argument("--searched-model-path",   type=str)
+    parser.add_argument("--supernet-model-path",   type=str,    default="./best_supernet_model.pth")
+    parser.add_argument("--searched-model-path",   type=str,    default="./searched_model_architecture.json")
 
     args = parser.parse_args()
+    args = setting_path_config(args)
+
     return args
+
+def setting_path_config(args):
+    """
+    Concatenate root path to each path argument
+    """
+    if not os.path.exists(os.path.join(args.root_path, args.title+"_{}".format(args.random_seed))):
+        args.root_path = os.path.join(args.root_path, args.title+"_{}".format(args.random_seed))
+        os.makedirs(args.root_path)
+
+    args.lookup_table_path = os.path.join(args.root_path, args.lookup_table_path)
+    args.supernet_model_path = os.path.join(args.root_path, args.supernet_model_path)
+    args.searched_model_path = os.path.join(args.root_path, args.searched_model_path)
+    return args
+
+    
     
