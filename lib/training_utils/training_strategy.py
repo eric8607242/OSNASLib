@@ -62,4 +62,7 @@ class TrainingStrategy:
                 random.shuffle(self.architecture_order[i])
         return architecture
 
+    def get_block_len(self):
+        return self.micro_len
+
 

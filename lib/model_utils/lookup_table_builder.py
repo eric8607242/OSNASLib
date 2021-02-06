@@ -32,7 +32,7 @@ class LookUpTable:
 
         model_info = []
         for i, l_ap in enumerate(architecture_parameter):
-            model_info.append(p * block_info for p, block_info in zip(l_ap, self.info_table[info_metric][i]))
+            model_info.extend([p * block_info for p, block_info in zip(l_ap, self.info_table[info_metric][i])])
         
         return sum(model_info)
     

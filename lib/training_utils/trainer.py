@@ -1,5 +1,4 @@
 import time
-
 from ..utils import AverageMeter, accuracy
 
 
@@ -35,6 +34,10 @@ class Trainer:
         for epoch in range(self.epochs):
             self._training_step(model, train_loader)
             val_top1 = self.validate(model, val_loader)
+
+            if val_top1 > best_top1_acc:
+                self.logger.info("Best validation top1-acc : {}!".format(val_top1))
+                best_top1_acc = val_top1
 
             
 
