@@ -121,6 +121,13 @@ class Supernet(nn.Module):
 
         self.architecture_param = Variable(1e-3*torch.randn(macro_len, micro_len), requires_grad=True)
 
+    def get_best_architecture_param(self):
+        """
+        Get the best neural architecture by architecture parameters (argmax).
+        """
+        return best_architecture
+
+
 
     def _initialize_weights(self):
         for m in self.modules():

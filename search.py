@@ -44,10 +44,6 @@ if __name__ == "__main__":
 
     #trainer.train_loop(supernet, train_loader, val_loader)
 
-    # Evolution search
-    best_architecture = evoluation_algorithm(trainer, training_strategy, supernet, val_loader, lookup_table, args.target_hc, logger, generation_num=args.generation_num, population=args.population, parent_num=args.parent_num, info_metric=args.info_metric)
-
-
-    # Random search
-    best_architecture = random_search(trainer, training_strategy, supernet, val_loader, lookup_table, args.target_hc, logger, random_iteration=args.random_iteration, info_metric=args.info_metric)
+    search_strategy = SearchStrategy(args.search_strategy)
+    best_architecture = search_strategy.search(trainer, training_strategy, supernet, val_loader, lookup_table, args, logger)
 

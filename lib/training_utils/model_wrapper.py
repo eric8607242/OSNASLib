@@ -1,6 +1,9 @@
 import torch.nn as nn
 
 class ModelWrapper:
+    """
+    Training supernet with different protocal. (e.g., Uniform, Fairstrict, and differentaible)
+    """
     def __init__(self, model, training_strategy, sample_strategy, g_optimizer=None):
         self.sample_strategy = sample_strategy
         self.training_strategy = training_strategy
