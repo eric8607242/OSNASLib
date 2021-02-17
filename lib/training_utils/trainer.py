@@ -3,7 +3,7 @@ from ..utils import AverageMeter, accuracy
 
 
 class Trainer:
-    def __init__(self, criterion, optimizer, epochs, writer, logger, device, model_wrapper):
+    def __init__(self, criterion, optimizer, epochs, writer, logger, device, training_strategy):
         self.top1 = AverageMeter()
         self.top5 = AverageMeter()
         self.losses = AverageMeter()
@@ -12,13 +12,12 @@ class Trainer:
         self.criterion = criterion
         self.optimizer = optimizer
 
+        self.training_strategy = training_strategy
+
         self.writer = writer
         self.logger = logger
 
         self.epochs = epochs
-
-        self.model_wrapper = model_wrapper
-
 
     def train_loop(self, model, train_loader, val_loader):
         """
@@ -50,7 +49,7 @@ class Trainer:
             N = X.shape[0]
 
             self.optimizer.zero_grad()
-            self.model_wrapper.step()
+            self.training_strategy.step()
 
             outs = model(X)
 

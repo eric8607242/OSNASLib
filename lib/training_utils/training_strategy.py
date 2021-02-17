@@ -6,10 +6,12 @@ class TrainingStrategy:
     """
     Support multiple sampling strategy ["uniform", "fair"]
     """
-    def __init__(self, sample_strategy, micro_len, macro_len):
+    def __init__(self, sample_strategy, micro_len, macro_len, model):
         self.micro_len = micro_len
         self.macro_len = macro_len
         self.sample_strategy = sample_strategy
+
+        self.model = model
 
         if self.sample_strategy == "uniform":
             pass
@@ -38,10 +40,19 @@ class TrainingStrategy:
 
     def step(self):
         if self.sample_strategy == "uniform":
-            pass
+            self.model.module.set_forward_state("single") if isinstance(self.model, nn.DataParallel) else self.model.set_forward_state("single")
+
+            architecture = self.generate_training_architecture()
+            self.model.module.set_activate_architecture(architecture) if isinstance(self.model, nn.DataParallel) else self.model.set_activate_architecture(architecture)
+
         elif self.sample_strategy == "fair":
-            pass
+            self.model.module.set_forward_state("single") if isinstance(self.model, nn.DataParallel) else self.model.set_forward_state("single")
+
+            architecture = self.training_strategy.get_fair_architectures()
+            self.model.module.set_activate_architecture(architecture) if isinstance(self.model, nn.DataParallel) else self.model.set_activate_architecture(architecture)
+
         elif self.sample_strategy == "differentiable":
+            self.model.module.set_forward_state("sum") if isinstance(self.model, nn.DataParallel) else self.model.set_forward_state("sum")
             pass
         else:
             raise 

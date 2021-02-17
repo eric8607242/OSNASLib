@@ -25,7 +25,7 @@ def get_lr_scheduler(optimizer, lr_schedule, logger, total_epochs=None, step_per
     return lr_scheduler
     
 
-def get_optimizer(model, optimizer_type, learning_rate, weight_decay, logger, momentum=None, alpha=None, beta=None):
+def get_optimizer(model_parameters, optimizer_type, learning_rate, weight_decay, logger, momentum=None, alpha=None, beta=None):
     logger.info("================= Optimizer =================")
     logger.info("Optimizer : {}".format(optimizer_type))
     logger.info("Learning rate : {}".format(learning_rate))
@@ -35,7 +35,7 @@ def get_optimizer(model, optimizer_type, learning_rate, weight_decay, logger, mo
         assert momentum is not None
 
         logger.info("Momentum : {}".format(momentum))
-        optimizer = torch.optim.SGD(params=model.parameters(),
+        optimizer = torch.optim.SGD(params=model_parameters,
                                     lr=learning_rate,
                                     momentum=momentum,
                                     weight_decay=weight_decay)
@@ -44,7 +44,7 @@ def get_optimizer(model, optimizer_type, learning_rate, weight_decay, logger, mo
         assert momentum is not None
 
         logger.info("Momentum : {}".format(momentum))
-        optimizer = torch.optim.RMSprop(model.parameters(),
+        optimizer = torch.optim.RMSprop(model_parameters,
                             lr=lr,
                             alpha=alpha,
                             momentum=momentum,
@@ -53,7 +53,7 @@ def get_optimizer(model, optimizer_type, learning_rate, weight_decay, logger, mo
         assert beta is not None
 
         logger.info("Beta : {}".format(beta))
-        optimizer = torch.optim.Adam(model.parameters(),
+        optimizer = torch.optim.Adam(model_parameters,
                             weight_decay=weight_decay,
                             lr=CONFIG.lr,
                             betas=(beta, 0.999))

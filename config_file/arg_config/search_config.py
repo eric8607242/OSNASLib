@@ -25,7 +25,6 @@ def get_init_config():
     parser.add_argument("--a-weight-decay",          type=float,  default=0.0004)
     parser.add_argument("--a-momentum",              type=float,  default=0.9)
 
-    parser.add_argument("--a-lr-scheduler",          type=str,    default="cosine")
     parser.add_argument("--a-decay-step",            type=int)
     parser.add_argument("--a-decay-ratio",           type=float)
 

@@ -38,6 +38,8 @@ class Supernet(nn.Module):
         bn_momentum = bn_momentum
         bn_track_running_stats = bn_track_running_stats
 
+        self.forward_state = "single" # [single, sum]
+
         # First Stage
         self.first_stages = nn.ModuleList()
         for l_cfg in macro_cfg["first"]:
@@ -97,11 +99,11 @@ class Supernet(nn.Module):
             x = l(x) 
 
         for i, l in enumerate(self.search_stages):
-            if self.search_strategy == "differentiable_gumbel" or self.search_strategy == "differentiable":
+            if self.forward_state == "sum":
                 weight = F.gumbel_softmax(self.architecture_param, dim=-1) \
                         if self.search_strategy == "differentiable_gumbel" else F.softmax(self.architecture_param, dim=-1)
                 x = sum(p * b(x) for p, b in zip(weight, l))
-            else:
+            elif self.forward_state == "single":
                 x = l[self.architecture[i]](x)
 
         for i, l in enumerate(self.last_stages):
@@ -119,7 +121,10 @@ class Supernet(nn.Module):
         micro_len = len(self.micro_cfg)
         macro_len = len(self.macro_cfg)
 
-        self.architecture_param = Variable(1e-3*torch.randn(macro_len, micro_len), requires_grad=True)
+        self.architecture_param = nn.Parameter(1e-3*torch.randn((macro_len, micro_len), requires_grad=False))
+
+    def get_architecture_param(self):
+        return self.architecture_param
 
     def get_best_architecture_param(self):
         """
@@ -127,6 +132,11 @@ class Supernet(nn.Module):
         """
         return best_architecture
 
+    def set_forward_state(self, state):
+        """
+        Set supernet forward state. ["single", "sum"]
+        """
+        self.forward_state = state
 
 
     def _initialize_weights(self):

@@ -60,24 +60,24 @@ cd config_file/arg_config/
 python3 search.py --title [EXPERIMENT TITLE] --search-strategy random_search
 ```
 * [Optional Hyperparameter]
-    * `--random-iteration` : The random sample number of the neural architectures to search the best architecture.
+    * `--random-iteration` : The random sample number of the neural architectures to search the best architecture. (default:1000)
 
 ### Evolution Algoeithm
 ```
 python3 search.py --title [EXPERIMENT TITLE] --search-strategy evolution
 ```
 * [Optional Hyperparameter]
-    * `--generation_num` : The generation num to evolve the best architecture.
-    * `--population` : The population size in each generation to evolve the best architecture.
-    * `--parent-num` : The parent size to mutate and crossover the best architecture.
+    * `--generation_num` : The generation num to evolve the best architecture. (default:20)
+    * `--population` : The population size in each generation to evolve the best architecture. (default:60)
+    * `--parent-num` : The parent size to mutate and crossover the best architecture. (default:10)
 
 ### Differentiable Search
 ```
 python3 search.py --title [EXPERIMENT TITLE] --search-strategy differentiable
 ```
 * [Optional Hyperparameter]
-    * `--a-lr` : The learning rate for the architecture parameters.
-    * `--a-weight-decay` : The weight decay for the architecture parameters.
-    * `--a-momentum` : The momentum for the architecture parameters.
-    * `--a-lr-scheduler` : The optimization schedule for the architecture parameters.
+    * `--a-optimizer` : The optimzier for the architecture parameters. (default:sgd)
+    * `--a-lr` : The learning rate for the architecture parameters. (default:0.05)
+    * `--a-weight-decay` : The weight decay for the architecture parameters. (default:0.0004)
+    * `--a-momentum` : The momentum for the architecture parameters. (default:0.9)
 

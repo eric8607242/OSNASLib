@@ -21,7 +21,7 @@ if __name__ == "__main__":
     writer = get_writer(args.title, args.random_seed, args.writer_path)
 
 
-    optimizer = get_optimizer(supernet, args.optimizer, 
+    optimizer = get_optimizer(supernet.parameters(), args.optimizer, 
                                   learning_rate=args.lr, 
                                   weight_decay=args.weight_decay, 
                                   logger=logger,
@@ -36,14 +36,13 @@ if __name__ == "__main__":
                                     decay_ratio=args.decay_ratio,
                                     total_epochs=args.epochs)
 
-    model_wrapper = ModelWrapper(supernet, training_strategy, args.sample_strategy)
 
     criterion = get_criterion()
 
-    trainer = Trainer(criterion, optimizer, args.epochs, writer, logger, args.device, model_wrapper)
+    trainer = Trainer(criterion, optimizer, args.epochs, writer, logger, args.device, training_strategy)
 
     #trainer.train_loop(supernet, train_loader, val_loader)
 
-    search_strategy = SearchStrategy(args.search_strategy)
-    best_architecture = search_strategy.search(trainer, training_strategy, supernet, val_loader, lookup_table, args, logger)
+    search_strategy = SearchStrategy(supernet, args.search_strategy, args, logger)
+    best_architecture = search_strategy.search(trainer, training_strategy, val_loader, lookup_table)
 
