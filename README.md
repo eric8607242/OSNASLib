@@ -1,4 +1,7 @@
 # OneShot_NAS_example
+
+**...The project is under construction...**
+
 ## Introduction
 The is a example repo for one-shot NAS. We cover the basic implementation for one-shot NAS(e.g., supernet, search strategy, and training strategy).
 
@@ -37,6 +40,7 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 * [x] get optimizer(e.g., rmsprop, sgd, and adam)
 * [x] get scheduler(e.g., cosine and step scheduler)
 * [x] search strategy (e.g., evolution algorithm and random search)
+* [ ] hardware constraint loss for differentiable search strategy.
 
 ### Util function
 * [x] Average tracker

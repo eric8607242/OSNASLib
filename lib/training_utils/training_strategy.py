@@ -57,9 +57,11 @@ class TrainingStrategy:
         else:
             raise 
 
+
     def get_uniform_architectures(self):
         architecture = torch.randint(low=0, high=self.micro_len, size=(self.macro_len,))
         return architecture
+
 
     def get_fair_architectures(self):
         architecture = torch.zeros(self.macro_len, dtype=torch.int)
@@ -72,6 +74,7 @@ class TrainingStrategy:
                 self.architecture_index[i] = 0
                 random.shuffle(self.architecture_order[i])
         return architecture
+
 
     def get_block_len(self):
         return self.micro_len

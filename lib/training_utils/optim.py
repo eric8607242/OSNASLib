@@ -63,3 +63,6 @@ def get_optimizer(model_parameters, optimizer_type, learning_rate, weight_decay,
 
 def get_criterion():
     pass
+
+def get_hc_criterion():
+    pass
