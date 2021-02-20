@@ -28,6 +28,7 @@ class SearchStrategy:
 
         self.val_loader = val_loader
 
+
     def step(self):
         if self.search_strategy == "evolution":
             pass
@@ -48,7 +49,7 @@ class SearchStrategy:
             architecture_parameter = self.supernet.get_architecture_param()
             architecture_info = lookup_table.get_model_info(architecture_parameter, info_metric=self.args.info_metric)
 
-            hc_loss = self.hc_criterion(args.target_hc, architecture_info)
+            hc_loss = self.hc_criterion(args.target_hc, architecture_info, args.hc_weight)
 
             total_loss = hc_loss + ce_loss
             total_loss.backward()
@@ -57,6 +58,7 @@ class SearchStrategy:
 
         else:
             raise 
+
 
     def search(self, trainer, training_strategy, lookup_table):
         if self.search_strategy == "evolution":

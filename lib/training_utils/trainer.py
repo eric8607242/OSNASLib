@@ -20,6 +20,7 @@ class Trainer:
 
         self.epochs = epochs
 
+
     def train_loop(self, model, train_loader, val_loader):
         """
         Support mode:
@@ -38,7 +39,6 @@ class Trainer:
             if val_top1 > best_top1_acc:
                 self.logger.info("Best validation top1-acc : {}!".format(val_top1))
                 best_top1_acc = val_top1
-
             
 
     def _training_step(self, model, train_loader):
