@@ -13,7 +13,7 @@ For example, for VGG16, the search space size is $3^{16}$ if the kernel size in 
 ### Search Strategy
 Given a search space, the objective of neural architecture search is to **search the best architecture under the specific hardware constraint**. To achieve the goal, a search strategy is needed to be adopted to search the best architecture from the search space. The common search strategies are RL, random search, evolution algorithm, and differentiable.
 ### Performance estimation strategy
-With the search strategy, **how do we evaluate the architectures in the search space? In other words, how do we know the performace of each architectures?**. To evaluate each architectures in the search space, the performance estimation strategy has to been adopted. The most intuitive estimation strategy is that we train each architecture few epochs (e.g., 10, 5, or 20) to get the approximated perofmrnace of each architecture.
+With the search strategy, **how do we evaluate the architectures in the search space? In other words, how do we know the performace of each architectures?**. To evaluate each architectures in the search space, the performance estimation strategy has to been adopted. The most intuitive estimation strategy is training each architecture few epochs (e.g., 10, 5, or 20) to get the approximated perofmrnace of each architecture, and training a performance predictor to predict the accuracy of each architecture.
 
 
 
