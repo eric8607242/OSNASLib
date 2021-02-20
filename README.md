@@ -25,6 +25,9 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
     * Random search
     * Evolution algorithm
 
+
+We are glad at all contributions to improve this repo. Please feel free to pull request.
+
 ## TODO
 ### Search Space
 * [x] supernet architecture for FBNet
@@ -89,4 +92,5 @@ python3 search.py --title [EXPERIMENT TITLE] --search-strategy differentiable
     * `--a-lr` : The learning rate for the architecture parameters. (default:0.05)
     * `--a-weight-decay` : The weight decay for the architecture parameters. (default:0.0004)
     * `--a-momentum` : The momentum for the architecture parameters. (default:0.9)
+
 
