@@ -29,6 +29,8 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 We are glad at all contributions to improve this repo. Please feel free to pull request.
 
 ## TODO
+* [ ] EMA
+* [ ] Warmup lr scheduler
 ### Search Space
 * [x] supernet architecture for FBNet
 * [x] supernet architecture for ProxylessNAS
@@ -47,7 +49,7 @@ We are glad at all contributions to improve this repo. Please feel free to pull 
 * [x] get optimizer(e.g., rmsprop, sgd, and adam)
 * [x] get scheduler(e.g., cosine and step scheduler)
 * [x] search strategy (e.g., evolution algorithm and random search)
-* [ ] hardware constraint loss for differentiable search strategy.
+* [x] hardware constraint loss for differentiable search strategy (L2 loss).
 
 ### Util function
 * [x] Average tracker
@@ -56,15 +58,44 @@ We are glad at all contributions to improve this repo. Please feel free to pull 
 * [x] Argument parser
 
 ## Config
+### Common Config
+Following is the common config in `config_file/arg_config/search_config.py` and `config_file/arg_config/evaluate_config.py`. 
+* `--title`
+    * `--resume`
+    * `--random-seed`
+    * `--device`
+    * `--ngpu`
+* `--optimizer`
+    * `--lr`
+    * `--weight-decay`
+    * `--momentum`
+* `--lr-scheduler`
+    * `--decay-step`
+    * `--decay-ratio`
+    * `--alpha`
+    * `--beta`
+* `--dataset`
+    * `--dataset-path`
+    * `--classes`
+    * `--input-size`
+    * `--batch-size`
+    * `--num-workers`
+    * `--train-portion`
+
+
+### Config File
 ```
 cd config_file/arg_config/
 ```
-* `search_config.py` : Config of search process (e.g., search strategy, epoch, target hc, and epoch)
+* `search_config.py` : Config for search process (e.g., search strategy, epoch, target hc, and epoch)
     * `--search-strategy`: Search strategy for searching the best architecture. (e.g., Random search, evolution algorithm, and differentiable)
     * `--search-space` : Search space in different papaer (e.g., ProxylessNAS, FBNet, and SPOS)
     * `--sample-strategy` : The way to train supernet (e.g., Uniform sampling, Fairstrict sampling,and differentiable)
         * differentiable : Jointly search architecture and training supernet with differentiable sheme.
     * `--hc-weight` : The weight of hardware constraint objective. (default : 0.005)
+
+* `evaluate_config.py` : Config for evaluate searched architecture.
+    *
 
 ## Search
 ### Random Search
@@ -93,4 +124,9 @@ python3 search.py --title [EXPERIMENT TITLE] --search-strategy differentiable
     * `--a-weight-decay` : The weight decay for the architecture parameters. (default:0.0004)
     * `--a-momentum` : The momentum for the architecture parameters. (default:0.9)
 
+## Evaluate
+Train the searched architectrue from scratch to evaluate the search quality.
+```
+python3 train.py --title [EXPERIMENT TITLE] --searched_model_path [PATH TO SEARCHED MODEL]
+```
 

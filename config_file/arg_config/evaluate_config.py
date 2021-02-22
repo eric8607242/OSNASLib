@@ -1,8 +1,8 @@
 import os
 import argparse
 
-def get_search_config():
-    parser = argparse.ArgumentParser(description="Searching configuration")
+def get_evaluate_config():
+    parser = argparse.ArgumentParser(description="Evaluating configuration")
     parser.add_argument("--title",                 type=str,                           help="Experiment title", required=True)
     parser.add_argument("--resume",                type=str,                           help="Resume path")
     parser.add_argument("--random-seed",           type=int,    default=42,            help="Random seed")
@@ -16,32 +16,10 @@ def get_search_config():
 
     parser.add_argument("--info-metric",           type=str,    default="flops",       help="HC objective for searching")
 
-    # Random search
-    parser.add_argument("--random-iteration",      type=int,    default=1000,          help="The network architectures sample num for random search")
-    # Evolution algorithm
-    parser.add_argument("--generation_num",        type=int,    default=20,            help="Generation num for evolution algorithm")
-    parser.add_argument("--population",            type=int,    default=60,            help="Population size for evoluation algorithm")
-    parser.add_argument("--parent-num",            type=int,    default=10,            help="Parent size for evolution algorithm")
-    # Differentiable 
-    parser.add_argument("--a-optimizer",             type=str,    default="sgd",         help="Optimizer for supernet training")
-    parser.add_argument("--a-lr",                    type=float,  default=0.05)
-    parser.add_argument("--a-weight-decay",          type=float,  default=0.0004)
-    parser.add_argument("--a-momentum",              type=float,  default=0.9)
-
-    parser.add_argument("--a-decay-step",            type=int)
-    parser.add_argument("--a-decay-ratio",           type=float)
-
-    parser.add_argument("--a-alpha",                 type=float)
-    parser.add_argument("--a-beta",                  type=float)
-
-
-
-
     # Supernet config
     parser.add_argument("--search-space",          type=str,    default="proxylessnas", help="Search spcae in different paper [proxylessnas, fbnet_s, fbnet_l, spos]")
-    parser.add_argument("--sample-strategy",       type=str,    default="fair",        help="Sampling strategy for training supernet [fair, uniform, differentiable]")
 
-    # Supernet training config
+    # Evaluate training config
     parser.add_argument("-epochs",                 type=int,    default=120,           help="The epochs for supernet training")
 
     parser.add_argument("--optimizer",             type=str,    default="sgd",         help="Optimizer for supernet training")

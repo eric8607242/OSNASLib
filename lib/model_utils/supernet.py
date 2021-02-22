@@ -3,7 +3,6 @@ import math
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.autograd import Variable
 
 from .network_utils import get_block
 
@@ -130,6 +129,8 @@ class Supernet(nn.Module):
         """
         Get the best neural architecture by architecture parameters (argmax).
         """
+        best_architecture = self.architecture_param.data.argmax(dim=1)
+        best_architecture = best_architecture.cpu().numpy()
         return best_architecture
 
     def set_forward_state(self, state):

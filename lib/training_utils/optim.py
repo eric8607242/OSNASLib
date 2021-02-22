@@ -67,8 +67,6 @@ def get_criterion():
 def get_hc_criterion():
     return l2_hc_loss
 
-
-
 def cross_entropy_with_label_smoothing(pred, target, eta=0.1):
     onehot_target = label_smoothing(pred, target, eta=eta)
     return cross_entropy_for_onehot(pred, onehot_target)

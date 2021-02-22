@@ -3,7 +3,7 @@ from ..utils import AverageMeter, accuracy
 
 
 class Trainer:
-    def __init__(self, criterion, optimizer, epochs, writer, logger, device, training_strategy, search_strategy):
+    def __init__(self, criterion, optimizer, epochs, writer, logger, device, trainer_state, training_strategy=None, search_strategy=None):
         self.top1 = AverageMeter()
         self.top5 = AverageMeter()
         self.losses = AverageMeter()
@@ -12,8 +12,10 @@ class Trainer:
         self.criterion = criterion
         self.optimizer = optimizer
 
-        self.training_strategy = training_strategy
-        self.search_strategy = search_strategy
+        self.trainer_state = trainer_state
+        if self.trainer_state == "search":
+            self.training_strategy = training_strategy
+            self.search_strategy = search_strategy
 
         self.writer = writer
         self.logger = logger
@@ -34,7 +36,7 @@ class Trainer:
 
         for epoch in range(self.epochs):
             self._training_step(model, train_loader)
-            val_top1 = self.validate(model, val_loader, inference=False)
+            val_top1 = self.validate(model, val_loader, inference=False if self.trainer_state=="search" else True)
 
             if val_top1 > best_top1_acc:
                 self.logger.info("Best validation top1-acc : {}!".format(val_top1))
@@ -47,14 +49,17 @@ class Trainer:
 
         for step, (X, y) in enumerate(train_loader):
 
-            # If search strategy is "differentiable". Update architecture parameter.
-            self.search_strategy.step()
+            if self.trainer_state == "search":
+                # If search strategy is "differentiable". Update architecture parameter.
+                self.search_strategy.step()
 
             X, y = X.to(self.device, non_blocking=True), y.to(self.device, non_blocking=True)
             N = X.shape[0]
 
             self.optimizer.zero_grad()
-            self.training_strategy.step()
+
+            if self.trainer_state == "search":
+                self.training_strategy.step()
 
             outs = model(X)
 
