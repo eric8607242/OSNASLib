@@ -8,7 +8,7 @@ class SearchStrategy:
     def __init__(self, supernet, val_loader, search_strategy, args, logger):
         self.search_strategy = search_strategy
 
-        if self.search_strategy == "differentaible":
+        if self.search_strategy == "differentaible" or self.search_strategy == "differentiable_gumbel":
             # Init architecture parameter optimizer
             self.a_optimizer = get_optimizer(supernet.get_architecture_param(),
                                              args.a_optimizer,
@@ -36,7 +36,7 @@ class SearchStrategy:
         elif self.search_strategy == "random_search":
             pass
 
-        elif self.search_strategy == "differentaible":
+        elif self.search_strategy == "differentaible" or self.search_strategy == "differentiable_gumbel":
             # Update architecture parameter
             self.a_optimizer.zero_grad()
 
@@ -67,7 +67,7 @@ class SearchStrategy:
         elif self.search_strategy == "random_search":
             best_architecture = random_search(trainer, training_strategy, self.supernet, self.val_loader, lookup_table, self.args.target_hc, self.logger, random_iteration=self.args.random_iteration, info_metric=self.args.info_metric)
 
-        elif self.search_strategy == "differentaible":
+        elif self.search_strategy == "differentaible" or self.search_strategy == "differentiable_gumbel":
             best_architecture = self.supernet.get_best_architecture()
 
             self.supernet.module.set_activate_architecture(best_architecture) if isinstance(self.supernet, nn.DataParallel) else self.supernet.set_activate_architecture(best_architecture)

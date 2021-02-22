@@ -29,33 +29,12 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 We are glad at all contributions to improve this repo. Please feel free to pull request.
 
 ## TODO
-* [ ] EMA
+* [ ] EMA for model evaluate
 * [ ] Warmup lr scheduler
-### Search Space
-* [x] supernet architecture for FBNet
-* [x] supernet architecture for ProxylessNAS
-* [x] supernet architecture for SPOS
-* [x] supernet forward process(e.g., differentiable and single-path)
-    - gumbel softmax
-    - softmax
-    - specific architecture(for uniform sampling and fairness sampling)
-* [x] contruct lookup table 
-    - FLOPs 
-    - Parameter number
-
-### Search strategy
-* [x] dataflow(e.g., CIFAR10, CIFAR100, and ImageNet)
-* [x] sample strategy(e.g., uniform sample, strictfairness sample)
-* [x] get optimizer(e.g., rmsprop, sgd, and adam)
-* [x] get scheduler(e.g., cosine and step scheduler)
-* [x] search strategy (e.g., evolution algorithm and random search)
-* [x] hardware constraint loss for differentiable search strategy (L2 loss).
-
-### Util function
-* [x] Average tracker
-* [x] Get logger, get tensorboard writer
-* [x] Calculate classification accuracy
-* [x] Argument parser
+* [ ] Inference code (`test.py`)
+* [ ] Evaluate supernet (`evaluate.py`)
+* [ ] Hyperparameter record for each run
+* [ ] Experiment results
 
 ## Config
 ### Common Config
