@@ -18,6 +18,8 @@ lib64/
 parts/
 sdist/
 var/
+logs/
+data/
 wheels/
 pip-wheel-metadata/
 share/python-wheels/

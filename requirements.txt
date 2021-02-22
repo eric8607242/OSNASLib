@@ -1,0 +1,4 @@
+torch==1.6.0
+torchvision==0.8.2
+tensorboardX==2.1
+tabulate==0.8.9

@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 def get_lr_scheduler(optimizer, lr_schedule, logger, total_epochs=None, step_per_epoch=None, step_size=None, decay_ratio=None):
     """

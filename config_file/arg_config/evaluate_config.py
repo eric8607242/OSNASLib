@@ -6,7 +6,7 @@ def get_evaluate_config():
     parser.add_argument("--title",                 type=str,                           help="Experiment title", required=True)
     parser.add_argument("--resume",                type=str,                           help="Resume path")
     parser.add_argument("--random-seed",           type=int,    default=42,            help="Random seed")
-    parser.add_argument("--device",                type=str,    default="cpu")
+    parser.add_argument("--device",                type=str,    default="cuda")
     parser.add_argument("--ngpu",                  type=int,    default=4)
     
     # Search config
@@ -56,7 +56,6 @@ def get_evaluate_config():
     parser.add_argument("--searched-model-path",   type=str,    default="./searched_model_architecture.json")
 
     args = parser.parse_args()
-    args = setting_path_config(args)
 
     return args
 

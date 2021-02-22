@@ -1,6 +1,8 @@
 # Train the architecture searched by NAS algorithm
 import time
 
+import torch
+
 from config_file.arg_config import *
 from config_file.supernet_config import *
 
@@ -14,13 +16,9 @@ if __name__ == "__main__":
     writer = get_writer(args.title, args.random_seed, args.writer_path)
 
     if args.seed is not None:
-        logging.info("Set random seed : {}".format(args.seed))
         set_random_seed(args.seed)
     
-    if args.cuda:
-        device = torch.device("cuda" if (torch.cuda.is_available() and args.ngpu > 0) else "cpu")
-    else:
-        device = torch.device("cpu")
+    device = torch.device(args.device)
 
     architecture = load_architecture()
 

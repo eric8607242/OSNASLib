@@ -1,6 +1,7 @@
 import random
 
 import torch
+import torch.nn as nn
 
 class TrainingStrategy:
     """
@@ -48,7 +49,7 @@ class TrainingStrategy:
         elif self.sample_strategy == "fair":
             self.model.module.set_forward_state("single") if isinstance(self.model, nn.DataParallel) else self.model.set_forward_state("single")
 
-            architecture = self.training_strategy.get_fair_architectures()
+            architecture = self.get_fair_architectures()
             self.model.module.set_activate_architecture(architecture) if isinstance(self.model, nn.DataParallel) else self.model.set_activate_architecture(architecture)
 
         elif self.sample_strategy == "differentiable":

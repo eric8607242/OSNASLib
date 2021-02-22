@@ -35,15 +35,15 @@ class Trainer:
         best_top1_acc = 0.0
 
         for epoch in range(self.epochs):
-            self._training_step(model, train_loader)
-            val_top1 = self.validate(model, val_loader, inference=False if self.trainer_state=="search" else True)
+            self._training_step(model, train_loader, epoch)
+            val_top1 = self.validate(model, val_loader, epoch, inference=False if self.trainer_state=="search" else True)
 
             if val_top1 > best_top1_acc:
-                self.logger.info("Best validation top1-acc : {}!".format(val_top1))
+                self.logger.info("Best validation top1-acc : {}!".format(val_top1*100))
                 best_top1_acc = val_top1
             
 
-    def _training_step(self, model, train_loader):
+    def _training_step(self, model, train_loader, epoch):
         model.train()
         start_time = time.time()
 
@@ -73,7 +73,7 @@ class Trainer:
         self._reset_average_tracker()
 
 
-    def validate(self, model, val_loader, inference=True):
+    def validate(self, model, val_loader, epoch, inference=True):
         """
             inference(bool) : True, evaluate specific architecture.
                               False, evaluate supernet.

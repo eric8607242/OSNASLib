@@ -1,3 +1,5 @@
+import os 
+
 from .search_config import get_search_config
 from .evaluate_config import get_evaluate_config
 
@@ -8,6 +10,7 @@ def get_init_config(config_state):
         args = get_evaluate_config()
 
     args = setting_path_config(args)
+
     return args
 
 
@@ -22,4 +25,6 @@ def setting_path_config(args):
     args.lookup_table_path = os.path.join(args.root_path, args.lookup_table_path)
     args.supernet_model_path = os.path.join(args.root_path, args.supernet_model_path)
     args.searched_model_path = os.path.join(args.root_path, args.searched_model_path)
+
     return args
+
