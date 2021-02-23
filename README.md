@@ -14,7 +14,6 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
     * Search space of ProxylessNAS
     * Search space of FbNet
     * Search space of SPOS
-    * Search space of Single-path NAS
 * Supernet training strategy
     * Uniform sampling
     * Strict fairness
@@ -29,11 +28,12 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 We are glad at all contributions to improve this repo. Please feel free to pull request.
 
 ## TODO
+* [ ] Resume
+* [ ] Hyperparameter record for each run
 * [ ] EMA for model evaluate
 * [ ] Warmup lr scheduler
-* [ ] Inference code (`test.py`)
+* [ ] Search space for Single-path NAS
 * [ ] Evaluate supernet (`evaluate.py`)
-* [ ] Hyperparameter record for each run
 * [ ] Experiment results
 
 ## Config

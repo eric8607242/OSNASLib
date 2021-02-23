@@ -100,3 +100,41 @@ def accuracy(output, target, topk=(1,)):
 
     return res
 
+def resume_checkpoint(model, checkpoint_path, optimizer=None, lr_scheduler=None):
+    resume_epoch = None
+    if os.path.isfile(checkpoint_path):
+        checkpoint = torch.load(checkpoint_path, map_location="cpu")
+        
+        if isinstance(checkpoint, dict) and ["model"] in checkpoint:
+            model.load_state_dict(checkpoint["model"])
+            if optimizer is not None and "optimizer" in checkpoint:
+                optimizer.load_state_dict(checkpoint["optimizer"])
+
+            if lr_scheduler is not None and "scheduler" in checkpoint:
+                lr_scheduler.load_state_dict(checkpoint["scheduler"])
+
+            if "epoch" in checkpoint:
+                resume_epoch = checkpoint["epoch"]
+
+        else:
+            model.load_state_dict(checkpoint)
+    else:
+        raise
+
+def save(model, checkpoint_path, optimizer=None, lr_scheduler=None, resume_epoch=None):
+    if optimizer is None and resume_epoch is None and lr_scheduler is None:
+        checkpoint = model.module.state_dict() if isinstance(model, nn.DataParallel) else model.state_dict()
+    else:
+        checkpoint = {"model":model.module.state_dict() if isinstance(model, nn.DataParallel) else model.state_dict()}
+        if optimizer is not None:
+            checkpoint["optimizer"] = optimizer.state_dict()
+
+        if lr_scheduler is not None:
+            checkpoint["scheduler"] = lr_scheduler.state_dict()
+
+        if resume_epoch is not None:
+            checkpoint["epoch"] = resume_epoch
+        
+    torch.save(checkpoint, checkpoint_path)
+
+

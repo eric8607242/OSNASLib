@@ -38,7 +38,7 @@ def get_common_config(parser):
     return parser
 
 
-def setting_path_config(parser):
+def setting_path_config(parser, config_state):
     """
     Concatenate root path to each path argument
     """
@@ -47,9 +47,10 @@ def setting_path_config(parser):
     parser.add_argument("--logger-path",           type=str,    default="./logs/")
     parser.add_argument("--writer-path",           type=str,    default="./logs/tb/")
 
+    parser.add_argument("--checkpoint-path-root",  type=str,    default="./checkpoints/")
     parser.add_argument("--lookup-table-path",     type=str,    default="./lookup_table.json")
 
-    parser.add_argument("--supernet-model-path",   type=str,    default="./best_supernet_model.pth")
+    parser.add_argument("--best-model-path",   type=str,    default="./best_model.pth")
     parser.add_argument("--searched-model-path",   type=str,    default="./searched_model_architecture.npy")
 
     parser.add_argument("--hyperparameter-track-path", type=str,default="./hyperparameter_track.csv")
@@ -61,7 +62,11 @@ def setting_path_config(parser):
         os.makedirs(args.root_path)
 
     args.lookup_table_path = os.path.join(args.root_path, args.lookup_table_path)
-    args.supernet_model_path = os.path.join(args.root_path, args.supernet_model_path)
+
+    args.checkpoint_path_root = os.path.join(args.root_path, args.checkpoint_path_root, config_state)
+    os.makedirs(args.checkpoint_path_root)
+
+    args.best_model_path = os.path.join(args.checkpoint_path_root, args.best_model_path )
     args.searched_model_path = os.path.join(args.root_path, args.searched_model_path)
 
     return args

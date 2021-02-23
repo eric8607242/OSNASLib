@@ -46,10 +46,10 @@ if __name__ == "__main__":
 
     criterion = get_criterion()
 
+    start_epoch = 0
     if args.resume:
-        optimizer_state, resume_epoch = resume_checkpoint(model, args.resume)
-        optimizer.load_state_dict(optimizer_state["optimizer"])
-        start_epoch = resume_epoch
+        start_epoch = resume_checkpoint(model, args.resume, optimizer, lr_scheduler)
+        logger.info("Resume training from {} at epoch {}".format(args.resume, start_epoch))
 
     if device.type == "cuda" and args.ngpu >= 1:
         supernet = supernet.to(device)
@@ -57,7 +57,7 @@ if __name__ == "__main__":
 
     search_strategy = SearchStrategy(supernet, val_loader, args.search_strategy, args, logger)
 
-    trainer = Trainer(criterion, optimizer, args.epochs, writer, logger, args.device, "search", training_strategy=training_strategy, search_strategy=search_strategy)
+    trainer = Trainer(criterion, optimizer, args.epochs, writer, logger, args.device, "search", training_strategy=training_strategy, search_strategy=search_strategy, start_epoch=start_epoch)
     trainer.train_loop(supernet, train_loader, val_loader)
 
     best_architecture = search_strategy.search(trainer, training_strategy, val_loader, lookup_table)

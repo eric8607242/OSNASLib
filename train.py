@@ -26,6 +26,7 @@ if __name__ == "__main__":
     model = Model(args.macro_cfg, args.micro_cfg, architecture, args.classes, args.dataset)
     
     train_loader, val_loader = get_train_loader(args.dataset, args.dataset_path, args.batch_size, args.num_workers, train_portion=args.train_portion)
+    test_loader = get_test_loader(args.dataset, args.dataset_path, args.batch_size, args.num_workers)
 
     optimizer = get_optimizer(supernet.parameters(), args.optimizer, 
                                   learning_rate=args.lr, 
@@ -43,19 +44,19 @@ if __name__ == "__main__":
 
     criterion = get_criterion()
 
+    start_epoch = 0
     if args.resume:
-        optimizer_state, resume_epoch = resume_checkpoint(model, args.resume)
-        optimizer.load_state_dict(optimizer_state["optimizer"])
-        start_epoch = resume_epoch
+        start_epoch = resume_checkpoint(model, args.resume, optimizer, lr_scheduler)
+        logger.info("Resume training from {} at epoch {}".format(args.resume, start_epoch))
 
     if device.type == "cuda" and args.ngpu >= 1):
         model = model.to(device)
         model = nn.DataParallel(model, list(range(args.ngpu)))
 
-    trainer = Trainer(criterion, optimizer, args.epochs, writer, logger, args.device, trainer_state="evaluate")
+    trainer = Trainer(criterion, optimizer, args.epochs, writer, logger, args.device, trainer_state="evaluate", start_epoch=start_epoch)
 
     start_time = time.time()
-    trainer.train_loop(model, train_loader, val_loader)
+    trainer.train_loop(model, train_loader, test_loader)
     logger.info("Total search time : {:.2f}".format(time.time() - start_time))
 
 

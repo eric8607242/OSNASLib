@@ -3,7 +3,7 @@ from ..utils import AverageMeter, accuracy
 
 
 class Trainer:
-    def __init__(self, criterion, optimizer, epochs, writer, logger, device, trainer_state, training_strategy=None, search_strategy=None):
+    def __init__(self, criterion, optimizer, epochs, writer, logger, device, trainer_state, training_strategy=None, search_strategy=None, start_epoch=0):
         self.top1 = AverageMeter()
         self.top5 = AverageMeter()
         self.losses = AverageMeter()
@@ -20,6 +20,7 @@ class Trainer:
         self.writer = writer
         self.logger = logger
 
+        self.start_epoch = start_epoch
         self.epochs = epochs
 
 
@@ -34,14 +35,17 @@ class Trainer:
         """
         best_top1_acc = 0.0
 
-        for epoch in range(self.epochs):
+        for epoch in range(self.start_epoch, self.epochs):
             self._training_step(model, train_loader, epoch)
             val_top1 = self.validate(model, val_loader, epoch, inference=False if self.trainer_state=="search" else True)
 
             if val_top1 > best_top1_acc:
                 self.logger.info("Best validation top1-acc : {}!".format(val_top1*100))
                 best_top1_acc = val_top1
-            
+                save(model, args.best_model_path, self.optimizer, self.lr_scheduler, epoch)
+
+            save(model, os.path.join(args.checkpoint_path_root, "{}_{}.pth".format(self.trainer_state, epoch)), self.optimizer, self.lr_scheduler, epoch)
+                
 
     def _training_step(self, model, train_loader, epoch):
         model.train()
