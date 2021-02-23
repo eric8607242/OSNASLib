@@ -14,7 +14,7 @@ def get_evaluate_config():
     parser.add_argument("--search-space",          type=str,    default="proxylessnas", help="Search spcae in different paper [proxylessnas, fbnet_s, fbnet_l, spos]")
 
     # Evaluate training config
-    parser.add_argument("-epochs",                 type=int,    default=120,           help="The epochs for supernet training")
+    parser.add_argument("--epochs",                 type=int,    default=120,           help="The epochs for supernet training")
 
     parser.add_argument("--optimizer",             type=str,    default="sgd",         help="Optimizer for supernet training")
     parser.add_argument("--lr",                    type=float,  default=0.05)

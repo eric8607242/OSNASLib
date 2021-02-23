@@ -110,7 +110,7 @@ def get_population_accuracy(population, trainer, supernet, val_loader, info_metr
     architectures_top1_acc = []
     for architecture in population:
         supernet.module.set_activate_architecture(architecture) if isinstance(supernet, nn.DataParallel) else supernet.set_activate_architecture(architecture)
-        architectures_top1_acc.append(trainer.validate(supernet, val_loader))
+        architectures_top1_acc.append(trainer.validate(supernet, val_loader, 0))
 
 
     return np.array(architectures_top1_acc)

@@ -9,10 +9,10 @@ PROXYLESSNAS_MICRO_CFG = [["Mobile", 3, False, "relu", {"expansion_rate":3}],
 
 PROXYLESSNAS_SUPERNET_S_CFG = {
         # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
-        "first":[["Conv", 3, 32, 2, 3, "relu", False, {}],
+        "first":[["Conv", 3, 32, 2, 3, "relu", False, {}], # stride 1 for CIFAR
             ["Mobile", 32, 16, 1, 3, "relu", False, {"expansion_rate":1}]],
         # in_channels, out_channels, stride
-        "search":[[16, 24, 2],
+        "search":[[16, 24, 2], # stride 1 for CIFAR
                   [24, 24, 1],
                   [24, 24, 1],
                   [24, 24, 1],

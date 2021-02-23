@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     architecture = load_architecture()
 
-    macro_cfg, micro_cfg = get_supernet_cfg(args.search_space, args.classes)
+    macro_cfg, micro_cfg = get_supernet_cfg(args.search_space, args.classes, args.dataset)
     model = Model(args.macro_cfg, args.micro_cfg, architecture, args.classes, args.dataset)
     
     test_loader = get_test_loader(args.dataset, args.dataset_path, args.batch_size, args.num_workers)
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         model = model.to(device)
         model = nn.DataParallel(model, list(range(args.ngpu)))
 
-    trainer = Trainer(criterion, None, None, writer, logger, args.device, trainer_state="evaluate")
+    trainer = Trainer(criterion, None, None, writer, logger, args.device, "evaluate", args)
 
     start_time = time.time()
     top1_acc = trainer.validate(model, test_loader, 0)

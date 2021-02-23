@@ -8,7 +8,7 @@ from .network_utils import get_block
 
 class Model(nn.Module):
     def __init__(self, macro_cfg, micro_cfg, architecture, classes, dataset, bn_momentum=0.1, bn_track_running_stats=True):
-        super(Supernet, self).__init__()
+        super(Model, self).__init__()
         self.micro_cfg = micro_cfg
         self.macro_cfg = macro_cfg
 

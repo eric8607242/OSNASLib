@@ -21,8 +21,10 @@ if __name__ == "__main__":
     
     device = torch.device(args.device)
 
-    macro_cfg, micro_cfg = get_supernet_cfg(args.search_space, args.classes)
+    macro_cfg, micro_cfg = get_supernet_cfg(args.search_space, args.classes, args.dataset)
     supernet = Supernet(macro_cfg, micro_cfg, args.classes, args.dataset, args.sample_strategy)
+
+    supernet = supernet.to(device)
 
     train_loader, val_loader = get_train_loader(args.dataset, args.dataset_path, args.batch_size, args.num_workers, train_portion=args.train_portion)
 
@@ -48,19 +50,21 @@ if __name__ == "__main__":
 
     start_epoch = 0
     if args.resume:
-        start_epoch = resume_checkpoint(model, args.resume, optimizer, lr_scheduler)
+        start_epoch = resume_checkpoint(supernet, args.resume, optimizer, lr_scheduler)
         logger.info("Resume training from {} at epoch {}".format(args.resume, start_epoch))
 
     if device.type == "cuda" and args.ngpu >= 1:
-        supernet = supernet.to(device)
         supernet = nn.DataParallel(supernet, list(range(args.ngpu)))
 
     search_strategy = SearchStrategy(supernet, val_loader, args.search_strategy, args, logger)
 
-    trainer = Trainer(criterion, optimizer, args.epochs, writer, logger, args.device, "search", training_strategy=training_strategy, search_strategy=search_strategy, start_epoch=start_epoch)
-    trainer.train_loop(supernet, train_loader, val_loader)
+    trainer = Trainer(criterion, optimizer, lr_scheduler, writer, logger, args.device, "search", args, training_strategy=training_strategy, search_strategy=search_strategy, start_epoch=start_epoch)
+    start_time = time.time()
 
-    best_architecture = search_strategy.search(trainer, training_strategy, val_loader, lookup_table)
+    if not args.directly_search:
+        trainer.train_loop(supernet, train_loader, val_loader)
+
+    best_architecture = search_strategy.search(trainer, training_strategy, lookup_table)
 
     save_architecture(args.searched_model_path, best_architecture)
     logger.info("Total search time : {:.2f}".format(time.time() - start_time))

@@ -34,11 +34,37 @@ class LookUpTable:
         for i, l_ap in enumerate(architecture_parameter):
             model_info.extend([p * block_info for p, block_info in zip(l_ap, self.info_table[info_metric][i])])
         
-        return sum(model_info)
+        return sum(model_info) + self.info_table["base_{}".format(info_metric)]
     
 
     def _construct_info_table(self, macro_cfg, micro_cfg, input_size, info_metric=["flops", "param", "latency"]):
+        base_info = 0
         info_table = {metric:[] for metric in info_metric}
+        base_info_table = {"base_{}".format(metric):0 for metric in info_metric}
+        
+        first_stage = []
+        first_in_channels = None
+        for l, l_cfg in enumerate(macro_cfg["first"]):
+            block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
+            first_in_channels = in_channels if first_in_channels is None else first_in_channels
+            layer = get_block(block_type=block_type,
+                              in_channels=in_channels,
+                              out_channels=out_channels,
+                              kernel_size=kernel_size,
+                              stride=stride,
+                              activation=activation,
+                              se=se,
+                              bn_momentum=0.1,
+                              bn_track_running_stats=True,
+                              **kwargs)
+            first_stage.append(layer)
+
+        first_stage = nn.Sequential(*first_stage)
+        base_info = self._get_block_info(first_stage, first_in_channels, input_size, info_metric)
+        input_size = input_size if stride == 1 else input_size//2
+        for k, v in base_info.items():
+            base_info_table["base_{}".format(k)] += v
+
 
         for l, l_cfg in enumerate(macro_cfg["search"]):
             in_channels, out_channels, stride = l_cfg
@@ -53,8 +79,8 @@ class LookUpTable:
                                   stride=stride,
                                   activation=activation,
                                   se=se,
-                                  bn_momentum=0.9,
-                                  bn_track_running_stats=False,
+                                  bn_momentum=0.1,
+                                  bn_track_running_stats=True,
                                   **kwargs
                                 )
 
@@ -64,8 +90,33 @@ class LookUpTable:
             input_size = input_size if stride == 1 else input_size//2
             info_table = self._merge_info_table(info_table, layer_info, info_metric)
 
-        return info_table
+        last_stage = []
+        last_in_channels = None
+        for l, l_cfg in enumerate(macro_cfg["last"]):
+            block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
+            last_in_channels = in_channels if last_in_channels is None else last_in_channels
 
+            layer = get_block(block_type=block_type,
+                              in_channels=in_channels,
+                              out_channels=out_channels,
+                              kernel_size=kernel_size,
+                              stride=stride,
+                              activation=activation,
+                              se=se,
+                              bn_momentum=0.1,
+                              bn_track_running_stats=True,
+                              **kwargs)
+            last_stage.append(layer)
+        last_stage = nn.Sequential(*last_stage)
+        base_info = self._get_block_info(last_stage, last_in_channels, input_size, info_metric)
+        input_size = input_size if stride == 1 else input_size//2
+
+        for k, v in base_info.items():
+            base_info_table["base_{}".format(k)] += v
+
+        info_table.update(base_info_table)
+
+        return info_table
 
     def _merge_info_table(self, info_table, new_info, info_metric):
         """Merge a dict with new info in to main info_table

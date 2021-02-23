@@ -103,9 +103,9 @@ def accuracy(output, target, topk=(1,)):
 def resume_checkpoint(model, checkpoint_path, optimizer=None, lr_scheduler=None):
     resume_epoch = None
     if os.path.isfile(checkpoint_path):
-        checkpoint = torch.load(checkpoint_path, map_location="cpu")
+        checkpoint = torch.load(checkpoint_path)
         
-        if isinstance(checkpoint, dict) and ["model"] in checkpoint:
+        if isinstance(checkpoint, dict) and "model" in checkpoint:
             model.load_state_dict(checkpoint["model"])
             if optimizer is not None and "optimizer" in checkpoint:
                 optimizer.load_state_dict(checkpoint["optimizer"])
@@ -120,6 +120,8 @@ def resume_checkpoint(model, checkpoint_path, optimizer=None, lr_scheduler=None)
             model.load_state_dict(checkpoint)
     else:
         raise
+
+    return resume_epoch
 
 def save(model, checkpoint_path, optimizer=None, lr_scheduler=None, resume_epoch=None):
     if optimizer is None and resume_epoch is None and lr_scheduler is None:

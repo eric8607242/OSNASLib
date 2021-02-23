@@ -1,9 +1,11 @@
+import os
 import time
-from ..utils import AverageMeter, accuracy
+
+from ..utils import *
 
 
 class Trainer:
-    def __init__(self, criterion, optimizer, epochs, writer, logger, device, trainer_state, training_strategy=None, search_strategy=None, start_epoch=0):
+    def __init__(self, criterion, optimizer, lr_scheduler, writer, logger, device, trainer_state, args, training_strategy=None, search_strategy=None, start_epoch=0):
         self.top1 = AverageMeter()
         self.top5 = AverageMeter()
         self.losses = AverageMeter()
@@ -11,6 +13,7 @@ class Trainer:
 
         self.criterion = criterion
         self.optimizer = optimizer
+        self.lr_scheduler = lr_scheduler
 
         self.trainer_state = trainer_state
         if self.trainer_state == "search":
@@ -21,7 +24,9 @@ class Trainer:
         self.logger = logger
 
         self.start_epoch = start_epoch
-        self.epochs = epochs
+        self.epochs = args.epochs
+
+        self.args = args
 
 
     def train_loop(self, model, train_loader, val_loader):
@@ -34,17 +39,21 @@ class Trainer:
             - Training architecture parameter and supernet
         """
         best_top1_acc = 0.0
+        
 
         for epoch in range(self.start_epoch, self.epochs):
+            self.logger.info("Start to train for epoch {}".format(epoch))
+            self.logger.info("Learning Rate : {:.8f}".format(self.optimizer.param_groups[0]["lr"]))
+
             self._training_step(model, train_loader, epoch)
             val_top1 = self.validate(model, val_loader, epoch, inference=False if self.trainer_state=="search" else True)
 
             if val_top1 > best_top1_acc:
-                self.logger.info("Best validation top1-acc : {}!".format(val_top1*100))
+                self.logger.info("Best validation top1-acc : {}. Save model!".format(val_top1*100))
                 best_top1_acc = val_top1
-                save(model, args.best_model_path, self.optimizer, self.lr_scheduler, epoch)
+                save(model, self.args.best_model_path, self.optimizer, self.lr_scheduler, epoch+1)
 
-            save(model, os.path.join(args.checkpoint_path_root, "{}_{}.pth".format(self.trainer_state, epoch)), self.optimizer, self.lr_scheduler, epoch)
+            save(model, os.path.join(self.args.checkpoint_path_root, "{}_{}.pth".format(self.trainer_state, epoch)), self.optimizer, self.lr_scheduler, epoch+1)
                 
 
     def _training_step(self, model, train_loader, epoch):
@@ -71,6 +80,7 @@ class Trainer:
             loss.backward()
 
             self.optimizer.step()
+            self.lr_scheduler.step()
             self._intermediate_stats_logging(outs, y, loss, step, epoch, N, len_loader=len(train_loader), val_or_train="Train")
 
         self._epoch_stats_logging(start_time, epoch, val_or_train="Train")
@@ -95,7 +105,7 @@ class Trainer:
             outs = model(X)
 
             loss = self.criterion(outs, y)
-            self._intermediate_stats_logging(outs, y, loss, step, epoch, N, len_loader=len(val_loader), val_or_train="Validation")
+            self._intermediate_stats_logging(outs, y, loss, step, epoch, N, len_loader=len(val_loader), val_or_train="Valid")
 
 
         top1_avg = self.top1.get_avg()

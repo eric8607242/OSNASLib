@@ -20,7 +20,7 @@ def random_search(trainer, training_strategy, supernet, val_loader, lookup_table
     architectures_top1_acc = []
     for a in random_architectures:
         supernet.module.set_activate_architecture(architecture) if isinstance(supernet, nn.DataParallel) else supernet.set_activate_architecture(architecture)
-        architectures_top1_acc.append(trainer.validate(supernet, val_loader))
+        architectures_top1_acc.append(trainer.validate(supernet, val_loader, 0))
 
 
     architectures_top1_acc = np.array(architectures_top1_acc)

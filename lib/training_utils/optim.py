@@ -19,9 +19,9 @@ def get_lr_scheduler(optimizer, lr_schedule, logger, total_epochs=None, step_per
         assert step_size is not None
         assert decay_ratio is not None
 
-        logger.info("Step size : {}".format(step_size))
+        logger.info("Step size (epoch) : {}".format(step_size))
         logger.info("Gamma : {}".format(decay_ratio))
-        lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=decay_ratio, last_epoch=-1)
+        lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step_size*step_per_epoch, gamma=decay_ratio, last_epoch=-1)
 
     return lr_scheduler
     

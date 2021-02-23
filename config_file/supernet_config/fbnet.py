@@ -12,10 +12,10 @@ FBNET_MICRO_CFG = [["Mobile", 3, False, "relu", {"expansion_rate":1, "point_grou
 
 FBNET_SUPERNET_S_CFG = {
         # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
-        "first":[["Conv", 3, 16, 2, 3, "relu", False, {}]],
+        "first":[["Conv", 3, 16, 2, 3, "relu", False, {}]], # stride 1 for CIFAR
         # in_channels, out_channels, stride
         "search":[[16, 16, 1],
-                  [16, 24, 2],
+                  [16, 24, 2], # stride 1 for CIFAR
                   [24, 24, 1],
                   [24, 24, 1],
                   [24, 24, 1],
@@ -44,10 +44,10 @@ FBNET_SUPERNET_S_CFG = {
 
 FBNET_SUPERNET_L_CFG = {
         # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
-        "first":[["Conv", 3, 16, 2, 3, "relu", False, {}]],
+        "first":[["Conv", 3, 16, 2, 3, "relu", False, {}]], # stride 1 for CIFAR
         # in_channels, out_channels, stride
         "search":[[16, 16, 1],
-                  [16, 24, 2],
+                  [16, 24, 2], # stride 1 for CIFAR
                   [24, 24, 1],
                   [24, 24, 1],
                   [24, 24, 1],

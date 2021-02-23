@@ -28,7 +28,6 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 We are glad at all contributions to improve this repo. Please feel free to pull request.
 
 ## TODO
-* [ ] Resume
 * [ ] Hyperparameter record for each run
 * [ ] EMA for model evaluate
 * [ ] Warmup lr scheduler
@@ -83,6 +82,8 @@ python3 search.py --title [EXPERIMENT TITLE] --search-strategy random_search
 ```
 * [Optional Hyperparameter]
     * `--random-iteration` : The random sample number of the neural architectures to search the best architecture. (default:1000)
+    * `--directly-search` : Directly searching flag. If the flag is `True`, searching the best architecture without training supernet. (Better with the resume flag to load the supernet pretrained weight.)
+    
 
 ### Evolution Algoeithm
 ```
@@ -92,6 +93,7 @@ python3 search.py --title [EXPERIMENT TITLE] --search-strategy evolution
     * `--generation_num` : The generation num to evolve the best architecture. (default:20)
     * `--population` : The population size in each generation to evolve the best architecture. (default:60)
     * `--parent-num` : The parent size to mutate and crossover the best architecture. (default:10)
+    * `--directly-search` : Directly searching flag. If the flag is `True`, searching the best architecture without training supernet. (Better with the resume flag to load the supernet pretrained weight.)
 
 ### Differentiable Search
 ```

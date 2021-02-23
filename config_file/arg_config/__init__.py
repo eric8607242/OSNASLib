@@ -11,7 +11,7 @@ def get_init_config(config_state):
         parser = get_evaluate_config()
 
     parser = get_common_config(parser)
-    args = setting_path_config(parser)
+    args = setting_path_config(parser, config_state)
 
     return args
 
@@ -57,14 +57,15 @@ def setting_path_config(parser, config_state):
 
     args = parser.parse_args()
 
-    if not os.path.exists(os.path.join(args.root_path, args.title+"_{}".format(args.random_seed))):
-        args.root_path = os.path.join(args.root_path, args.title+"_{}".format(args.random_seed))
+    args.root_path = os.path.join(args.root_path, args.title+"_{}".format(args.random_seed))
+    if not os.path.exists(args.root_path):
         os.makedirs(args.root_path)
 
     args.lookup_table_path = os.path.join(args.root_path, args.lookup_table_path)
 
     args.checkpoint_path_root = os.path.join(args.root_path, args.checkpoint_path_root, config_state)
-    os.makedirs(args.checkpoint_path_root)
+    if not os.path.exists(args.checkpoint_path_root):
+        os.makedirs(args.checkpoint_path_root)
 
     args.best_model_path = os.path.join(args.checkpoint_path_root, args.best_model_path )
     args.searched_model_path = os.path.join(args.root_path, args.searched_model_path)

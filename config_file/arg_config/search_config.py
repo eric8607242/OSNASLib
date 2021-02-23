@@ -4,6 +4,7 @@ import argparse
 def get_search_config():
     parser = argparse.ArgumentParser(description="Searching configuration")
     # Search config
+    parser.add_argument("--directly-search",     action="store_true",   default=False,   help="Supernet training or not. If not, than direct search the best architecture based on the weight of sueprnet.")
     parser.add_argument("--search-strategy",       type=str,    default="random_search", help="The way to search the best architecture[evolution, random_search, differentiable, differentiable_gumbel]")
 
     parser.add_argument("--target-hc",             type=int,    default=100,           help="Target hardware constraint")
@@ -14,7 +15,7 @@ def get_search_config():
     # Random search
     parser.add_argument("--random-iteration",      type=int,    default=1000,          help="The network architectures sample num for random search")
     # Evolution algorithm
-    parser.add_argument("--generation_num",        type=int,    default=20,            help="Generation num for evolution algorithm")
+    parser.add_argument("--generation-num",        type=int,    default=20,            help="Generation num for evolution algorithm")
     parser.add_argument("--population",            type=int,    default=60,            help="Population size for evoluation algorithm")
     parser.add_argument("--parent-num",            type=int,    default=10,            help="Parent size for evolution algorithm")
     # Differentiable 
@@ -37,10 +38,10 @@ def get_search_config():
     parser.add_argument("--sample-strategy",       type=str,    default="uniform",        help="Sampling strategy for training supernet [fair, uniform, differentiable, differentiable_gumbel]")
 
     # Supernet training config
-    parser.add_argument("-epochs",                 type=int,    default=120,           help="The epochs for supernet training")
+    parser.add_argument("--epochs",                 type=int,    default=120,           help="The epochs for supernet training")
 
     parser.add_argument("--optimizer",             type=str,    default="sgd",         help="Optimizer for supernet training")
-    parser.add_argument("--lr",                    type=float,  default=0.0225)
+    parser.add_argument("--lr",                    type=float,  default=0.045)
     parser.add_argument("--weight-decay",          type=float,  default=0.00004)
     parser.add_argument("--momentum",              type=float,  default=0.9)
 

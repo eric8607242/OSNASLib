@@ -8,9 +8,9 @@ SPOS_MICRO_CFG = [["Shuffle", 3, False, "relu", {}],
 
 SPOS_SUPERNET_CFG = {
         # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
-        "first":[["Conv", 3, 16, 2, 3, "relu", False, {}]],
+        "first":[["Conv", 3, 16, 2, 3, "relu", False, {}]], # stride 1 for CIFAR
         # in_channels, out_channels, stride
-        "search":[[16, 64, 2],
+        "search":[[16, 64, 2], # stride 1 for CIFAR
                   [64, 64, 1],
                   [64, 64, 1],
                   [64, 64, 1],
