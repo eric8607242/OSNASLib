@@ -13,6 +13,8 @@ def get_init_config(config_state):
     parser = get_common_config(parser)
     args = setting_path_config(parser, config_state)
 
+    args.bn_track_running_stats = bool(args.bn_track_running_stats)
+
     return args
 
 

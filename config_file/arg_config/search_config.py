@@ -20,8 +20,8 @@ def get_search_config():
     parser.add_argument("--parent-num",            type=int,    default=10,            help="Parent size for evolution algorithm")
     # Differentiable 
     parser.add_argument("--a-optimizer",             type=str,    default="sgd",         help="Optimizer for supernet training")
-    parser.add_argument("--a-lr",                    type=float,  default=0.05)
-    parser.add_argument("--a-weight-decay",          type=float,  default=0.0004)
+    parser.add_argument("--a-lr",                    type=float,  default=0.001)
+    parser.add_argument("--a-weight-decay",          type=float,  default=0.0)
     parser.add_argument("--a-momentum",              type=float,  default=0.9)
 
     parser.add_argument("--a-decay-step",            type=int)
@@ -51,6 +51,9 @@ def get_search_config():
 
     parser.add_argument("--alpha",                 type=float)
     parser.add_argument("--beta",                  type=float)
+
+    parser.add_argument("--bn-momentum",           type=float,  default=0.1, help="Momentum for the BN")
+    parser.add_argument("--bn-track-running-stats",type=int,    default=1, help="Track running stats")
 
     return parser
 

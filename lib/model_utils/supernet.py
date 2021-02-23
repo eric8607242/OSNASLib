@@ -99,8 +99,8 @@ class Supernet(nn.Module):
 
         for i, l in enumerate(self.search_stages):
             if self.forward_state == "sum":
-                weight = F.gumbel_softmax(self.architecture_param, dim=-1) \
-                        if self.search_strategy == "differentiable_gumbel" else F.softmax(self.architecture_param, dim=-1)
+                weight = F.gumbel_softmax(self.architecture_param[i], dim=0) \
+                        if self.search_strategy == "differentiable_gumbel" else F.softmax(self.architecture_param[i], dim=0)
                 x = sum(p * b(x) for p, b in zip(weight, l))
             elif self.forward_state == "single":
                 x = l[self.architecture[i]](x)
@@ -118,7 +118,7 @@ class Supernet(nn.Module):
 
     def _initialize_architecture_param(self):
         micro_len = len(self.micro_cfg)
-        macro_len = len(self.macro_cfg)
+        macro_len = len(self.macro_cfg["search"])
 
         self.architecture_param = nn.Parameter(1e-3*torch.randn((macro_len, micro_len), requires_grad=False))
 

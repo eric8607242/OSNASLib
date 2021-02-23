@@ -22,7 +22,10 @@ if __name__ == "__main__":
     device = torch.device(args.device)
 
     macro_cfg, micro_cfg = get_supernet_cfg(args.search_space, args.classes, args.dataset)
-    supernet = Supernet(macro_cfg, micro_cfg, args.classes, args.dataset, args.sample_strategy)
+    supernet = Supernet(macro_cfg, micro_cfg, args.classes, 
+                        args.dataset, args.search_strategy, 
+                        bn_momentum=args.bn_momentum, 
+                        bn_track_running_stats=args.bn_track_running_stats)
 
     supernet = supernet.to(device)
 
@@ -56,7 +59,7 @@ if __name__ == "__main__":
     if device.type == "cuda" and args.ngpu >= 1:
         supernet = nn.DataParallel(supernet, list(range(args.ngpu)))
 
-    search_strategy = SearchStrategy(supernet, val_loader, args.search_strategy, args, logger)
+    search_strategy = SearchStrategy(supernet, val_loader, lookup_table, args.search_strategy, args, logger, device)
 
     trainer = Trainer(criterion, optimizer, lr_scheduler, writer, logger, args.device, "search", args, training_strategy=training_strategy, search_strategy=search_strategy, start_epoch=start_epoch)
     start_time = time.time()
@@ -64,7 +67,10 @@ if __name__ == "__main__":
     if not args.directly_search:
         trainer.train_loop(supernet, train_loader, val_loader)
 
-    best_architecture = search_strategy.search(trainer, training_strategy, lookup_table)
+    best_architecture, best_architecture_hc, best_architecture_top1 = search_strategy.search(trainer, training_strategy)
+    logger.info("Best architectrue : {}".format(best_architecture))
+    logger.info("Best architectrue top1 : {:.3f}".format(best_architecture_top1*100))
+    logger.info("Best architectrue hc : {}".format(best_architecture_hc))
 
     save_architecture(args.searched_model_path, best_architecture)
     logger.info("Total search time : {:.2f}".format(time.time() - start_time))

@@ -5,7 +5,7 @@ import torch.nn as nn
 
 class TrainingStrategy:
     """
-    Support multiple sampling strategy ["uniform", "fair"]
+    Support multiple sampling strategy ["uniform", "fair", "differentiable"]
     """
     def __init__(self, sample_strategy, micro_len, macro_len, model):
         self.micro_len = micro_len
@@ -22,6 +22,8 @@ class TrainingStrategy:
                 random.shuffle(sub_architecture_order)
 
             self.architecture_index = [0 for i in range(self.macro_len)]
+        elif self.sample_strategy == "differentiable":
+            pass
         else:
             raise 
             
@@ -54,7 +56,7 @@ class TrainingStrategy:
 
         elif self.sample_strategy == "differentiable":
             self.model.module.set_forward_state("sum") if isinstance(self.model, nn.DataParallel) else self.model.set_forward_state("sum")
-            pass
+
         else:
             raise 
 

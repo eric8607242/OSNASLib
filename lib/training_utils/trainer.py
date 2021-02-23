@@ -107,9 +107,8 @@ class Trainer:
             loss = self.criterion(outs, y)
             self._intermediate_stats_logging(outs, y, loss, step, epoch, N, len_loader=len(val_loader), val_or_train="Valid")
 
-
         top1_avg = self.top1.get_avg()
-        self._epoch_stats_logging(start_time, epoch, val_or_train="Validation")
+        self._epoch_stats_logging(start_time, epoch, val_or_train="Valid")
         self._reset_average_tracker()
 
         return top1_avg

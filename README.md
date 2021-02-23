@@ -71,6 +71,8 @@ cd config_file/arg_config/
     * `--sample-strategy` : The way to train supernet (e.g., Uniform sampling, Fairstrict sampling,and differentiable)
         * differentiable : Jointly search architecture and training supernet with differentiable sheme.
     * `--hc-weight` : The weight of hardware constraint objective. (default : 0.005)
+    * `--bn-momentum`
+    * `--bn-track-running-stats` : Whether tracking the running stats for BN or utilizing the stats of batch data in each iteraion. (0 : False, 1 : True)
 
 * `evaluate_config.py` : Config for evaluate searched architecture.
     *
@@ -100,6 +102,7 @@ python3 search.py --title [EXPERIMENT TITLE] --search-strategy evolution
 python3 search.py --title [EXPERIMENT TITLE] --search-strategy differentiable
 ```
 * [Optional Hyperparameter]
+    * `--sample-strategy` : The strategy to train supernet [uniform, fair, differentiable]. If you adopt uniform or fair, we recommend that set `--bn-track-running-stats` as `0` to close the running stats tracking.
     * `--a-optimizer` : The optimzier for the architecture parameters. (default:sgd)
     * `--a-lr` : The learning rate for the architecture parameters. (default:0.05)
     * `--a-weight-decay` : The weight decay for the architecture parameters. (default:0.0004)
