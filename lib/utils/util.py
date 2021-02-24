@@ -11,6 +11,7 @@ import torch.nn.functional as F
 
 from tensorboardX import SummaryWriter
 
+
 class AverageMeter(object):
     def __init__(self, name=''):
         self._name = name
@@ -24,10 +25,10 @@ class AverageMeter(object):
         self.cnt = 0.0
 
     def update(self, val, n=1):
-        self.sum += val*n
+        self.sum += val * n
         self.cnt += n
-        self.avg = self.sum/self.cnt
-    
+        self.avg = self.sum / self.cnt
+
     def __str__(self):
         return "%s: %.5f" % (self._name, self.avg)
 
@@ -74,7 +75,12 @@ def get_logger(log_dir=None):
 def get_writer(title, seed, writer_dir=None):
     today = datetime.today()
     current_time = today.strftime("%d%m%Y%H%M%S")
-    writer_dir = os.path.join(writer_dir, current_time+"_{}_{}".format(title, seed))
+    writer_dir = os.path.join(
+        writer_dir,
+        current_time +
+        "_{}_{}".format(
+            title,
+            seed))
 
     writer = SummaryWriter(log_dir=writer_dir)
     return writer
@@ -96,15 +102,20 @@ def accuracy(output, target, topk=(1,)):
     res = []
     for k in topk:
         correct_k = correct[:k].reshape(-1).float().sum(0)
-        res.append(correct_k.mul_(1.0/batch_size))
+        res.append(correct_k.mul_(1.0 / batch_size))
 
     return res
 
-def resume_checkpoint(model, checkpoint_path, optimizer=None, lr_scheduler=None):
+
+def resume_checkpoint(
+        model,
+        checkpoint_path,
+        optimizer=None,
+        lr_scheduler=None):
     resume_epoch = None
     if os.path.isfile(checkpoint_path):
         checkpoint = torch.load(checkpoint_path)
-        
+
         if isinstance(checkpoint, dict) and "model" in checkpoint:
             model.load_state_dict(checkpoint["model"])
             if optimizer is not None and "optimizer" in checkpoint:
@@ -123,11 +134,19 @@ def resume_checkpoint(model, checkpoint_path, optimizer=None, lr_scheduler=None)
 
     return resume_epoch
 
-def save(model, checkpoint_path, optimizer=None, lr_scheduler=None, resume_epoch=None):
+
+def save(
+        model,
+        checkpoint_path,
+        optimizer=None,
+        lr_scheduler=None,
+        resume_epoch=None):
     if optimizer is None and resume_epoch is None and lr_scheduler is None:
-        checkpoint = model.module.state_dict() if isinstance(model, nn.DataParallel) else model.state_dict()
+        checkpoint = model.module.state_dict() if isinstance(
+            model, nn.DataParallel) else model.state_dict()
     else:
-        checkpoint = {"model":model.module.state_dict() if isinstance(model, nn.DataParallel) else model.state_dict()}
+        checkpoint = {"model": model.module.state_dict() if isinstance(
+            model, nn.DataParallel) else model.state_dict()}
         if optimizer is not None:
             checkpoint["optimizer"] = optimizer.state_dict()
 
@@ -136,7 +155,5 @@ def save(model, checkpoint_path, optimizer=None, lr_scheduler=None, resume_epoch
 
         if resume_epoch is not None:
             checkpoint["epoch"] = resume_epoch
-        
+
     torch.save(checkpoint, checkpoint_path)
-
-

@@ -2,6 +2,7 @@ from .fbnet import FBNET_SUPERNET_S_CFG, FBNET_SUPERNET_L_CFG, FBNET_MICRO_CFG
 from .proxylessnas import PROXYLESSNAS_SUPERNET_S_CFG, PROXYLESSNAS_MICRO_CFG
 from .spos import SPOS_SUPERNET_CFG, SPOS_MICRO_CFG
 
+
 def get_supernet_cfg(search_space, classes, dataset):
     if search_space == "fbnet_s":
         supernet_cfg = FBNET_SUPERNET_S_CFG
@@ -30,10 +31,7 @@ def get_supernet_cfg(search_space, classes, dataset):
                 supernet_cfg["search"][l][2] = 1
                 break
 
-
     # Modify the output channel of classifier
     supernet_cfg["last"][-1][2] = classes
 
     return supernet_cfg, micro_cfg
-
-

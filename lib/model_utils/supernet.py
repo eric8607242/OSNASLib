@@ -6,7 +6,14 @@ import torch.nn.functional as F
 
 from .network_utils import get_block
 
-def construct_supernet_layer(micro_cfg, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
+
+def construct_supernet_layer(
+        micro_cfg,
+        in_channels,
+        out_channels,
+        stride,
+        bn_momentum,
+        bn_track_running_stats):
     supernet_layer = nn.ModuleList()
     for b_cfg in micro_cfg:
         block_type, kernel_size, se, activation, kwargs = b_cfg
@@ -20,12 +27,21 @@ def construct_supernet_layer(micro_cfg, in_channels, out_channels, stride, bn_mo
                           bn_momentum=bn_momentum,
                           bn_track_running_stats=bn_track_running_stats,
                           **kwargs
-                        )
+                          )
         supernet_layer.append(block)
     return supernet_layer
 
+
 class Supernet(nn.Module):
-    def __init__(self, macro_cfg, micro_cfg, classes, dataset, search_strategy, bn_momentum=0.1, bn_track_running_stats=True):
+    def __init__(
+            self,
+            macro_cfg,
+            micro_cfg,
+            classes,
+            dataset,
+            search_strategy,
+            bn_momentum=0.1,
+            bn_track_running_stats=True):
         super(Supernet, self).__init__()
         self.micro_cfg = micro_cfg
         self.macro_cfg = macro_cfg
@@ -37,7 +53,7 @@ class Supernet(nn.Module):
         bn_momentum = bn_momentum
         bn_track_running_stats = bn_track_running_stats
 
-        self.forward_state = "single" # [single, sum]
+        self.forward_state = "single"  # [single, sum]
 
         # First Stage
         self.first_stages = nn.ModuleList()
@@ -57,16 +73,17 @@ class Supernet(nn.Module):
             self.first_stages.append(layer)
 
         # Search Stage
-        self.search_stages= nn.ModuleList()
+        self.search_stages = nn.ModuleList()
         for l_cfg in macro_cfg["search"]:
             in_channels, out_channels, stride = l_cfg
 
-            layer = construct_supernet_layer(micro_cfg=micro_cfg,
-                                             in_channels=in_channels,
-                                             out_channels=out_channels,
-                                             stride=stride,
-                                             bn_momentum=bn_momentum,
-                                             bn_track_running_stats=bn_track_running_stats)
+            layer = construct_supernet_layer(
+                micro_cfg=micro_cfg,
+                in_channels=in_channels,
+                out_channels=out_channels,
+                stride=stride,
+                bn_momentum=bn_momentum,
+                bn_track_running_stats=bn_track_running_stats)
             self.search_stages.append(layer)
 
         # Last Stage
@@ -86,21 +103,23 @@ class Supernet(nn.Module):
                               **kwargs)
             self.last_stages.append(layer)
 
-        self._initialize_weights() 
+        self._initialize_weights()
         if self.search_strategy == "differentiable_gumbel" or self.search_strategy == "differentiable":
             self._initialize_architecture_param()
         else:
             self.architecture = None
 
-
     def forward(self, x):
         for i, l in enumerate(self.first_stages):
-            x = l(x) 
+            x = l(x)
 
         for i, l in enumerate(self.search_stages):
             if self.forward_state == "sum":
-                weight = F.gumbel_softmax(self.architecture_param[i], dim=0) \
-                        if self.search_strategy == "differentiable_gumbel" else F.softmax(self.architecture_param[i], dim=0)
+                weight = F.gumbel_softmax(
+                    self.architecture_param[i],
+                    dim=0) if self.search_strategy == "differentiable_gumbel" else F.softmax(
+                    self.architecture_param[i],
+                    dim=0)
                 x = sum(p * b(x) for p, b in zip(weight, l))
             elif self.forward_state == "single":
                 x = l[self.architecture[i]](x)
@@ -120,7 +139,8 @@ class Supernet(nn.Module):
         micro_len = len(self.micro_cfg)
         macro_len = len(self.macro_cfg["search"])
 
-        self.architecture_param = nn.Parameter(1e-3*torch.randn((macro_len, micro_len), requires_grad=False))
+        self.architecture_param = nn.Parameter(
+            1e-3 * torch.randn((macro_len, micro_len), requires_grad=False))
 
     def get_architecture_param(self):
         return self.architecture_param
@@ -139,7 +159,6 @@ class Supernet(nn.Module):
         """
         self.forward_state = state
 
-
     def _initialize_weights(self):
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -153,5 +172,4 @@ class Supernet(nn.Module):
             elif isinstance(m, nn.Linear):
                 n = m.weight.size(1)
                 m.weight.data.normal_(0, 0.01)
-                m.bias.data.zero_()  
-
+                m.bias.data.zero_()

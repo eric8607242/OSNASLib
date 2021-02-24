@@ -16,8 +16,17 @@ class FLOPS_Counter:
     def print_layers(self):
         ignored_layers = {'Relu', 'BatchNorm2d'}
         print('Ignoring the following layers:', ignored_layers)
-        layers = [layer for layer in self.layers if layer['attributes']['name'] not in ignored_layers]
-        print(_tabulate(layers, ('attributes', '% gflops', 'gflops', 'nbytes', 'in_shape', 'out_shape')))
+        layers = [layer for layer in self.layers if layer['attributes']
+                  ['name'] not in ignored_layers]
+        print(
+            _tabulate(
+                layers,
+                ('attributes',
+                 '% gflops',
+                 'gflops',
+                 'nbytes',
+                 'in_shape',
+                 'out_shape')))
         return layers
 
     def print_summary(self, print_flag=False):
@@ -34,15 +43,23 @@ class FLOPS_Counter:
             # shape is BxCxHxW
             if layer['attributes']['name'] == 'Conv2d':
                 kernel = layer['attributes']['kernel']
-                layer['gflops'] = (np.prod(layer['out_shape']) * np.prod(layer['attributes']['kernel'])
-                                  * layer['in_shape'][1] / (10 ** 9 * layer['attributes']['groups']))
+                layer['gflops'] = (np.prod(layer['out_shape']) *
+                                   np.prod(layer['attributes']['kernel']) *
+                                   layer['in_shape'][1] /
+                                   (10 ** 9 *
+                                    layer['attributes']['groups']))
                 self.total_gflops += layer['gflops']
 
             layer['in_shape'] = 'x'.join(map(str, layer['in_shape']))
             layer['out_shape'] = 'x'.join(map(str, layer['out_shape']))
 
         for layer in self.layers:
-            layer['% gflops'] = str(round(layer.get('gflops', 0) / self.total_gflops * 100, 3)) + '%'
+            layer['% gflops'] = str(
+                round(
+                    layer.get(
+                        'gflops',
+                        0) / self.total_gflops * 100,
+                    3)) + '%'
 
 
 class HookBackend:
@@ -70,28 +87,33 @@ class HookBackend:
         handles = []
         model.apply(register_hook)
 
-        data = torch.rand(*input_shape).to(next(model.parameters()).device)  # get data on same device as model
+        data = torch.rand(
+            *
+            input_shape).to(
+            next(
+                model.parameters()).device)  # get data on same device as model
 
         with torch.no_grad():
-            model(data) if not self.arch_param else model(data, self.arch_param)
+            model(data) if not self.arch_param else model(
+                data, self.arch_param)
         for handle in handles:
             handle.remove()
 
         return self.layers
 
     def get_attributes(self, module):
-        if type(module) == nn.Conv2d:
+        if isinstance(module, nn.Conv2d):
             return {
                 'name': 'Conv2d',
                 'kernel': module.kernel_size,
                 'groups': module.groups,
                 'stride': module.stride,
             }
-        if type(module) == nn.ReLU:
+        if isinstance(module, nn.ReLU):
             return {
                 'name': 'Relu',
             }
-        if type(module) == nn.BatchNorm2d:
+        if isinstance(module, nn.BatchNorm2d):
             return {
                 'name': 'BatchNorm2d',
             }
@@ -112,4 +134,3 @@ def _tabulate(data, keys):
         new_data.append([layer.get(key, None) for key in keys])
 
     return tabulate(new_data, headers=keys, tablefmt='fancy_grid')
-

@@ -10,9 +10,6 @@ def load_architecture(path_to_architecture):
     architecture = np.load(path_to_architecture)
     return architecture
 
+
 def save_architecture(path_to_architecture, architecture):
     np.save(path_to_architecture, architecture)
-
-
-
-

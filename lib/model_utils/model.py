@@ -6,8 +6,17 @@ import torch.nn.functional as F
 
 from .network_utils import get_block
 
+
 class Model(nn.Module):
-    def __init__(self, macro_cfg, micro_cfg, architecture, classes, dataset, bn_momentum=0.1, bn_track_running_stats=True):
+    def __init__(
+            self,
+            macro_cfg,
+            micro_cfg,
+            architecture,
+            classes,
+            dataset,
+            bn_momentum=0.1,
+            bn_track_running_stats=True):
         super(Model, self).__init__()
         self.micro_cfg = micro_cfg
         self.macro_cfg = macro_cfg
@@ -36,7 +45,7 @@ class Model(nn.Module):
             self.first_stages.append(layer)
 
         # Search Stage
-        self.stages= nn.ModuleList()
+        self.stages = nn.ModuleList()
         for l_cfg, block_idx in zip(macro_cfg["search"], architecture):
             in_channels, out_channels, stride = l_cfg
 
@@ -51,7 +60,7 @@ class Model(nn.Module):
                               bn_momentum=bn_momentum,
                               bn_track_running_stats=bn_track_running_stats,
                               **kwargs
-                            )
+                              )
 
             self.stages.append(layer)
 
@@ -72,12 +81,11 @@ class Model(nn.Module):
                               **kwargs)
             self.last_stages.append(layer)
 
-        self._initialize_weights() 
-
+        self._initialize_weights()
 
     def forward(self, x):
         for i, l in enumerate(self.first_stages):
-            x = l(x) 
+            x = l(x)
 
         for i, l in enumerate(self.stages):
             x = l(x)
@@ -86,7 +94,6 @@ class Model(nn.Module):
             x = l(x)
 
         return x
-
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -101,5 +108,4 @@ class Model(nn.Module):
             elif isinstance(m, nn.Linear):
                 n = m.weight.size(1)
                 m.weight.data.normal_(0, 0.01)
-                m.bias.data.zero_()  
-
+                m.bias.data.zero_()
