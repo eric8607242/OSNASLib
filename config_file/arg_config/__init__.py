@@ -1,4 +1,8 @@
 import os 
+import csv
+from datetime import datetime
+
+from collections import OrderedDict
 
 from .search_config import get_search_config
 from .evaluate_config import get_evaluate_config
@@ -14,6 +18,8 @@ def get_init_config(config_state):
     args = setting_path_config(parser, config_state)
 
     args.bn_track_running_stats = bool(args.bn_track_running_stats)
+
+    hyperparameter_record(args)
 
     return args
 
@@ -55,7 +61,7 @@ def setting_path_config(parser, config_state):
     parser.add_argument("--best-model-path",   type=str,    default="./best_model.pth")
     parser.add_argument("--searched-model-path",   type=str,    default="./searched_model_architecture.npy")
 
-    parser.add_argument("--hyperparameter-track-path", type=str,default="./hyperparameter_track.csv")
+    parser.add_argument("--hyperparameter-tracker",type=str,    default="./logs/{}_hyperparameter_tracker.csv".format(config_state))
 
     args = parser.parse_args()
 
@@ -73,4 +79,25 @@ def setting_path_config(parser, config_state):
     args.searched_model_path = os.path.join(args.root_path, args.searched_model_path)
 
     return args
+
+
+def hyperparameter_record(args):
+    current_time = datetime.now()
+    current_time_str = current_time.strftime("%d/%m/%Y %H:%M:%S")
+
+    hyperparameter_dict = OrderedDict(time=current_time_str)
+    hyperparameter_dict.update([(k, v) for k, v in vars(args).items()])
+
+    record_header = False
+    if not os.path.exists(args.hyperparameter_tracker):
+        # If file do not exist, we should record the header first
+        record_header = True
+
+    with open(args.hyperparameter_tracker, "a", newline="") as csvfile:
+        dw = csv.DictWriter(csvfile, fieldnames=hyperparameter_dict.keys())
+        if record_header:
+            dw.writeheader()
+
+        dw.writerow(hyperparameter_dict)
+
 

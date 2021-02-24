@@ -2,6 +2,7 @@
 * [What is one-shot NAS](./one_shot_nas.md)
 
 # What is one-shot neural architecture search?
+Deep neural networks have brought suprising advances in various research field (e.g., classification, object detection, and semantic segmentation). However, it is very difficult to design a good neural architecture for a specific hardware constraint (or devices with limited hardware resource), which requires much domain knowledge and lots of time. To reduce the effort of designing neural architecutre and get the better neural architecture, neural architecture search (NAS) has recevied much attention in recent years.
 To improve the search efficiency of earliest NAS which evaluate each architecture by training it from scratch, one-shot NAS methods were proposed to encode the entire search space into an over-parameterized neural network, called ***supernet***. The "one-shot" in one-shot NAS means that the only neural architecture needs to be trained to evaluate the entire search space instead of training each architecture from scratch.
 
 > Figure

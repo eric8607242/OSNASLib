@@ -2,20 +2,23 @@
 * [What is one-shot NAS](./one_shot_nas.md)
 
 # What is neural architecture search (NAS)?
-By now, deep learning networks has brought surprising advances in various research field (e.g., image classification, semantic segmentation, and object detection). However, to boost the performance, the model architecture and the model size become more complex and huge significantly, which make the deep learning models are hard to deploy on the devices with limited hardware resource. But designing good neural networks manually specific to various hardware constraints requires much domain knowledge, rich experience on model training and tuning, and lots of time on trial and errors. Besides, the manually designed architectures are often stuck into the local optimal.
-To get the better trade off between the hardware resource and the performance, neural architecture search (NAS) aiming at automatically searching the best architecture under the specific hardware constraints is highly demanded.
+By now, deep learning networks has brought surprising advances in various research field (e.g., image classification, semantic segmentation, and object detection). However, it is very difficult to design a good neural architecture for a specific hardware constraint (or devices with limited hardware resource), which requires much domain knowledge and lots of time. To reduce the effort of designing neural architecutre and get the better neural architecture, neural architecture search (NAS) has recevied much attention in recent years.
 
 ## The main components of neural architecture search (NAS)
-Generally NAS methods can be categorized according to three dimensions: Search space, Search strategy, and Performance estimation strategy.
+Generally NAS methods can be categorized according to three dimensions: search space, search strategy, and performance estimation strategy.
 ### Search Space
-For the search space, it mean that the **all candidate neural architectures can be selected** (kernel sizes, channel size, layer size, and etc.). 
-For example, for VGG16, the search space size is $3^{16}$ if the kernel size in each layer can be implemented by {3, 5, 7}.
+There are lots of configuration can be selected to design a good neural architecture (e.g., kernel size, layer size, and channel size). For the search space, it means that the **all candidate neural architectures composed by all configurations**.
+For example, for VGG16, the search space size is 3\*\*16$ if the kernel size in each layer can be implemented by {3, 5, 7}.
+
+The common search spaces in recent years are the search space constructed by the inverted residual blocks with linear bottlenecks (MobilenetV2) and the DAG search space (DATRS).
+
 ### Search Strategy
-Given a search space, the objective of neural architecture search is to **search the best architecture under the specific hardware constraint**. To achieve the goal, a search strategy is needed to be adopted to search the best architecture from the search space. The common search strategies are RL, random search, evolution algorithm, and differentiable.
+Given a search space, the objective of neural architecture search is to **search the best architecture under the specific hardware constraint**. 
+To achieve the goal, a search strategy is demanded to be adopted to search the best architecture from the search space. The common search strategies are RL, random search, evolution algorithm, and gradient descent (differentiable NAS).
 ### Performance estimation strategy
-With the search strategy, **how do we evaluate the architectures in the search space? In other words, how do we know the performace of each architectures?**. To evaluate each architectures in the search space, the performance estimation strategy has to been adopted. The most intuitive estimation strategy is training each architecture few epochs (e.g., 10, 5, or 20) to get the approximated perofmrnace of each architecture, and training a performance predictor to predict the accuracy of each architecture.
+With the search strategy, **how can we evaluate the architectures in the search space? In other words, how do we know the performace of each architectures?**. To evaluate each architectures in the search space, the performance estimation strategy has to been adopted. The most intuitive estimation strategy is training each architecture few epochs (e.g., 10, 5, or 20) to get the approximated perofmrnace of each architecture or training a performance predictor to predict the accuracy of each architecture.
+However, performance estimation is still very time-consuming because tons of network training are required, which makes NAS is not approachable. One-shot NAS and zero-shot NAS have been proposed to save large amount of time.
 
+In this repo, we focus on one-shot NAS. You can implement each baseline of one-shot NAS easily by our repo.
 
-
-The earliest NAS methods were developed based on reinforcement learning or the evolution algorithm. However, extremely expensive computation is needed because these methods train each architecture from scratch to estimate the performance. For example, 2000 GPU days are needed by a reinforcement learning method, and 3150 GPU days are needed by the evolution algorithm.
 

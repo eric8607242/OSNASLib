@@ -28,7 +28,6 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 We are glad at all contributions to improve this repo. Please feel free to pull request.
 
 ## TODO
-* [ ] Hyperparameter record for each run
 * [ ] EMA for model evaluate
 * [ ] Warmup lr scheduler
 * [ ] Search space for Single-path NAS
