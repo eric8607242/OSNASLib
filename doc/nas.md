@@ -8,9 +8,9 @@ By now, deep learning networks has brought surprising advances in various resear
 Generally NAS methods can be categorized according to three dimensions: search space, search strategy, and performance estimation strategy.
 ### Search Space
 There are lots of configuration can be selected to design a good neural architecture (e.g., kernel size, layer size, and channel size). For the search space, it means that the **all candidate neural architectures composed by all configurations**.
-For example, for VGG16, the search space size is 3\*\*16$ if the kernel size in each layer can be implemented by {3, 5, 7}.
+For example, for VGG16, the search space size is 3\*\*16 if the kernel size in each layer can be implemented by {3, 5, 7}.
 
-The common search spaces in recent years are the search space constructed by the inverted residual blocks with linear bottlenecks (MobilenetV2) and the DAG search space (DATRS).
+The common search spaces in recent years are constructed by the inverted residual blocks with linear bottlenecks (MobilenetV2) and the DAG search space (DATRS).
 
 ### Search Strategy
 Given a search space, the objective of neural architecture search is to **search the best architecture under the specific hardware constraint**. 

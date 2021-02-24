@@ -5,9 +5,6 @@ def get_evaluate_config():
     parser = argparse.ArgumentParser(description="Evaluating configuration")
     # Search config
     parser.add_argument("--search-strategy",       type=str,    default="random_search", help="The way to search the best architecture[evolution, random_search, differentiable]")
-    parser.add_argument("--target-hc",             type=int,    default=100,           help="Target hardware constraint")
-    parser.add_argument("--hc-weight",             type=float,  default=0.005,         help="The weight of hardware constraint objective")
-
     parser.add_argument("--info-metric",           type=str,    default="flops",       help="HC objective for searching")
 
     # Supernet config

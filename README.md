@@ -1,29 +1,30 @@
 # OneShot_NAS_example
 
-**...The project is under construction...**
-
 ## Introduction
 
 * [What is neural architecture search (NAS)](./doc/nas.md)
 * [What is one-shot NAS](./doc/one_shot_nas.md)
 
 The is a example repo for one-shot NAS. We cover the basic implementation for one-shot NAS(e.g., supernet, search strategy, and training strategy).
-
-**The main components of one-shot NAS in this repo**
-* Supernet
-    * Search space of ProxylessNAS
-    * Search space of FbNet
-    * Search space of SPOS
-* Supernet training strategy
-    * Uniform sampling
-    * Strict fairness
-* Search Strategy
-    * Gradient Descent(Differentiable)
-        - Softmax
-        - Gumbel Softmax
-    * Random search
-    * Evolution algorithm
-
+* Components implemented in this repo
+    * Supernet
+        * Search space of ProxylessNAS
+        * Search space of FbNet
+        * Search space of SPOS
+    * Supernet training strategy
+        * Uniform sampling
+        * Strict fairness
+        * Differentiable (specific for differentiable search strategy)
+    * Search Strategy
+        * Gradient Descent(Differentiable)
+            - Softmax
+            - Gumbel Softmax
+        * Random search
+        * Evolution algorithm
+* Additional property in this repo
+    * Hyperparameter tracker
+        * We record all hyperparameter in each searching or evaluating process.
+    * Evaluate searched neural architecture. (Train from scratch)
 
 We are glad at all contributions to improve this repo. Please feel free to pull request.
 
@@ -31,14 +32,14 @@ We are glad at all contributions to improve this repo. Please feel free to pull 
 * [ ] EMA for model evaluate
 * [ ] Warmup lr scheduler
 * [ ] Search space for Single-path NAS
-* [ ] Evaluate supernet (`evaluate.py`)
+* [ ] Analyze code (`evaluate.py`)
 * [ ] Experiment results
 
 ## Config
 ### Common Config
 Following is the common config in `config_file/arg_config/search_config.py` and `config_file/arg_config/evaluate_config.py`. 
 * `--title`
-    * `--resume`
+    * `--resume [PATH TO RESUME CHECKPOINT]`
     * `--random-seed`
     * `--device`
     * `--ngpu`
@@ -59,12 +60,23 @@ Following is the common config in `config_file/arg_config/search_config.py` and 
     * `--num-workers`
     * `--train-portion`
 
+* Path
+    * `--root-path` : The root path to save all of checkpoint, lookup-table, or searched model in this searching process. We set `root-path` based on the `title` and `random seed`.
+    * `--logger-path` : The path to logger file.
+    * `--writer-path` : The path to tensorboard writer file.
+    * `--checkpoint-path-root` : The path to the directoy of the checkpoint. We seperate the directory into `evaluate/` and `search/` for different process.
+    * `--lookup-table-path` : The path to lookup table.
+    * `--best-model-path` : The path to the weight of best model.
+    * `--searched-model-path` : The path to the configuration of the searched model.
+    * `--hyperparameter-tracker` : The path to the hyperparameter-tracker. Hyperparameter-tracker record all hyperparameter for each searching and evaluating process.
 
 ### Config File
 ```
 cd config_file/arg_config/
 ```
 * `search_config.py` : Config for search process (e.g., search strategy, epoch, target hc, and epoch)
+    * `--target-hc` : The target hardware constraints.
+    * `--info-metric` : The metric of hardware constraints. (e.g., flops, param, latency)
     * `--search-strategy`: Search strategy for searching the best architecture. (e.g., Random search, evolution algorithm, and differentiable)
     * `--search-space` : Search space in different papaer (e.g., ProxylessNAS, FBNet, and SPOS)
     * `--sample-strategy` : The way to train supernet (e.g., Uniform sampling, Fairstrict sampling,and differentiable)
@@ -72,9 +84,6 @@ cd config_file/arg_config/
     * `--hc-weight` : The weight of hardware constraint objective. (default : 0.005)
     * `--bn-momentum`
     * `--bn-track-running-stats` : Whether tracking the running stats for BN or utilizing the stats of batch data in each iteraion. (0 : False, 1 : True)
-
-* `evaluate_config.py` : Config for evaluate searched architecture.
-    *
 
 ## Search
 ### Random Search
@@ -107,9 +116,11 @@ python3 search.py --title [EXPERIMENT TITLE] --search-strategy differentiable
     * `--a-weight-decay` : The weight decay for the architecture parameters. (default:0.0004)
     * `--a-momentum` : The momentum for the architecture parameters. (default:0.9)
 
-## Evaluate
-Train the searched architectrue from scratch to evaluate the search quality.
+## Evaluate - Train from scratch
+Train the searched architectrue from scratch to evaluate the searching quality.
 ```
 python3 train.py --title [EXPERIMENT TITLE] --searched_model_path [PATH TO SEARCHED MODEL]
 ```
+
+
 
