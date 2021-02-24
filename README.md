@@ -29,7 +29,7 @@ The is a example repo for one-shot NAS. We cover the basic implementation for on
 We are glad at all contributions to improve this repo. Please feel free to pull request.
 
 ## Getting Started
-```python=
+```python
 # Search the best architecture under the specific hardware constraint.
 searcher = Searcher(args)
 searcher.search()
