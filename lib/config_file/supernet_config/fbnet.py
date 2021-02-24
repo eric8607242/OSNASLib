@@ -1,12 +1,19 @@
 # block_type, kernel_size, se, activation, kwargs
 FBNET_MICRO_CFG = [["Mobile", 3, False, "relu", {"expansion_rate": 1, "point_group": 1}],
-                   ["Mobile", 3, False, "relu", {"expansion_rate": 1, "point_group": 2}],
-                   ["Mobile", 3, False, "relu", {"expansion_rate": 3, "point_group": 1}],
-                   ["Mobile", 3, False, "relu", {"expansion_rate": 6, "point_group": 1}],
-                   ["Mobile", 5, False, "relu", {"expansion_rate": 1, "point_group": 1}],
-                   ["Mobile", 5, False, "relu", {"expansion_rate": 1, "point_group": 2}],
-                   ["Mobile", 5, False, "relu", {"expansion_rate": 3, "point_group": 1}],
-                   ["Mobile", 5, False, "relu", {"expansion_rate": 6, "point_group": 1}],
+                   ["Mobile", 3, False, "relu", {
+                       "expansion_rate": 1, "point_group": 2}],
+                   ["Mobile", 3, False, "relu", {
+                       "expansion_rate": 3, "point_group": 1}],
+                   ["Mobile", 3, False, "relu", {
+                       "expansion_rate": 6, "point_group": 1}],
+                   ["Mobile", 5, False, "relu", {
+                       "expansion_rate": 1, "point_group": 1}],
+                   ["Mobile", 5, False, "relu", {
+                       "expansion_rate": 1, "point_group": 2}],
+                   ["Mobile", 5, False, "relu", {
+                       "expansion_rate": 3, "point_group": 1}],
+                   ["Mobile", 5, False, "relu", {
+                       "expansion_rate": 6, "point_group": 1}],
                    ["Skip", 0, False, "relu", {}]]
 
 
