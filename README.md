@@ -39,7 +39,7 @@ evaluator = Evaluator(args)
 evaluator.evaluate()
 ```
 
-More configuration please refer [configuration](./doc/get_start.md).
+More configuration please refer [configuration](./doc/configuration.md).
 
 ## TODO
 * [ ] EMA for model evaluate

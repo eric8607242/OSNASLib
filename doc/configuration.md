@@ -1,4 +1,4 @@
-# Get Start
+# Configuration
 ## Random Search
 * `--search-strategy random_search`
 * [Optional Hyperparameter]
