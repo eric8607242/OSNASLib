@@ -7,7 +7,6 @@ from config_file.arg_config import *
 from config_file.supernet_config import *
 
 from lib import *
-from search_strategy import *
 
 if __name__ == "__main__":
     args = get_init_config("evaluate")
