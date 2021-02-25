@@ -37,6 +37,7 @@ searcher.search()
 # Evaluate the searched architecture.
 evaluator = Evaluator(args)
 evaluator.evaluate()
+evaluator.inference()
 ```
 
 More configuration please refer [configuration](./doc/configuration.md).

@@ -8,8 +8,6 @@ class Trainer:
     def __init__(
             self,
             criterion,
-            optimizer,
-            lr_scheduler,
             writer,
             logger,
             device,
@@ -17,15 +15,14 @@ class Trainer:
             args,
             training_strategy=None,
             search_strategy=None,
-            start_epoch=0):
+    ):
+
         self.top1 = AverageMeter()
         self.top5 = AverageMeter()
         self.losses = AverageMeter()
         self.device = device
 
         self.criterion = criterion
-        self.optimizer = optimizer
-        self.lr_scheduler = lr_scheduler
 
         self.trainer_state = trainer_state
         if self.trainer_state == "search":
@@ -35,12 +32,18 @@ class Trainer:
         self.writer = writer
         self.logger = logger
 
-        self.start_epoch = start_epoch
         self.epochs = args.epochs
 
         self.args = args
 
-    def train_loop(self, model, train_loader, val_loader):
+    def train_loop(
+            self,
+            model,
+            train_loader,
+            val_loader,
+            optimizer,
+            lr_scheduler,
+            start_epoch=0):
         """
         Support mode:
         1) Two stages training:
@@ -51,13 +54,18 @@ class Trainer:
         """
         best_top1_acc = 0.0
 
-        for epoch in range(self.start_epoch, self.epochs):
+        for epoch in range(start_epoch, self.epochs):
             self.logger.info("Start to train for epoch {}".format(epoch))
             self.logger.info(
                 "Learning Rate : {:.8f}".format(
-                    self.optimizer.param_groups[0]["lr"]))
+                    optimizer.param_groups[0]["lr"]))
 
-            self._training_step(model, train_loader, epoch)
+            self._training_step(
+                model,
+                train_loader,
+                optimizer,
+                lr_scheduler,
+                epoch)
             val_top1 = self.validate(
                 model,
                 val_loader,
@@ -71,8 +79,8 @@ class Trainer:
                 save(
                     model,
                     self.args.best_model_path,
-                    self.optimizer,
-                    self.lr_scheduler,
+                    optimizer,
+                    lr_scheduler,
                     epoch + 1)
 
             save(
@@ -82,11 +90,17 @@ class Trainer:
                     "{}_{}.pth".format(
                         self.trainer_state,
                         epoch)),
-                self.optimizer,
-                self.lr_scheduler,
+                optimizer,
+                lr_scheduler,
                 epoch + 1)
 
-    def _training_step(self, model, train_loader, epoch):
+    def _training_step(
+            self,
+            model,
+            train_loader,
+            optimizer,
+            lr_scheduler,
+            epoch):
         model.train()
         start_time = time.time()
 
@@ -102,7 +116,7 @@ class Trainer:
                 self.device, non_blocking=True)
             N = X.shape[0]
 
-            self.optimizer.zero_grad()
+            optimizer.zero_grad()
 
             if self.trainer_state == "search":
                 self.training_strategy.step()
@@ -112,8 +126,8 @@ class Trainer:
             loss = self.criterion(outs, y)
             loss.backward()
 
-            self.optimizer.step()
-            self.lr_scheduler.step()
+            optimizer.step()
+            lr_scheduler.step()
             self._intermediate_stats_logging(
                 outs,
                 y,
