@@ -1,5 +1,5 @@
 from config import get_init_config
-from container import SearchAgent
+from agent import SearchAgent
 
 
 if __name__ == "__main__":

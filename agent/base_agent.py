@@ -2,7 +2,7 @@ import torch
 
 from utils import get_logger, get_writer, set_random_seed, AverageMeter
 from criterion import get_criterion
-from data import get_train_loader, get_test_loader
+from dataflow import get_train_loader, get_test_loader
 from config import get_supernet_cfg
 
 class MetaAgent:

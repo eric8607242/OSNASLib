@@ -1,5 +1,5 @@
 from config import get_init_config
-from container import EvaluateAgent
+from agent import EvaluateAgent
 
 
 if __name__ == "__main__":
