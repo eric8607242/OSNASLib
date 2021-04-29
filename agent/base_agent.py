@@ -1,12 +1,15 @@
+import os
+import time
+
 import torch
 
-from utils import get_logger, get_writer, set_random_seed, AverageMeter
+from utils import get_logger, get_writer, set_random_seed, AverageMeter, accuracy, save
 from criterion import get_criterion
 from dataflow import get_train_loader, get_test_loader
 from config import get_supernet_cfg
 
 class MetaAgent:
-    def __init__(self, args, agenet_state="search"):
+    def __init__(self, args, agent_state="search"):
         self.args = args
 
         self.logger = get_logger(args.logger_path)
@@ -37,9 +40,8 @@ class MetaAgent:
         self.top1 = AverageMeter()
         self.top5 = AverageMeter()
         self.losses = AverageMeter()
-        self.device = device
 
-        self.agenet_state = agenet_state
+        self.agent_state = agent_state
 
         self.epochs = args.epochs
         self.start_epochs = 0
@@ -51,8 +53,7 @@ class MetaAgent:
                          train_loader,
                          val_loader,
                          optimizer,
-                         lr_scheduler,
-                         start_epoch=0):
+                         lr_scheduler):
         """
         Support mode:
         1) Two stages training:
@@ -63,7 +64,7 @@ class MetaAgent:
         """
         best_top1_acc = 0.0
 
-        for epoch in range(start_epoch, self.epochs):
+        for epoch in range(self.start_epochs, self.epochs):
             self.logger.info("Start to train for epoch {}".format(epoch))
             self.logger.info(
                 "Learning Rate : {:.8f}".format(

@@ -9,6 +9,7 @@ class SearchStrategy:
             supernet,
             val_loader,
             lookup_table,
+            criterion,
             search_strategy,
             args,
             logger,
@@ -35,7 +36,7 @@ class SearchStrategy:
         self.logger = logger
         self.supernet = supernet
 
-        self.ce_criterion = get_criterion()
+        self.criterion = criterion
         self.val_loader = val_loader
 
         self.lookup_table = lookup_table
@@ -62,7 +63,7 @@ class SearchStrategy:
                 self.device, non_blocking=True)
 
             outs = self.supernet(X)
-            ce_loss = self.ce_criterion(outs, y)
+            ce_loss = self.criterion(outs, y)
 
             architecture_parameter = self.supernet.module.get_architecture_param() if isinstance(
                 self.supernet, nn.DataParallel) else self.supernet.get_architecture_param()

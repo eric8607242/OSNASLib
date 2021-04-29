@@ -1,7 +1,13 @@
+import time
+
+import torch
+import torch.nn as nn
+
 from .base_agent import MetaAgent
 
-from utils import get_optimizer, get_lr_scheduler, resume_checkpoint
-from model import Supernet, save_architecture
+from utils import get_optimizer, get_lr_scheduler, resume_checkpoint, TrainingStrategy
+from model import Supernet, save_architecture, LookUpTable
+from search_strategy import SearchStrategy
 
 class SearchAgent(MetaAgent):
     def __init__(self, args):
@@ -42,28 +48,36 @@ class SearchAgent(MetaAgent):
 
         # Construct search utility ========================================================
         self.training_strategy = TrainingStrategy(
-            self.args.sample_strategy, len(micro_cfg), len(
-                macro_cfg["search"]), self.supernet)
+            self.args.sample_strategy, len(self.micro_cfg), len(
+                self.macro_cfg["search"]), self.supernet)
 
         self.lookup_table = LookUpTable(
-            macro_cfg,
-            micro_cfg,
+            self.macro_cfg,
+            self.micro_cfg,
             self.args.lookup_table_path,
             self.args.input_size,
             info_metric=[
                 "flops",
                 "param"])
+
+        self.search_strategy = SearchStrategy(self.supernet,
+                                              self.val_loader,
+                                              self.lookup_table,
+                                              self.criterion,
+                                              self.args.search_strategy,
+                                              self.args,
+                                              self.logger,
+                                              self.device)
         # =================================================================================
 
 
         # Resume checkpoint ===============================================================
-        start_epoch = 0
         if self.args.resume:
-            start_epoch = resume_checkpoint(
-                self.supernet,
-                self.args.resume,
-                self.optimizer,
-                self.lr_scheduler)
+            self.start_epochs = resume_checkpoint(
+                    self.supernet,
+                    self.args.resume,
+                    self.optimizer,
+                    self.lr_scheduler)
             logger.info(
                 "Resume training from {} at epoch {}".format(
                     self.args.resume, start_epoch))
@@ -83,8 +97,7 @@ class SearchAgent(MetaAgent):
                 self.train_loader,
                 self.val_loader,
                 self.optimizer,
-                self.lr_scheduler,
-                start_epoch)
+                self.lr_scheduler)
 
         best_architecture, best_architecture_hc, best_architecture_top1 = self.search_strategy.search(
             self.trainer, self.training_strategy)
