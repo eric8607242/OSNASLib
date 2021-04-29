@@ -4,144 +4,128 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+from .base import BaseSearcher
 
-def evoluation_algorithm(
-        trainer,
-        training_strategy,
-        supernet,
-        val_loader,
-        lookup_table,
-        target_hc,
-        logger,
-        generation_num=20,
-        population=60,
-        parent_num=30,
-        info_metric="flops"):
-    # Population initialization
-    new_population = []
-    population_info = []
-    for p in range(population):
-        architecture = training_strategy.generate_training_architecture()
-        architecture_info = lookup_table.get_model_info(
-            architecture, info_metric=info_metric)
+class EvolutionSearcher(BaseSearcher):
+    def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, logger):
+        super(RandomSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, logger)
 
-        while architecture_info > target_hc:
-            architecture = training_strategy.generate_training_architecture()
-            architecture_info = lookup_table.get_model_info(
-                architecture, info_metric=info_metric)
-        new_population.append(architecture.tolist())
-        population_info.append(architecture_info)
-
-    new_population = np.array(new_population)
-    population_fitness = get_population_accuracy(
-        new_population, trainer, supernet, val_loader, info_metric)
-    population_info = np.array(population_info)
-
-    # Generation start
-    global_best_fitness = 0
-    start_time = time.time()
-    for g in range(generation_num):
-        logger.info(
-            "Generation : {}, Time : {}".format(
-                g, time.time() - start_time))
-        cur_best_fitness = np.max(population_fitness)
-
-        if global_best_fitness < cur_best_fitness:
-            global_best_fitness = cur_best_fitness
-            logger.info(
-                "New global best fitness : {}".format(global_best_fitness))
-
-        parents, parents_fitness = select_mating_pool(
-            new_population, population_fitness, parent_num)
-        offspring_size = population - parent_num
-
-        evoluation_id = 0
-        offspring = []
-        while evoluation_id < offspring_size:
-            # Evolve for each offspring
-            offspring_evolution = crossover(parents)
-            offspring_evolution = mutation(
-                offspring_evolution, training_strategy)
-
-            offspring_hc = lookup_table.get_model_info(
-                offspring_evolution, info_metric=info_metric)
-
-            if offspring_hc <= target_hc:
-                offspring.append(offspring_evolution)
-                evoluation_id += 1
-
-        offspring_evolution = np.array(offspring_evolution)
-        offspring_fittness = get_population_accuracy(
-            offspring_evolution, trainer, supernet, val_loader, info_metric)
-
-        new_population[:parent_num, :] = parents
-        new_population[parent_num:, :] = offspring_evolution
-
-        population_fitness[:parent_num] = parents_fitness
-        population_fitness[parent_num:] = offspring_fittness
-
-    best_match_index = np.argmax(population_fitness)
-    logger.info("Best fitness : {}".format(np.max(population_fitness)))
-
-    return new_population[best_match_index]
+        self.generation_num = self.config["search_utility"]["generation_num"]
+        self.population_num = self.config["search_utility"]["population_num"]
+        self.parent_num = self.config["search_utility"]["parent_num"]
 
 
-def select_mating_pool(population, population_fitness, parent_num):
-    pf_sort_indexs = population_fitness.argsort()[::-1]
-    pf_indexs = pf_sort_indexs[:parent_num]
+    def search(self):
+        # Population initialization
+        new_population = []
+        population_info = []
 
-    parents = population[pf_indexs]
-    parents_fitness = population_fitness[pf_indexs]
+        for p in range(self.population):
+            architecture = self.training_strategy.generate_training_architecture()
+            architecture_info = self.lookup_table.get_model_info(
+                architecture, info_metric=self.info_metric)
 
-    return parents, parents_fitness
+            while architecture_info > self.target_hc:
+                architecture = self.training_strategy.generate_training_architecture()
+                architecture_info = self.lookup_table.get_model_info(
+                    architecture, info_metric=self.info_metric)
+
+            new_population.append(architecture.tolist())
+            population_info.append(architecture_info)
+
+        new_population = np.array(new_population)
+        population_fitness = self.evaluate_architectures(supernet, new_population)
+        population_info = np.array(population_info)
+
+        # Generation start
+        global_best_fitness = 0
+        start_time = time.time()
+        for g in range(self.generation_num):
+            self.logger.info(
+                "Generation : {}, Time : {}".format(
+                    g, time.time() - start_time))
+            cur_best_fitness = np.max(population_fitness)
+
+            if global_best_fitness < cur_best_fitness:
+                global_best_fitness = cur_best_fitness
+                self.logger.info(
+                    "New global best fitness : {}".format(global_best_fitness))
+
+            parents, parents_fitness = self.select_mating_pool(
+                new_population, population_fitness, self.parent_num)
+            offspring_size = self.population_num - self.parent_num
+
+            evoluation_id = 0
+            offspring = []
+            while evoluation_id < offspring_size:
+                # Evolve for each offspring
+                offspring_evolution = self.crossover(parents)
+                offspring_evolution = self.mutation(offspring_evolution)
+
+                offspring_hc = self.lookup_table.get_model_info(
+                    offspring_evolution, info_metric=info_metric)
+
+                if offspring_hc <= self.target_hc:
+                    offspring.append(offspring_evolution)
+                    evoluation_id += 1
+
+            offspring_evolution = np.array(offspring_evolution)
+            offspring_fittness = self.evaluate_architectures(supernet, offspring_evolution)
+
+            new_population[:self.parent_num, :] = parents
+            new_population[self.parent_num:, :] = offspring_evolution
+
+            population_fitness[:self.parent_num] = parents_fitness
+            population_fitness[self.parent_num:] = offspring_fittness
+
+        best_match_index = np.argmax(population_fitness)
+        self.logger.info("Best fitness : {}".format(np.max(population_fitness)))
+
+        best_architecture = new_population[best_match_index]
+
+        return best_architecture
 
 
-def crossover(parents):
-    parents_size = parents.shape[0]
-    architecture_len = parents.shape[1]
+    def select_mating_pool(self, population, population_fitness, parent_num):
+        pf_sort_indexs = population_fitness.argsort()[::-1]
+        pf_indexs = pf_sort_indexs[:parent_num]
 
-    offspring_evolution = np.empty((1, architecture_len), dtype=np.int32)
+        parents = population[pf_indexs]
+        parents_fitness = population_fitness[pf_indexs]
 
-    crossover_point = np.random.randint(low=0, high=architecture_len)
-    parent1_idx = np.random.randint(low=0, high=parents_size)
-    parent2_idx = np.random.randint(low=0, high=parents_size)
-
-    offspring_evolution[0,
-                        :crossover_point] = parents[parent1_idx,
-                                                    :crossover_point]
-    offspring_evolution[0,
-                        crossover_point:] = parents[parent2_idx,
-                                                    crossover_point:]
-    return offspring_evolution
+        return parents, parents_fitness
 
 
-def mutation(offspring_evolution, training_strategy):
-    architecture_len = offspring_evolution.shape[1]
+    def crossover(self, parents):
+        parents_size = parents.shape[0]
+        architecture_len = parents.shape[1]
 
-    for l in range(architecture_len):
-        mutation_p = np.random.choice([0, 1], p=[0.9, 0.1])
+        offspring_evolution = np.empty((1, architecture_len), dtype=np.int32)
 
-        if mutation_p == 1:
-            # Mutation activate
-            micro_len = training_strategy.get_block_len()
-            random_mutation = np.random.randint(low=0, high=micro_len)
+        crossover_point = np.random.randint(low=0, high=architecture_len)
+        parent1_idx = np.random.randint(low=0, high=parents_size)
+        parent2_idx = np.random.randint(low=0, high=parents_size)
 
-            offspring_evolution[0, l] = random_mutation
-    return offspring_evolution
+        offspring_evolution[0,
+                            :crossover_point] = parents[parent1_idx,
+                                                        :crossover_point]
+        offspring_evolution[0,
+                            crossover_point:] = parents[parent2_idx,
+                                                        crossover_point:]
+        return offspring_evolution
 
 
-def get_population_accuracy(
-        population,
-        trainer,
-        supernet,
-        val_loader,
-        info_metric="flops"):
-    architectures_top1_acc = []
-    for architecture in population:
-        supernet.module.set_activate_architecture(architecture) if isinstance(
-            supernet, nn.DataParallel) else supernet.set_activate_architecture(architecture)
-        architectures_top1_acc.append(
-            trainer.validate(
-                supernet, val_loader, 0))
+    def mutation(self, offspring_evolution):
+        architecture_len = offspring_evolution.shape[1]
 
-    return np.array(architectures_top1_acc)
+        for l in range(architecture_len):
+            mutation_p = np.random.choice([0, 1], p=[0.9, 0.1])
+
+            if mutation_p == 1:
+                # Mutation activate
+                micro_len = self.training_strategy.get_block_len()
+                random_mutation = np.random.randint(low=0, high=micro_len)
+
+                offspring_evolution[0, l] = random_mutation
+        return offspring_evolution
+

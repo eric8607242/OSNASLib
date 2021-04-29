@@ -1,9 +1,6 @@
 import torch
 import torch.nn.functional as F
 
-def get_hc_criterion():
-    return l2_hc_loss
-
 
 def cross_entropy_with_label_smoothing(pred, target, eta=0.1):
     onehot_target = label_smoothing(pred, target, eta=eta)

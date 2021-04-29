@@ -9,33 +9,29 @@ from dataflow import get_train_loader, get_test_loader
 from config import get_supernet_cfg
 
 class MetaAgent:
-    def __init__(self, args, agent_state="search"):
-        self.args = args
+    def __init__(self, config, title, agent_state="search"):
+        self.config = config
 
-        self.logger = get_logger(args.logger_path)
+        self.logger = get_logger(config["logs_path"]["logger_path"])
         self.writer = get_writer(
-            args.title,
-            args.random_seed,
-            args.writer_path)
+            title,
+            config["train"]["random_seed"],
+            config["logs_path"]["writer_path"])
 
-        if self.args.random_seed is not None:
-            set_random_seed(args.random_seed)
+        if self.config["train"]["random_seed"] is not None:
+            set_random_seed(config["train"]["random_seed"])
 
-        self.device = torch.device(args.device)
+        self.device = torch.device(config["train"]["device"])
 
         self.macro_cfg, self.micro_cfg = get_supernet_cfg(
-            self.args.search_space, self.args.classes, self.args.dataset)
+            self.config["supernet_utility"]["search_space"], self.config["dataset"]["classes"], self.config["dataset"]["dataset"])
 
         self.train_loader, self.val_loader = get_train_loader(
-            self.args.dataset, self.args.dataset_path, self.args.batch_size, self.args.num_workers, train_portion=self.args.train_portion)
+            self.config["dataset"]["dataset"], self.config["dataset"]["dataset_path"], self.config["dataset"]["batch_size"], self.config["dataset"]["num_workers"], train_portion=self.config["dataset"]["train_portion"])
         self.test_loader = get_test_loader(
-            self.args.dataset,
-            self.args.dataset_path,
-            self.args.batch_size,
-            self.args.num_workers)
+            self.config["dataset"]["dataset"], self.config["dataset"]["dataset_path"], self.config["dataset"]["batch_size"], self.config["dataset"]["num_workers"])
 
-
-        self.criterion = get_criterion(args.criterion_type)
+        self.criterion = get_criterion(config["train"]["criterion_type"])
 
         self.top1 = AverageMeter()
         self.top5 = AverageMeter()
@@ -43,10 +39,10 @@ class MetaAgent:
 
         self.agent_state = agent_state
 
-        self.epochs = args.epochs
+        self.epochs = config["train"]["epochs"]
         self.start_epochs = 0
 
-        self.args = args
+        self.config = config
 
 
     def train_loop(self, model,
@@ -88,7 +84,7 @@ class MetaAgent:
                 best_top1_acc = val_top1
                 save(
                     model,
-                    self.args.best_model_path,
+                    self.config["experiment_path"]["best_checkpoint_path"],
                     optimizer,
                     lr_scheduler,
                     epoch + 1)
@@ -96,7 +92,7 @@ class MetaAgent:
             save(
                 model,
                 os.path.join(
-                    self.args.checkpoint_path_root,
+                    self.config["experiment_path"]["checkpoint_root_path"],
                     "{}_{}.pth".format(
                         self.agent_state,
                         epoch)),
@@ -159,27 +155,28 @@ class MetaAgent:
         model.eval()
         start_time = time.time()
 
-        for step, (X, y) in enumerate(val_loader):
-            X, y = X.to(
-                self.device, non_blocking=True), y.to(
-                self.device, non_blocking=True)
-            N = X.shape[0]
+        with torch.no_grad():
+            for step, (X, y) in enumerate(val_loader):
+                X, y = X.to(
+                    self.device, non_blocking=True), y.to(
+                    self.device, non_blocking=True)
+                N = X.shape[0]
 
-            if not inference:
-                self.training_strategy.step()
+                if not inference:
+                    self.training_strategy.step()
 
-            outs = model(X)
+                outs = model(X)
 
-            loss = self.criterion(outs, y)
-            self._intermediate_stats_logging(
-                outs,
-                y,
-                loss,
-                step,
-                epoch,
-                N,
-                len_loader=len(val_loader),
-                val_or_train="Valid")
+                loss = self.criterion(outs, y)
+                self._intermediate_stats_logging(
+                    outs,
+                    y,
+                    loss,
+                    step,
+                    epoch,
+                    N,
+                    len_loader=len(val_loader),
+                    val_or_train="Valid")
 
         top1_avg = self.top1.get_avg()
         self._epoch_stats_logging(start_time, epoch, val_or_train="Valid")

@@ -8,6 +8,20 @@ from .search_config import get_search_config
 from .evaluate_config import get_evaluate_config
 
 
+def process_config(config, title):
+    root_path = os.path.join(config["logs_path"]["logger_path"], title)
+    if not os.path.exists(root_path):
+        os.makedirs(root_path)
+
+    for k, v in config["experiment_path"].items():
+        config["experiment_path"][k] = os.path.join(root_path, v)
+
+    if not os.path.exists(config["experiment_path"]["checkpoint_root_path"]):
+        os.makedirs(config["experiment_path"]["checkpoint_root_path"])
+
+    return config
+
+
 def get_init_config(config_state):
     if config_state == "search":
         parser = get_search_config()

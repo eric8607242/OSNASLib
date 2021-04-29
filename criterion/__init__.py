@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from .loss import cross_entropy_with_label_smoothing
+from .loss import cross_entropy_with_label_smoothing, l2_hc_loss
 
 def get_criterion(criterion_type):
     if criterion_type == "CESmooth":
@@ -10,3 +10,5 @@ def get_criterion(criterion_type):
     else:
         raise
 
+def get_hc_criterion():
+    return l2_hc_loss
