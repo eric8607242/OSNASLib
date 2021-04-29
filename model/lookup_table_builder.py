@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 
 from .network_utils import get_block
-from ..utils import FLOPS_Counter
+from utils import FLOPS_Counter
 
 
 class LookUpTable:

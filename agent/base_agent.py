@@ -1,49 +1,58 @@
-import os
-import time
+import torch
 
-from ..utils import *
+from utils import get_logger, get_writer, set_random_seed, AverageMeter
+from criterion import get_criterion
+from data import get_train_loader, get_test_loader
+from config import get_supernet_cfg
+
+class MetaAgent:
+    def __init__(self, args, agenet_state="search"):
+        self.args = args
+
+        self.logger = get_logger(args.logger_path)
+        self.writer = get_writer(
+            args.title,
+            args.random_seed,
+            args.writer_path)
+
+        if self.args.random_seed is not None:
+            set_random_seed(args.random_seed)
+
+        self.device = torch.device(args.device)
+
+        self.macro_cfg, self.micro_cfg = get_supernet_cfg(
+            self.args.search_space, self.args.classes, self.args.dataset)
+
+        self.train_loader, self.val_loader = get_train_loader(
+            self.args.dataset, self.args.dataset_path, self.args.batch_size, self.args.num_workers, train_portion=self.args.train_portion)
+        self.test_loader = get_test_loader(
+            self.args.dataset,
+            self.args.dataset_path,
+            self.args.batch_size,
+            self.args.num_workers)
 
 
-class Trainer:
-    def __init__(
-            self,
-            criterion,
-            writer,
-            logger,
-            device,
-            trainer_state,
-            args,
-            training_strategy=None,
-            search_strategy=None,
-    ):
+        self.criterion = get_criterion(args.criterion_type)
 
         self.top1 = AverageMeter()
         self.top5 = AverageMeter()
         self.losses = AverageMeter()
         self.device = device
 
-        self.criterion = criterion
-
-        self.trainer_state = trainer_state
-        if self.trainer_state == "search":
-            self.training_strategy = training_strategy
-            self.search_strategy = search_strategy
-
-        self.writer = writer
-        self.logger = logger
+        self.agenet_state = agenet_state
 
         self.epochs = args.epochs
+        self.start_epochs = 0
 
         self.args = args
 
-    def train_loop(
-            self,
-            model,
-            train_loader,
-            val_loader,
-            optimizer,
-            lr_scheduler,
-            start_epoch=0):
+
+    def train_loop(self, model,
+                         train_loader,
+                         val_loader,
+                         optimizer,
+                         lr_scheduler,
+                         start_epoch=0):
         """
         Support mode:
         1) Two stages training:
@@ -70,7 +79,7 @@ class Trainer:
                 model,
                 val_loader,
                 epoch,
-                inference=False if self.trainer_state == "search" else True)
+                inference=False if self.agent_state == "search" else True)
 
             if val_top1 > best_top1_acc:
                 self.logger.info(
@@ -88,7 +97,7 @@ class Trainer:
                 os.path.join(
                     self.args.checkpoint_path_root,
                     "{}_{}.pth".format(
-                        self.trainer_state,
+                        self.agent_state,
                         epoch)),
                 optimizer,
                 lr_scheduler,
@@ -106,7 +115,7 @@ class Trainer:
 
         for step, (X, y) in enumerate(train_loader):
 
-            if self.trainer_state == "search":
+            if self.agent_state == "search":
                 # If search strategy is "differentiable". Update architecture
                 # parameter.
                 self.search_strategy.step()
@@ -118,7 +127,7 @@ class Trainer:
 
             optimizer.zero_grad()
 
-            if self.trainer_state == "search":
+            if self.agent_state == "search":
                 self.training_strategy.step()
 
             outs = model(X)

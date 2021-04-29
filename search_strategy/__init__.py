@@ -3,9 +3,6 @@ import torch.nn as nn
 from .random_search import random_search
 from .evolution_search import evoluation_algorithm
 
-from lib import *
-
-
 class SearchStrategy:
     def __init__(
             self,

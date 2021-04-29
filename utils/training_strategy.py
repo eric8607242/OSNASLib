@@ -30,18 +30,6 @@ class TrainingStrategy:
         else:
             raise
 
-    def generate_training_architecture(self):
-        if self.sample_strategy == "uniform":
-            architecture = self.get_uniform_architectures()
-        elif self.sample_strategy == "fair":
-            architecture = self.get_fair_architectures()
-        elif self.sample_strategy == "differentiable":
-            pass
-        else:
-            raise
-
-        return architecture
-
     def step(self):
         if self.sample_strategy == "uniform":
             self.model.module.set_forward_state("single") if isinstance(
@@ -65,6 +53,18 @@ class TrainingStrategy:
 
         else:
             raise
+
+    def generate_training_architecture(self):
+        if self.sample_strategy == "uniform":
+            architecture = self.get_uniform_architectures()
+        elif self.sample_strategy == "fair":
+            architecture = self.get_fair_architectures()
+        elif self.sample_strategy == "differentiable":
+            pass
+        else:
+            raise
+
+        return architecture
 
     def get_uniform_architectures(self):
         architecture = torch.randint(

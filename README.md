@@ -5,7 +5,7 @@
 * [What is neural architecture search (NAS)](./doc/nas.md)
 * [What is one-shot NAS](./doc/one_shot_nas.md)
 
-The is a example repo for one-shot NAS. We cover the basic implementation for one-shot NAS(e.g., supernet, search strategy, and training strategy).
+This is a example repo for one-shot NAS. We cover the basic implementation for one-shot NAS (e.g., supernet, search strategy, and training strategy).
 * Components implemented in this repo
     * Supernet
         * Search space of ProxylessNAS
@@ -31,11 +31,11 @@ We are glad at all contributions to improve this repo. Please feel free to pull 
 ## Getting Started
 ```python
 # Search the best architecture under the specific hardware constraint.
-searcher = Searcher(args)
+searcher = SearchAgent(args)
 searcher.search()
 
 # Evaluate the searched architecture.
-evaluator = Evaluator(args)
+evaluator = EvaluateAgent(args)
 evaluator.evaluate()
 evaluator.inference()
 ```

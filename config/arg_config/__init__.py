@@ -68,6 +68,8 @@ def get_common_config(parser):
     parser.add_argument("--num-workers", type=int, default=4)
     parser.add_argument("--train-portion", type=float, default=0.8)
 
+    parser.add_argument("--criterion-type", type=str, default="CESmooth")
+
     return parser
 
 

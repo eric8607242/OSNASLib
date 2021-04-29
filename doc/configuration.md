@@ -50,6 +50,7 @@
     * `--batch-size`
     * `--num-workers`
     * `--train-portion`
+* `--criterion-type`
 
 * Path
     * `--root-path` : The root path to save all of checkpoint, lookup-table, or searched model in this searching process. We set `root-path` based on the `title` and `random seed`.
