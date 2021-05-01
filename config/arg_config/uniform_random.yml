@@ -1,21 +1,22 @@
-agent: "SearchAgent"
+agent:
+    main_agent: "SearchAgent"
+    training_strategy_agent: "UniformSampler"
+    search_strategy_agent: "RandomSearcher"
 
 target_hc: 100
 
 search_utility:
-    directly_search: True
+    directly_search: False
     search_strategy: "random_search"
-    search_strategy_agent: "RandomSearcher"
     random_iteration: 1000
     info_metric: "flops"
 
 
 supernet_utility:
     search_space: "proxylessnas"
-    sample_strategy: "uniform"
 
 train:
-    resume: True
+    resume: False
     random_seed: 42
     device: "cuda"
     ngpu: 1

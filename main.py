@@ -13,7 +13,7 @@ def main(config_path, title):
         config = process_config(config, title)
         pprint(config)
 
-    agent_cls = get_agent_cls(config["agent"])
+    agent_cls = get_agent_cls(config["agent"]["main_agent"])
     agent = agent_cls(config)
     agent.fit()
 

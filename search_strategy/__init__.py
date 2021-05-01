@@ -1,5 +1,4 @@
 import sys
-import torch.nn as nn
 
 from .random_search import RandomSearcher
 from .evolution_search import EvolutionSearcher

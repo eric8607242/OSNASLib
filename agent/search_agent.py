@@ -5,9 +5,11 @@ import torch.nn as nn
 
 from .base_agent import MetaAgent
 
-from utils import get_optimizer, get_lr_scheduler, resume_checkpoint, TrainingStrategy
+from utils import get_optimizer, get_lr_scheduler, resume_checkpoint
 from model import Supernet, save_architecture, LookUpTable
+
 from search_strategy import get_search_strategy
+from training_strategy import get_training_strategy
 
 class SearchAgent(MetaAgent):
     def __init__(self, config):
@@ -47,9 +49,8 @@ class SearchAgent(MetaAgent):
 
 
         # Construct search utility ========================================================
-        self.training_strategy = TrainingStrategy(
-            self.config["supernet_utility"]["sample_strategy"], len(self.micro_cfg), len(
-                self.macro_cfg["search"]), self.supernet)
+        training_strategy_class = get_training_strategy(self.config["agent"]["training_strategy_agent"])
+        self.training_strategy = training_strategy_class(len(self.micro_cfg), len(self.macro_cfg["search"]), self.supernet)
 
         self.lookup_table = LookUpTable(
             self.macro_cfg,
@@ -60,7 +61,7 @@ class SearchAgent(MetaAgent):
                 "flops",
                 "param"])
 
-        search_strategy_class = get_search_strategy(self.config["search_utility"]["search_strategy_agent"])
+        search_strategy_class = get_search_strategy(self.config["agent"]["search_strategy_agent"])
         self.search_strategy = search_strategy_class(self.config, self.supernet, self.val_loader, self.lookup_table, self.training_strategy, self.device, self.logger)
         # =================================================================================
 
