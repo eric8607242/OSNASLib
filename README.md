@@ -13,7 +13,10 @@ OSNASLib is a library for one-shot NAS. In this library, we cover various compon
 ```
 python3 main.py -c [CONFIG FILE] --title [EXPERIMENT TITLE]
 ```
-More configuration please refer [configuration](./doc/configuration.md).
+* `[CONFIG FILE]` : The path to the config file. We provide serveral example config files in `./config/arg_config/`.
+* `[EXPERIMENT TITLE]` : In each experiment, all corresponding files will be saved in the directory named with experiment title. 
+
+More information about configuration please refer to [configuration](./doc/configuration.md).
 
 ## Customize NAS For Your Tasks
 In this project, you can design different NAS for your task by modifying or expanding any components easily.
@@ -24,4 +27,9 @@ Please refer to the documents to follow our customizing guidelines.
 * [How to customize the search strategy](./doc/customize/search_strategy.md)
 * [How to customize the training strategy](./doc/customize/training_strategy.md)
 
+## TODO
+* [ ] Reconstruct criterion
+* [ ] Reconstruct model (e.g., model constructor and model config file)
+* [ ] Reconstruct dataflow
+* [ ] Documents
 
