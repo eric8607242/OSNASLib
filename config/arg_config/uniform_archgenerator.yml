@@ -1,16 +1,21 @@
 agent:
     main_agent: "SearchAgent"
     training_strategy_agent: "UniformSampler"
-    search_strategy_agent: "RandomSearcher"
+    search_strategy_agent: "ArchitectureGeneratorSearcher"
 
 target_hc: 100
 
 search_utility:
     directly_search: True
-    search_strategy: "random_search"
+    search_strategy: "architecture_generator"
     random_iteration: 10
     info_metric: "flops"
 
+
+generator:
+    hc_dim: 10
+    tau_decay: 0.95
+    epochs: 50
 
 supernet_utility:
     search_space: "proxylessnas"
@@ -50,13 +55,13 @@ optim:
     decay_ratio: 0.1
 
 arch_optim:
-    hc_weight: ""
-    a_optimizer: ""
-    a_lr: ""
-    a_weight_decay: ""
-    a_momentum: ""
+    hc_weight: 0.0003
+    a_optimizer: "adam"
+    a_lr: 0.001
+    a_weight_decay: 0
+    a_momentum: 0
     a_alpha: ""
-    a_beta: ""
+    a_beta: 0.5
 
 logs_path:
     logger_path: "./logs/"

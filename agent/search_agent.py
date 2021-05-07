@@ -99,13 +99,13 @@ class SearchAgent(MetaAgent):
 
         best_architecture, best_architecture_hc, best_architecture_top1 = self.search_strategy.search()
 
-        logger.info("Best architectrue : {}".format(best_architecture))
-        logger.info(
+        self.logger.info("Best architectrue : {}".format(best_architecture))
+        self.logger.info(
             "Best architectrue top1 : {:.3f}".format(
                 best_architecture_top1 * 100))
-        logger.info("Best architectrue hc : {}".format(best_architecture_hc))
+        self.logger.info("Best architectrue hc : {}".format(best_architecture_hc))
 
         save_architecture(self.config["experiment_path"]["searched_model_path"], best_architecture)
-        logger.info(
+        self.logger.info(
             "Total search time : {:.2f}".format(
                 time.time() - start_time))

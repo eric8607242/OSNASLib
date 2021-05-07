@@ -8,7 +8,7 @@ from .base import BaseSearcher
 
 class EvolutionSearcher(BaseSearcher):
     def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, logger):
-        super(RandomSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, logger)
+        super(EvolutionSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, logger)
 
         self.generation_num = self.config["search_utility"]["generation_num"]
         self.population_num = self.config["search_utility"]["population_num"]
@@ -20,7 +20,7 @@ class EvolutionSearcher(BaseSearcher):
         new_population = []
         population_info = []
 
-        for p in range(self.population):
+        for p in range(self.population_num):
             architecture = self.training_strategy.generate_training_architecture()
             architecture_info = self.lookup_table.get_model_info(
                 architecture, info_metric=self.info_metric)
@@ -34,7 +34,7 @@ class EvolutionSearcher(BaseSearcher):
             population_info.append(architecture_info)
 
         new_population = np.array(new_population)
-        population_fitness = self.evaluate_architectures(supernet, new_population)
+        population_fitness = self.evaluate_architectures(new_population)
         population_info = np.array(population_info)
 
         # Generation start
@@ -56,21 +56,21 @@ class EvolutionSearcher(BaseSearcher):
             offspring_size = self.population_num - self.parent_num
 
             evoluation_id = 0
-            offspring = []
+            offspring_evolution = []
             while evoluation_id < offspring_size:
                 # Evolve for each offspring
-                offspring_evolution = self.crossover(parents)
-                offspring_evolution = self.mutation(offspring_evolution)
+                offspring = self.crossover(parents)
+                offspring = self.mutation(offspring)
 
                 offspring_hc = self.lookup_table.get_model_info(
-                    offspring_evolution, info_metric=info_metric)
+                    offspring)
 
                 if offspring_hc <= self.target_hc:
-                    offspring.append(offspring_evolution)
+                    offspring_evolution.extend(offspring)
                     evoluation_id += 1
 
             offspring_evolution = np.array(offspring_evolution)
-            offspring_fittness = self.evaluate_architectures(supernet, offspring_evolution)
+            offspring_fittness = self.evaluate_architectures(offspring_evolution)
 
             new_population[:self.parent_num, :] = parents
             new_population[self.parent_num:, :] = offspring_evolution
@@ -82,8 +82,10 @@ class EvolutionSearcher(BaseSearcher):
         self.logger.info("Best fitness : {}".format(np.max(population_fitness)))
 
         best_architecture = new_population[best_match_index]
+        best_architecture_top1 = population_fitness[best_match_index]
+        best_architecture_hc = self.lookup_table.get_model_info(best_architecture)
 
-        return best_architecture
+        return best_architecture, best_architecture_hc, best_architecture_top1
 
 
     def select_mating_pool(self, population, population_fitness, parent_num):

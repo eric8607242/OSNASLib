@@ -66,6 +66,7 @@ def get_optimizer(
         assert momentum is not None
 
         logger.info("Momentum : {}".format(momentum))
+        logger.info("Alpha: {}".format(alpha))
         optimizer = torch.optim.RMSprop(model_parameters,
                                         lr=lr,
                                         alpha=alpha,

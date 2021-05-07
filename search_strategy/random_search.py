@@ -34,5 +34,7 @@ class RandomSearcher(BaseSearcher):
             architectures_top1_acc[max_top1_acc_index]))
 
         best_architecture = random_architectures[max_top1_acc_index]
+        best_architecture_top1 = architectures_top1_acc[max_top1_acc_index]
+        best_architecture_hc = self.lookup_table.get_model_info(best_architecture)
 
-        return best_architecture
+        return best_architecture, best_architecture_hc, best_architecture_top1
