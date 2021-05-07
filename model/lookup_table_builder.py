@@ -39,11 +39,14 @@ class LookUpTable:
             # Get one dim vector, convert to one-hot architecture parameter
             architecture_parameter = self._architecture_to_one_hot(
                 architecture_parameter)
+        else:
+            architecture_parameter = architecture_parameter.reshape(len(self.macro_cfg["search"]), len(self.micro_cfg))
 
         model_info = []
         for i, l_ap in enumerate(architecture_parameter):
             model_info.extend(
                 [p * block_info for p, block_info in zip(l_ap, self.info_table[info_metric][i])])
+
 
         return sum(model_info) + self.info_table["base_{}".format(info_metric)]
 

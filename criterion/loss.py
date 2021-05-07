@@ -23,5 +23,5 @@ def cross_entropy_for_onehot(pred, target):
     return torch.mean(torch.sum(-target * F.log_softmax(pred, dim=-1), 1))
 
 
-def l2_hc_loss(search_hc, target_hc, hc_weight):
+def l2_hc_loss(search_hc, target_hc, hc_weight=0.0003):
     return (search_hc - target_hc) ** 2 * hc_weight

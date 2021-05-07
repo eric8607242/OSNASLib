@@ -10,5 +10,5 @@ def get_criterion(criterion_type):
     else:
         raise
 
-def get_hc_criterion():
+def get_hc_criterion(hc_weight):
     return l2_hc_loss

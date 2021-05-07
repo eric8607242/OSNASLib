@@ -1,3 +1,5 @@
+import math 
+
 import torch
 import torch.nn as nn
 
@@ -15,7 +17,7 @@ class Generator(nn.Module):
                 ConvReLU(1, N, 3, 1, 1),
                 ConvReLU(N, N, 3, 1, 1))
 
-        sel.head = ConvReLU(N, N, 3, 1, 1)
+        self.head = ConvReLU(N, N, 3, 1, 1)
 
         self.main_stages = nn.Sequential()
         for i in range(layer_nums - 2):
@@ -27,7 +29,7 @@ class Generator(nn.Module):
 
         self._initialize_weights()
 
-    def forward(self, prior):
+    def forward(self, prior, hc):
         reshape_prior = prior.view(1, 1, *prior.shape)
 
         hc = hc.expand(*hc.shape[:-1], self.hc_dim * prior.size(-1), prior.size(-2))
@@ -39,7 +41,7 @@ class Generator(nn.Module):
 
         hc_prior = self.head(hc_prior_head)
         hc_prior = self.main_stages(hc_prior)
-        hc_prior = hc_prior + hc_prior_haed
+        hc_prior = hc_prior + hc_prior_head
 
         hc_prior = self.tail(hc_prior)
         return hc_prior

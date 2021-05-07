@@ -78,7 +78,7 @@ def get_optimizer(
         logger.info("Beta : {}".format(beta))
         optimizer = torch.optim.Adam(model_parameters,
                                      weight_decay=weight_decay,
-                                     lr=CONFIG.lr,
+                                     lr=learning_rate,
                                      betas=(beta, 0.999))
 
     return optimizer

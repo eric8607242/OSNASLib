@@ -12,6 +12,7 @@ search_utility:
     info_metric: "flops"
     lowest_hardware_constraint: 80
     highest_hardware_constraint: 120
+    prior_pool_size: 1
 
 
 generator:
@@ -23,7 +24,7 @@ supernet_utility:
     search_space: "proxylessnas"
 
 train:
-    resume: True
+    resume: False
     random_seed: 42
     device: "cuda"
     ngpu: 1
@@ -40,7 +41,7 @@ dataset:
     classes: 100
     input_size: 32
 
-    batch_size: 128
+    batch_size: 32
     num_workers: 4
     train_portion: 0.8
 

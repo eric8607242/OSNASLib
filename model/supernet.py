@@ -130,13 +130,14 @@ class Supernet(nn.Module):
         return x
 
     def set_arch_param(self, arch_param):
-        pass
+        self.architecture_param = arch_param
+        
 
     def get_arch_param_nums(self):
         micro_len = len(self.micro_cfg)
         macro_len = len(self.macro_cfg["search"])
 
-        return (micro_len, macro_len)
+        return (macro_len, micro_len)
 
     def set_activate_architecture(self, architecture):
         """
