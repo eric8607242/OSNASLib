@@ -10,6 +10,8 @@ search_utility:
     search_strategy: "architecture_generator"
     random_iteration: 10
     info_metric: "flops"
+    lowest_hardware_constraint: 80
+    highest_hardware_constraint: 120
 
 
 generator:
@@ -77,6 +79,11 @@ experiment_path:
 
     lookup_table_path: "./lookup_table.json"
     searched_model_path: "./searched_model_architecture.npy"
+
+    best_loss_generator_checkpoint_path: "./best_loss_generator_checkpoint.pth"
+    best_acc_generator_checkpoint_path: "./best_acc_generator_checkpoint_path.pth"
+    final_generator_checkpoint_path: "./final_generator_checkpoint.pth"
+    generator_evaluate_path: "./generator_evaluate.csv"
 
 
 

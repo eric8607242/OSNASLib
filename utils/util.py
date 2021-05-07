@@ -157,3 +157,7 @@ def save(
             checkpoint["epoch"] = resume_epoch
 
     torch.save(checkpoint, checkpoint_path)
+
+def min_max_normalize(min_value, max_value, value):
+    new_value = (value - min_value) / (max_value - min_value)
+    return new_value
