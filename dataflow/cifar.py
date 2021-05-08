@@ -30,13 +30,16 @@ def get_CIFAR_dataloader(dataset_name, dataset_path, batch_size, num_workers, tr
         test_dataset = datasets.CIFAR10(root=dataset_path, train=False,
                                          download=True, transform=test_transform)
     elif dataset_name == "cifar100":
-        pass
+        train_dataset = datasets.CIFAR100(root=dataset_path, train=True,
+                                         download=True, transform=train_transform)
+        test_dataset = datasets.CIFAR100(root=dataset_path, train=False,
+                                         download=True, transform=test_transform)
     else:
         raise 
 
 
     if train_portion != 1:
-        train_len = len(train_data)
+        train_len = len(train_dataset)
         indices = list(range(train_len))
         random.shuffle(indices)
         split = int(np.floor(train_portion * train_len))
@@ -46,20 +49,20 @@ def get_CIFAR_dataloader(dataset_name, dataset_path, batch_size, num_workers, tr
         val_sampler = SubsetRandomSampler(val_idx)
 
         train_loader = build_loader(
-            train_data,
+            train_dataset,
             True,
             batch_size,
             num_workers,
             sampler=train_sampler)
         val_loader = build_loader(
-            train_data,
+            train_dataset,
             False,
             batch_size,
             num_workers,
             sampler=val_sampler)
     else:
         train_loader = build_loader(
-            train_data,
+            train_dataset,
             True,
             batch_size,
             num_workers,
