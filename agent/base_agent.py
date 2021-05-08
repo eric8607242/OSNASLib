@@ -5,7 +5,7 @@ import torch
 
 from utils import get_logger, get_writer, set_random_seed, AverageMeter, accuracy, save
 from criterion import get_criterion
-from dataflow import get_train_loader, get_test_loader
+from dataflow import get_dataloader
 from config import get_supernet_cfg
 
 class MetaAgent:
@@ -26,10 +26,12 @@ class MetaAgent:
         self.macro_cfg, self.micro_cfg = get_supernet_cfg(
             self.config["supernet_utility"]["search_space"], self.config["dataset"]["classes"], self.config["dataset"]["dataset"])
 
-        self.train_loader, self.val_loader = get_train_loader(
-            self.config["dataset"]["dataset"], self.config["dataset"]["dataset_path"], self.config["dataset"]["batch_size"], self.config["dataset"]["num_workers"], train_portion=self.config["dataset"]["train_portion"])
-        self.test_loader = get_test_loader(
-            self.config["dataset"]["dataset"], self.config["dataset"]["dataset_path"], self.config["dataset"]["batch_size"], self.config["dataset"]["num_workers"])
+
+        self.train_loader, self.val_loader, self.test_loader = get_dataloader(self.config["dataset"]["dataset"], 
+                                                                self.config["dataset"]["dataset_path"], 
+                                                                self.config["dataset"]["batch_size"], 
+                                                                self.config["dataset"]["num_workers"], 
+                                                                train_portion=self.config["dataset"]["train_portion"])
 
         self.criterion = get_criterion(config["train"]["criterion_type"])
 
