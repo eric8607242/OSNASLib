@@ -19,13 +19,11 @@ class RandomSearcher(BaseSearcher):
             self.logger.info("Architecture index : {}".format(i))
 
             architecture = self.training_strategy.generate_training_architecture()
-            architecture_info = self.lookup_table.get_model_info(
-                architecture, info_metric=self.info_metric)
+            architecture_info = self.lookup_table.get_model_info(architecture)
 
             while architecture_info > self.target_hc:
                 architecture = self.training_strategy.generate_training_architecture()
-                architecture_info = self.lookup_table.get_model_info(
-                    architecture, info_metric=self.info_metric)
+                architecture_info = self.lookup_table.get_model_info(architecture)
             random_architectures.append(architecture)
 
         architectures_top1_acc = self.evaluate_architectures(random_architectures)

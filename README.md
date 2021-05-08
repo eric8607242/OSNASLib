@@ -30,6 +30,5 @@ Please refer to the documents to follow our customizing guidelines.
 ## TODO
 * [ ] Reconstruct criterion
 * [ ] Reconstruct model (e.g., model constructor and model config file)
-* [ ] Reconstruct dataflow
 * [ ] Documents
 

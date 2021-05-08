@@ -6,7 +6,7 @@ import torch
 from utils import get_logger, get_writer, set_random_seed, AverageMeter, accuracy, save
 from criterion import get_criterion
 from dataflow import get_dataloader
-from config import get_supernet_cfg
+from model import get_supernet_cfg
 
 class MetaAgent:
     def __init__(self, config, title, agent_state="search"):

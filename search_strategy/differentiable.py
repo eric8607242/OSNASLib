@@ -40,7 +40,7 @@ class DifferentiableSearcher(BaseSearcher):
         architecture_parameter = self.supernet.module.get_architecture_param() if isinstance(
             self.supernet, nn.DataParallel) else self.supernet.get_architecture_param()
         architecture_info = self.lookup_table.get_model_info(
-            architecture_parameter, info_metric=self.config.info_metric)
+            architecture_parameter)
 
         hc_loss = self.hc_criterion(
             self.target_hc,

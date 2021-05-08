@@ -20,7 +20,6 @@ class BaseSearcher:
         self.logger = logger
 
         self.target_hc = self.config["target_hc"]
-        self.info_metric = self.config["search_utility"]["info_metric"]
         self.top1 = AverageMeter()
 
     def step(self):

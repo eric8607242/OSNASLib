@@ -130,6 +130,9 @@ class Supernet(nn.Module):
         return x
 
     def set_arch_param(self, arch_param):
+        """
+        Set architecture parameter directly
+        """
         self.architecture_param = arch_param
         
 

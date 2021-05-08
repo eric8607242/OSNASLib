@@ -57,9 +57,7 @@ class SearchAgent(MetaAgent):
             self.micro_cfg,
             self.config["experiment_path"]["lookup_table_path"],
             self.config["dataset"]["input_size"],
-            info_metric=[
-                "flops",
-                "param"])
+            info_metric=self.config["search_utility"]["info_metric"])
 
         search_strategy_class = get_search_strategy(self.config["agent"]["search_strategy_agent"])
         self.search_strategy = search_strategy_class(self.config, self.supernet, self.val_loader, self.lookup_table, self.training_strategy, self.device, self.logger)

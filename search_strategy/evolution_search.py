@@ -22,13 +22,11 @@ class EvolutionSearcher(BaseSearcher):
 
         for p in range(self.population_num):
             architecture = self.training_strategy.generate_training_architecture()
-            architecture_info = self.lookup_table.get_model_info(
-                architecture, info_metric=self.info_metric)
+            architecture_info = self.lookup_table.get_model_info(architecture)
 
             while architecture_info > self.target_hc:
                 architecture = self.training_strategy.generate_training_architecture()
-                architecture_info = self.lookup_table.get_model_info(
-                    architecture, info_metric=self.info_metric)
+                architecture_info = self.lookup_table.get_model_info(architecture)
 
             new_population.append(architecture.tolist())
             population_info.append(architecture_info)
@@ -62,8 +60,7 @@ class EvolutionSearcher(BaseSearcher):
                 offspring = self.crossover(parents)
                 offspring = self.mutation(offspring)
 
-                offspring_hc = self.lookup_table.get_model_info(
-                    offspring)
+                offspring_hc = self.lookup_table.get_model_info(offspring)
 
                 if offspring_hc <= self.target_hc:
                     offspring_evolution.extend(offspring)

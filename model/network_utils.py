@@ -6,6 +6,91 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+def get_block(block_type,
+              in_channels,
+              out_channels,
+              kernel_size,
+              stride,
+              activation,
+              se,
+              bn_momentum,
+              bn_track_running_stats,
+              *args,
+              **kwargs):
+
+    if block_type == "Mobile":
+        # Inverted Residual Block of MobileNet
+        expansion_rate = kwargs["expansion_rate"]
+        point_group = kwargs["point_group"] if "point_group" in kwargs else 1
+
+        block = IRBlock(in_channels=in_channels,
+                        out_channels=out_channels,
+                        kernel_size=kernel_size,
+                        stride=stride,
+                        activation=activation,
+                        se=se,
+                        expansion_rate=expansion_rate,
+                        bn_momentum=bn_momentum,
+                        bn_track_running_stats=bn_track_running_stats,
+                        point_group=point_group)
+
+    elif block_type == "Shuffle":
+        # Block of ShuffleNet
+        block = ShuffleBlock(in_channels=in_channels,
+                             out_channels=out_channels,
+                             kernel_size=kernel_size,
+                             stride=stride,
+                             activation=activation,
+                             se=se,
+                             bn_momentum=bn_momentum,
+                             bn_track_running_stats=bn_track_running_stats)
+    elif block_type == "ShuffleX":
+        # Block of ShuffleNet
+        block = ShuffleBlockX(in_channels=in_channels,
+                              out_channels=out_channels,
+                              stride=stride,
+                              activation=activation,
+                              se=se,
+                              bn_momentum=bn_momentum,
+                              bn_track_running_stats=bn_track_running_stats)
+
+    elif block_type == "classifier":
+        block = nn.Linear(in_channels, out_channels)
+
+    elif block_type == "global_average":
+        block = GlobalAveragePooling()
+
+    elif block_type == "Conv":
+        block = ConvBNAct(in_channels=in_channels,
+                          out_channels=out_channels,
+                          kernel_size=kernel_size,
+                          stride=stride,
+                          activation=activation,
+                          bn_momentum=bn_momentum,
+                          bn_track_running_stats=bn_track_running_stats,
+                          group=1,
+                          pad=(kernel_size // 2))
+
+    elif block_type == "Skip":
+        if in_channels != out_channels:
+            block = ConvBNAct(in_channels=in_channels,
+                              out_channels=out_channels,
+                              kernel_size=3,
+                              stride=stride,
+                              activation="relu",
+                              bn_momentum=bn_momentum,
+                              bn_track_running_stats=bn_track_running_stats,
+                              group=1,
+                              pad=(3 // 2))
+        else:
+            block = nn.Sequential()
+
+    else:
+        raise NotImplementedError
+
+    return block
+
+
 def make_divisible(x, divisible_by=8):
     return int(np.ceil(x * 1. / divisible_by) * divisible_by)
 
@@ -374,86 +459,3 @@ class IRBlock(nn.Module):
         return y
 
 
-def get_block(block_type,
-              in_channels,
-              out_channels,
-              kernel_size,
-              stride,
-              activation,
-              se,
-              bn_momentum,
-              bn_track_running_stats,
-              *args,
-              **kwargs):
-
-    if block_type == "Mobile":
-        # Inverted Residual Block of MobileNet
-        expansion_rate = kwargs["expansion_rate"]
-        point_group = kwargs["point_group"] if "point_group" in kwargs else 1
-
-        block = IRBlock(in_channels=in_channels,
-                        out_channels=out_channels,
-                        kernel_size=kernel_size,
-                        stride=stride,
-                        activation=activation,
-                        se=se,
-                        expansion_rate=expansion_rate,
-                        bn_momentum=bn_momentum,
-                        bn_track_running_stats=bn_track_running_stats,
-                        point_group=point_group)
-
-    elif block_type == "Shuffle":
-        # Block of ShuffleNet
-        block = ShuffleBlock(in_channels=in_channels,
-                             out_channels=out_channels,
-                             kernel_size=kernel_size,
-                             stride=stride,
-                             activation=activation,
-                             se=se,
-                             bn_momentum=bn_momentum,
-                             bn_track_running_stats=bn_track_running_stats)
-    elif block_type == "ShuffleX":
-        # Block of ShuffleNet
-        block = ShuffleBlockX(in_channels=in_channels,
-                              out_channels=out_channels,
-                              stride=stride,
-                              activation=activation,
-                              se=se,
-                              bn_momentum=bn_momentum,
-                              bn_track_running_stats=bn_track_running_stats)
-
-    elif block_type == "classifier":
-        block = nn.Linear(in_channels, out_channels)
-
-    elif block_type == "global_average":
-        block = GlobalAveragePooling()
-
-    elif block_type == "Conv":
-        block = ConvBNAct(in_channels=in_channels,
-                          out_channels=out_channels,
-                          kernel_size=kernel_size,
-                          stride=stride,
-                          activation=activation,
-                          bn_momentum=bn_momentum,
-                          bn_track_running_stats=bn_track_running_stats,
-                          group=1,
-                          pad=(kernel_size // 2))
-
-    elif block_type == "Skip":
-        if in_channels != out_channels:
-            block = ConvBNAct(in_channels=in_channels,
-                              out_channels=out_channels,
-                              kernel_size=3,
-                              stride=stride,
-                              activation="relu",
-                              bn_momentum=bn_momentum,
-                              bn_track_running_stats=bn_track_running_stats,
-                              group=1,
-                              pad=(3 // 2))
-        else:
-            block = nn.Sequential()
-
-    else:
-        raise NotImplementedError
-
-    return block

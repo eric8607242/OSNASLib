@@ -15,23 +15,23 @@ class LookUpTable:
         micro_cfg,
         table_path,
         input_size,
-        info_metric=[
-            "flops",
-            "param",
-            "latency"]):
+        info_metric="flops"):
+
         if os.path.isfile(table_path):
             with open(table_path) as f:
                 self.info_table = json.load(f)
         else:
             self.info_table = self._construct_info_table(
-                macro_cfg, micro_cfg, input_size, info_metric=info_metric)
+                macro_cfg, micro_cfg, input_size)
             with open(table_path, "w") as f:
                 json.dump(self.info_table, f)
 
         self.macro_cfg = macro_cfg
         self.micro_cfg = micro_cfg
 
-    def get_model_info(self, architecture_parameter, info_metric="flops"):
+        self.info_metric = info_metric
+
+    def get_model_info(self, architecture_parameter):
         """
         architecture_parameter(matrix) : one-hot of the architecture
         """
@@ -45,24 +45,24 @@ class LookUpTable:
         model_info = []
         for i, l_ap in enumerate(architecture_parameter):
             model_info.extend(
-                [p * block_info for p, block_info in zip(l_ap, self.info_table[info_metric][i])])
+                [p * block_info for p, block_info in zip(l_ap, self.info_table[self.info_metric][i])])
 
 
-        return sum(model_info) + self.info_table["base_{}".format(info_metric)]
+        return sum(model_info) + self.info_table["base_{}".format(self.info_metric)]
 
     def _construct_info_table(
         self,
         macro_cfg,
         micro_cfg,
         input_size,
-        info_metric=[
+        info_metric_list=[
             "flops",
             "param",
             "latency"]):
         base_info = 0
-        info_table = {metric: [] for metric in info_metric}
+        info_table = {metric: [] for metric in info_metric_list}
         base_info_table = {"base_{}".format(
-            metric): 0 for metric in info_metric}
+            metric): 0 for metric in info_metric_list}
 
         first_stage = []
         first_in_channels = None
@@ -83,14 +83,14 @@ class LookUpTable:
 
         first_stage = nn.Sequential(*first_stage)
         base_info = self._get_block_info(
-            first_stage, first_in_channels, input_size, info_metric)
+            first_stage, first_in_channels, input_size, info_metric_list)
         input_size = input_size if stride == 1 else input_size // 2
         for k, v in base_info.items():
             base_info_table["base_{}".format(k)] += v
 
         for l, l_cfg in enumerate(macro_cfg["search"]):
             in_channels, out_channels, stride = l_cfg
-            layer_info = {metric: [] for metric in info_metric}
+            layer_info = {metric: [] for metric in info_metric_list}
 
             for b, b_cfg in enumerate(micro_cfg):
                 block_type, kernel_size, se, activation, kwargs = b_cfg
@@ -107,13 +107,13 @@ class LookUpTable:
                                   )
 
                 block_info = self._get_block_info(
-                    block, in_channels, input_size, info_metric)
+                    block, in_channels, input_size, info_metric_list)
                 layer_info = self._merge_info_table(
-                    layer_info, block_info, info_metric)
+                    layer_info, block_info, info_metric_list)
 
             input_size = input_size if stride == 1 else input_size // 2
             info_table = self._merge_info_table(
-                info_table, layer_info, info_metric)
+                info_table, layer_info, info_metric_list)
 
         last_stage = []
         last_in_channels = None
@@ -134,7 +134,7 @@ class LookUpTable:
             last_stage.append(layer)
         last_stage = nn.Sequential(*last_stage)
         base_info = self._get_block_info(
-            last_stage, last_in_channels, input_size, info_metric)
+            last_stage, last_in_channels, input_size, info_metric_list)
         input_size = input_size if stride == 1 else input_size // 2
 
         for k, v in base_info.items():
@@ -144,19 +144,19 @@ class LookUpTable:
 
         return info_table
 
-    def _merge_info_table(self, info_table, new_info, info_metric):
+    def _merge_info_table(self, info_table, new_info, info_metric_list):
         """Merge a dict with new info in to main info_table
         info_table(dict) : Main info table
         new_info(dict)
         """
-        for metric in info_metric:
+        for metric in info_metric_list:
             info_table[metric].append(new_info[metric])
 
         return info_table
 
-    def _get_block_info(self, block, in_channels, input_size, info_metric):
+    def _get_block_info(self, block, in_channels, input_size, info_metric_list):
         block_info = {}
-        for metric in info_metric:
+        for metric in info_metric_list:
             if metric == "flops":
                 block_info["flops"] = calculate_flops(
                     block, in_channels, input_size)
