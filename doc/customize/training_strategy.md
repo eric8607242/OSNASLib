@@ -18,14 +18,17 @@ from .base import BaseSampler
 class CustomizerSampler(BaseSampler):
     def generate_training_architecture(self):
         """
-            In this function, the sampler should generate an architecture and return. With the generated architecture, the sampler can set activate architecture in the supernet to forward and update.
+            In this function, the sampler should generate an architecture and return. 
+            With the generated architecture, the sampler can set activate architecture 
+            in the supernet to forward and update.
             
         """
         return architecture
     
     def step(self):
         """
-            During training supernet, this function will be called before each supernet training iteration to set the activate architecture in the supernet.
+            During training supernet, this function will be called before each supernet 
+            training iteration to set the activate architecture in the supernet.
         """
         architecture = self.generate_training_architecture()
 ```
