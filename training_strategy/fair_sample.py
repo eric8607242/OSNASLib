@@ -19,7 +19,7 @@ class FairnessSampler(BaseSampler):
         self.model.module.set_forward_state("single") if isinstance(
             self.model, nn.DataParallel) else self.model.set_forward_state("single")
 
-        architecture = self.get_fair_architectures()
+        architecture = self.generate_training_architecture()
         self.model.module.set_activate_architecture(architecture) if isinstance(
             self.model, nn.DataParallel) else self.model.set_activate_architecture(architecture)
 

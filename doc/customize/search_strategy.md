@@ -14,6 +14,8 @@ In OSNASLib, all search strategy inherited by `BaseSearcher` in `./search_strate
 
 ```python
 # ./search_strategy/customize.py
+from .base import BaseSearcher
+
 class CustomizerSearcher(BaseSearcher):
     def search(self):
         """
