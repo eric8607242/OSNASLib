@@ -40,7 +40,7 @@ class BaseSupernet(nn.Module):
             search_strategy,
             bn_momentum=0.1,
             bn_track_running_stats=True):
-        super(Supernet, self).__init__()
+        super(BaseSupernet, self).__init__()
         self.search_strategy = search_strategy
 
         self.classes = classes
@@ -53,7 +53,7 @@ class BaseSupernet(nn.Module):
 
         # First Stage
         self.first_stages = nn.ModuleList()
-        for l_cfg in macro_cfg["first"]:
+        for l_cfg in self.macro_cfg["first"]:
             block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
 
             layer = get_block(block_type=block_type,
@@ -70,11 +70,11 @@ class BaseSupernet(nn.Module):
 
         # Search Stage
         self.search_stages = nn.ModuleList()
-        for l_cfg in macro_cfg["search"]:
+        for l_cfg in self.macro_cfg["search"]:
             in_channels, out_channels, stride = l_cfg
 
             layer = construct_supernet_layer(
-                micro_cfg=micro_cfg,
+                micro_cfg=self.micro_cfg,
                 in_channels=in_channels,
                 out_channels=out_channels,
                 stride=stride,
@@ -84,7 +84,7 @@ class BaseSupernet(nn.Module):
 
         # Last Stage
         self.last_stages = nn.ModuleList()
-        for l_cfg in macro_cfg["last"]:
+        for l_cfg in self.macro_cfg["last"]:
             block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
 
             layer = get_block(block_type=block_type,

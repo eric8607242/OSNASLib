@@ -6,7 +6,7 @@ import torch.nn as nn
 from .base_agent import MetaAgent
 
 from utils import get_optimizer, get_lr_scheduler, resume_checkpoint
-from model import Supernet, save_architecture, LookUpTable, get_search_strategy
+from model import save_architecture, LookUpTable, get_supernet
 
 from search_strategy import get_search_strategy
 from training_strategy import get_training_strategy

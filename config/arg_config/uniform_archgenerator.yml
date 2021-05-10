@@ -2,6 +2,7 @@ agent:
     main_agent: "SearchAgent"
     training_strategy_agent: "UniformSampler"
     search_strategy_agent: "ArchitectureGeneratorSearcher"
+    supernet_agent: "ProxylessNASSupernet"
 
 target_hc: 100
 
