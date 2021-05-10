@@ -6,7 +6,6 @@ import torch
 from utils import get_logger, get_writer, set_random_seed, AverageMeter, accuracy, save
 from criterion import get_criterion
 from dataflow import get_dataloader
-from model import get_supernet_cfg
 
 class MetaAgent:
     def __init__(self, config, title, agent_state="search"):
@@ -22,10 +21,6 @@ class MetaAgent:
             set_random_seed(config["train"]["random_seed"])
 
         self.device = torch.device(config["train"]["device"])
-
-        self.macro_cfg, self.micro_cfg = get_supernet_cfg(
-            self.config["supernet_utility"]["search_space"], self.config["dataset"]["classes"], self.config["dataset"]["dataset"])
-
 
         self.train_loader, self.val_loader, self.test_loader = get_dataloader(self.config["dataset"]["dataset"], 
                                                                 self.config["dataset"]["dataset_path"], 

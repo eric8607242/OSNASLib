@@ -1,10 +1,13 @@
+import sys
 import numpy as np
 
 from .lookup_table_builder import LookUpTable
 from .network_utils import get_block
-from .supernet import Supernet
 from .model import Model
-from .supernet_config import get_supernet_cfg
+
+from .fbnet import FBNetSSupernet, FBNetLSupernet
+from .spos import SPOSSupernet
+from .proxylessnas import ProxylessNASSupernet
 
 
 def load_architecture(path_to_architecture):
@@ -14,3 +17,7 @@ def load_architecture(path_to_architecture):
 
 def save_architecture(path_to_architecture, architecture):
     np.save(path_to_architecture, architecture)
+
+
+def get_supernet(name):
+    return getattr(sys.modules[__name__], name)

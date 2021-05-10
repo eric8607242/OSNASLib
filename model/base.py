@@ -32,19 +32,15 @@ def construct_supernet_layer(
     return supernet_layer
 
 
-class Supernet(nn.Module):
+class BaseSupernet(nn.Module):
     def __init__(
             self,
-            macro_cfg,
-            micro_cfg,
             classes,
             dataset,
             search_strategy,
             bn_momentum=0.1,
             bn_track_running_stats=True):
         super(Supernet, self).__init__()
-        self.micro_cfg = micro_cfg
-        self.macro_cfg = macro_cfg
         self.search_strategy = search_strategy
 
         self.classes = classes
@@ -141,6 +137,9 @@ class Supernet(nn.Module):
         macro_len = len(self.macro_cfg["search"])
 
         return (macro_len, micro_len)
+
+    def get_model_cfg(self):
+        return self.macro_cfg, self.micro_cfg
 
     def set_activate_architecture(self, architecture):
         """

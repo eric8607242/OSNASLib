@@ -6,7 +6,7 @@ import torch.nn as nn
 from .base_agent import MetaAgent
 
 from utils import get_optimizer, get_lr_scheduler, resume_checkpoint
-from model import Supernet, save_architecture, LookUpTable
+from model import Supernet, save_architecture, LookUpTable, get_search_strategy
 
 from search_strategy import get_search_strategy
 from training_strategy import get_training_strategy
@@ -16,15 +16,16 @@ class SearchAgent(MetaAgent):
         super(SearchAgent, self).__init__(config, "search")
 
         # Construct model and correspond optimizer ======================================
-        supernet = Supernet(
-            self.macro_cfg,
-            self.micro_cfg,
+        supernet_class = get_supernet(self.config["agent"]["supernet_agent"])
+        supernet = supernet_class(
             self.config["dataset"]["classes"],
             self.config["dataset"]["dataset"],
             self.config["search_utility"]["search_strategy"],
             bn_momentum=self.config["train"]["bn_momentum"],
             bn_track_running_stats=self.config["train"]["bn_track_running_stats"])
         self.supernet = supernet.to(self.device)
+
+        self.macro_cfg, self.micro_cfg = self.supernet.get_model_cfg()
 
         self.optimizer = get_optimizer(
             self.supernet.parameters(),
