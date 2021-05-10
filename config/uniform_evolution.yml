@@ -1,19 +1,19 @@
 agent:
     main_agent: "SearchAgent"
     training_strategy_agent: "UniformSampler"
-    search_strategy_agent: "RandomSearcher"
+    search_strategy_agent: "EvolutionSearcher"
+    supernet_agent: "ProxylessNASSupernet"
 
 target_hc: 100
 
 search_utility:
     directly_search: True
-    search_strategy: "random_search"
-    random_iteration: 10
+    search_strategy: "evolution"
+    generation_num: 10
+    population_num: 10
+    parent_num: 5
     info_metric: "flops"
 
-
-supernet_utility:
-    search_space: "proxylessnas"
 
 train:
     resume: True
