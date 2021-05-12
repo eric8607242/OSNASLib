@@ -101,7 +101,7 @@ class BaseSupernet(nn.Module):
 
         self._initialize_weights()
         if self.search_strategy == "differentiable_gumbel" or self.search_strategy == "differentiable":
-            self._initialize_architecture_param()
+            self._initialize_arch_param()
         else:
             self.architecture = None
 
@@ -112,9 +112,9 @@ class BaseSupernet(nn.Module):
         for i, l in enumerate(self.search_stages):
             if self.forward_state == "sum":
                 weight = F.gumbel_softmax(
-                    self.architecture_param[i],
+                    self.arch_param[i],
                     dim=0) if self.search_strategy == "differentiable_gumbel" else F.softmax(
-                    self.architecture_param[i],
+                    self.arch_param[i],
                     dim=0)
                 x = sum(p * b(x) for p, b in zip(weight, l))
             elif self.forward_state == "single":
@@ -129,7 +129,7 @@ class BaseSupernet(nn.Module):
         """
         Set architecture parameter directly
         """
-        self.architecture_param = arch_param
+        self.arch_param = arch_param
         
 
     def get_arch_param_nums(self):
@@ -147,21 +147,21 @@ class BaseSupernet(nn.Module):
         """
         self.architecture = architecture
 
-    def _initialize_architecture_param(self):
+    def _initialize_arch_param(self):
         micro_len = len(self.micro_cfg)
         macro_len = len(self.macro_cfg["search"])
 
-        self.architecture_param = nn.Parameter(
+        self.arch_param = nn.Parameter(
             1e-3 * torch.randn((macro_len, micro_len), requires_grad=False))
 
-    def get_architecture_param(self):
-        return self.architecture_param
+    def get_arch_param(self):
+        return self.arch_param
 
-    def get_best_architecture_param(self):
+    def get_best_arch_param(self):
         """
         Get the best neural architecture by architecture parameters (argmax).
         """
-        best_architecture = self.architecture_param.data.argmax(dim=1)
+        best_architecture = self.arch_param.data.argmax(dim=1)
         best_architecture = best_architecture.cpu().numpy()
         return best_architecture
 

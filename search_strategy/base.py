@@ -1,3 +1,5 @@
+import abc 
+
 import numpy as np
 
 import torch
@@ -24,6 +26,10 @@ class BaseSearcher:
 
     def step(self):
         pass
+
+    @abc.abstractmethod
+    def search(self):
+        return NotImplemented
 
     def _evaluate(self):
         self.supernet.eval()

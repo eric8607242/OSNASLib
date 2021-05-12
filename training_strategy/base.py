@@ -1,3 +1,4 @@
+import abc
 
 class BaseSampler:
     def __init__(self, micro_len, macro_len, model):
@@ -6,11 +7,10 @@ class BaseSampler:
         
         self.model = model
 
+    @abc.abstractmethod
     def step(self):
-        pass
+        return NotImplemented
 
     def get_block_len(self):
         return self.micro_len
 
-    def generate_training_architecture(self):
-        pass

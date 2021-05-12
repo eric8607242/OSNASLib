@@ -1,9 +1,11 @@
 # OSNASLib
 
 ## Introduction
-OSNASLib is a library for one-shot NAS. In this library, we cover various components of one-shot NAS (e.g., search space, search strategy, and training strategy). You can incorporate any components to specify for your tasks easily. Please refer to the guidelines to customize for your tasks.
+OSNASLib is a library for one-shot NAS. Recently, searching the neural architecture for various deep learning tasks becomes a common pipeline no matter in semantic segmentation, object detection, NLP, etc. Therefore, OSNASLib provides extremely flexible interfaces to allow researchers can incorporate different one-shot NAS algorithms into various specific tasks efficient.
 
-* [What we cover in this library](./doc/osnaslib.md)
+In OSNASLib, we cover various components of one-shot NAS (e.g., search space, search strategy, and training strategy). You can incorporate any components to specify for different dataset, differnt criterion and different specific tasks easily. 
+Please refer to [What is OSNASLib](./doc/osnaslib.md) for more detail about this library.
+
 * [What is neural architecture search (NAS)](./doc/nas.md)
 * [What is one-shot NAS](./doc/one_shot_nas.md)
 
@@ -19,7 +21,7 @@ python3 main.py -c [CONFIG FILE] --title [EXPERIMENT TITLE]
 More information about configuration please refer to [configuration](./doc/configuration.md).
 
 ## Customize NAS For Your Tasks
-In this project, you can design different NAS for your task by modifying or expanding any components easily.
+OSNASLib provides extremely flexible interfaces to make researchers can incorporate different components of one-shot NAS for various tasks easily.
 Please refer to the documents to follow our customizing guidelines.
 * [How to customize the criterion](./doc/customize/criterion.md)
 * [How to customize the dataloader](./doc/customize/dataloader.md)
