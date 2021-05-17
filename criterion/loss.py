@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 
 
@@ -25,3 +26,5 @@ def cross_entropy_for_onehot(pred, target):
 
 def l2_hc_loss(search_hc, target_hc, hc_weight=0.0003):
     return (search_hc - target_hc) ** 2 * hc_weight
+
+

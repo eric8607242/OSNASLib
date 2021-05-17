@@ -32,7 +32,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
                         beta=self.config["arch_optim"]["a_beta"])
 
         self.criterion = get_criterion(self.config["train"]["criterion_type"])
-        self.hc_criterion = get_hc_criterion(self.config["arch_optim"]["hc_weight"])
+        self.hc_criterion = get_hc_criterion(self.config["train"]["hc_criterion_type"])
 
         self.arch_param_nums = self.supernet.get_arch_param_nums()
         self.prior_pool = PriorPool(self.lookup_table, self.arch_param_nums, self.config, self.logger)
@@ -94,7 +94,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
             arch_param_hardware_constraint = self.lookup_table.get_model_info(arch_param)
             self.logger.info(f"Generating architecture parameter hardware constraint: {arch_param_hardware_constraint.item()}")
 
-            hc_loss = self.hc_criterion(target_hardware_constraint, arch_param_hardware_constraint)
+            hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint)* self.config["arch_optim"]["hc_weight"]
 
             X, y = X.to(self.device, non_blocking=True), y.to(self.device, non_blocking=True)
             N = X.shape[0]
@@ -130,7 +130,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
             arch_param_hardware_constraint = self.lookup_table.get_model_info(arch_param)
             self.logger.info(f"Generating architecture parameter hardware constraint: {arch_param_hardware_constraint.item()}")
 
-            hc_loss = self.hc_criterion(target_hardware_constraint, arch_param_hardware_constraint)
+            hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint)* self.config["arch_optim"]["hc_weight"]
             self.logger.info(f"Hardware loss : {hc_loss.item()}")
 
             for step, (X, y) in enumerate(self.val_loader):
@@ -241,7 +241,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
             arch_param_hardware_constraint = self.lookup_table.get_model_info(arch_param)
             self.logger.info(f"Generating architecture parameter hardware constraint: {arch_param_hardware_constraint}")
 
-            hc_loss = self.hc_criterion(target_hardware_constraint, arch_param_hardware_constraint)
+            hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint) * self.config["arch_optim"]["hc_weight"]
 
             evaluate_metric["gen_hardware_constraint"].append(arch_param_hardware_constraint.item())
             evaluate_metric["target_hardware_constraint"].append(hc)

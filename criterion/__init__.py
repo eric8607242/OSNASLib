@@ -10,5 +10,8 @@ def get_criterion(criterion_type):
     else:
         raise
 
-def get_hc_criterion(hc_weight):
-    return l2_hc_loss
+def get_hc_criterion(criterion_type):
+    if criterion_type == "MSE":
+        return nn.MSELoss()
+    else:
+        raise NotImplemented
