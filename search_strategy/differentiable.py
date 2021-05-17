@@ -22,8 +22,8 @@ class DifferentiableSearcher(BaseSearcher):
             alpha=self.config["arch_optim"]["a_alpha"],
             beta=self.config["arch_optim"]["a_beta"])
 
-        self.criterion = get_criterion(self.config["train"]["criterion_type"])
-        self.hc_criterion = get_hc_criterion(self.config["train"]["hc_criterion_type"])
+        self.criterion = get_criterion(self.config["agent"]["criterion_agent"])
+        self.hc_criterion = get_hc_criterion(self.config["agent"]["hc_criterion_agent"])
 
         self.top1 = AverageMeter()
         self.top5 = AverageMeter()

@@ -4,6 +4,9 @@ agent:
     search_strategy_agent: "DifferentiableSearcher"
     supernet_agent: "ProxylessNASSupernet"
 
+    criterion_agent: "LabelSmoothingCrossEntropy"
+    hc_criterion_agent: "MSELoss"
+
 target_hc: 100
 
 search_utility:
@@ -22,9 +25,6 @@ train:
 
     bn_track_running_stats: True
     bn_momentum: 0.1
-
-    criterion_type: "CESmooth"
-    hc_criterion_type: "MSE"
 
 dataset:
     dataset: "cifar100"
@@ -60,9 +60,6 @@ arch_optim:
 logs_path:
     logger_path: "./logs/"
     writer_path: "./logs/tb/"
-
-    hyperparameter_tracker: "./search_hyperparameter_tracker.csv"
-
 
 experiment_path:
     resume_path: "./best_checkpoint.pth"

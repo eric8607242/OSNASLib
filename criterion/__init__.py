@@ -1,17 +1,15 @@
-import torch.nn as nn
+import sys
 
-from .loss import cross_entropy_with_label_smoothing, l2_hc_loss
+import torch.nn.CrossEntropyLoss as CrossEntropyLoss
+import torch.nn.MSELoss as MSELoss
 
-def get_criterion(criterion_type):
-    if criterion_type == "CESmooth":
-        return cross_entropy_with_label_smoothing
-    elif criterion_type == "CE":
-        return nn.CrossEntropy()
-    else:
-        raise
+from .lscrossentropy import LabelSmoothingCrossEntropy
 
-def get_hc_criterion(criterion_type):
-    if criterion_type == "MSE":
-        return nn.MSELoss()
-    else:
-        raise NotImplemented
+def get_criterion(name):
+    criterion_class = getattr(sys.modules[__name__], name)
+    return criterion_class()
+
+def get_hc_criterion(name):
+    criterion_class = getattr(sys.modules[__name__], name)
+    return criterion_class()
+

@@ -31,8 +31,8 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
                         alpha=self.config["arch_optim"]["a_alpha"],
                         beta=self.config["arch_optim"]["a_beta"])
 
-        self.criterion = get_criterion(self.config["train"]["criterion_type"])
-        self.hc_criterion = get_hc_criterion(self.config["train"]["hc_criterion_type"])
+        self.criterion = get_criterion(self.config["agent"]["criterion_agent"])
+        self.hc_criterion = get_hc_criterion(self.config["agent"]["hc_criterion_agent"])
 
         self.arch_param_nums = self.supernet.get_arch_param_nums()
         self.prior_pool = PriorPool(self.lookup_table, self.arch_param_nums, self.config, self.logger)
