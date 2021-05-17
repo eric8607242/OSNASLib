@@ -1,7 +1,7 @@
 import sys
 
-import torch.nn.CrossEntropyLoss as CrossEntropyLoss
-import torch.nn.MSELoss as MSELoss
+from torch.nn import CrossEntropyLoss
+from torch.nn import MSELoss
 
 from .lscrossentropy import LabelSmoothingCrossEntropy
 

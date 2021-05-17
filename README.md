@@ -30,7 +30,5 @@ Please refer to the documents to follow our customizing guidelines.
 * [How to customize the training strategy](./doc/customize/training_strategy.md)
 
 ## TODO
-* [ ] Reconstruct criterion
-* [ ] Reconstruct model (e.g., model constructor and model config file)
 * [ ] Documents
 
