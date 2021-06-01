@@ -1,5 +1,6 @@
 import os
 import os.path as osp
+import random
 
 import numpy as np
 from PIL import Image
@@ -7,13 +8,14 @@ from PIL import Image
 import torch
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
+from torch.utils.data.sampler import SubsetRandomSampler
 
 from . import build_loader
 
 FACE_MEAN = [0.485, 0.456, 0.406]
 FACE_STD = [0.229, 0.224, 0.225]
 
-class get_pairface_dataloader(dataset_name, dataset_path, input_size, batch_size, num_workers, train_portion=1):
+def get_face_dataloader(dataset_name, dataset_path, input_size, batch_size, num_workers, train_portion=1):
     train_transform = transforms.Compose([
                         transforms.Resize(input_size),
                         transforms.RandomHorizontalFlip(),
@@ -25,9 +27,9 @@ class get_pairface_dataloader(dataset_name, dataset_path, input_size, batch_size
                         transforms.Normalize(FACE_MEAN, FACE_STD)
                         ])
 
-    train_dataset = ImageFolder(root=osp.join(dataset_path, "face", "train"),
+    train_dataset = datasets.ImageFolder(root=osp.join(dataset_path, "face", "train", "CASIA-WebFace"),
                                 transform=train_transform)
-    test_dataset = PairFaceDataset(root=osp.join(dataset_path, "face", "test"),
+    test_dataset = PairFaceDataset(root=osp.join(dataset_path, "face", "test", "LFW"),
                                 transform=test_transform)
     if train_portion != 1:
         train_len = len(train_dataset)

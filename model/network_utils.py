@@ -169,7 +169,7 @@ class ConvBNAct(nn.Sequential):
 
         super(ConvBNAct, self).__init__()
 
-        assert activation in ["hswish", "relu", None]
+        assert activation in ["hswish", "relu", "prelu", None]
         assert stride in [1, 2, 4]
 
         self.add_module(

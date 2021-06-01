@@ -37,7 +37,7 @@ class OnlineTripletLoss(nn.Module):
         an_distances = (embeddings[triplets[:, 0]] - embeddings[triplets[:, 2]]).pow(2).sum(1)
         losses = F.relu(ap_distances - an_distances + self.margin)
 
-        return losses.mean(), len(triplets)
+        return losses.mean()
 
 def pdist(embeddings):
     term1 = np.power(embeddings, 2).sum(1).reshape(1, -1)
@@ -103,7 +103,7 @@ class FunctionNegativeTripletSelector(TripletSelector):
                     triplets.append([anchor_positive[0], anchor_positive[1], hard_negative])
 
         if len(triplets) == 0:
-            triplets.append([anchor_positive[0], anchor_positive[1], negative_indices[0]])
+            triplets.append([anchor_positives[0], anchor_positives[1], negative_indices[0]])
 
         triplets = np.array(triplets)
         return triplets

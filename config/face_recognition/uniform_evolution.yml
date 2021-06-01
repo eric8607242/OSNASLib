@@ -21,22 +21,20 @@ train:
     resume: False
     random_seed: 42
     device: "cuda"
-    ngpu: 1
+    ngpu: 4
     epochs: 5
 
     bn_track_running_stats: True
     bn_momentum: 0.1
 
 criterion:
-    # Margin of triplet loss
-    margin: 0.3
+    margin: 0.3 # Margin of triplet loss
 
 dataset:
-    dataset: "CASIA-WebFace"
+    dataset: "face"
     dataset_path: "./data/"
     
-    # Embedding channels
-    classes: 128
+    classes: 128 # Embedding channels
     input_size: 112
 
     batch_size: 128
