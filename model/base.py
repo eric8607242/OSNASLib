@@ -41,6 +41,9 @@ class BaseSupernet(nn.Module):
             bn_momentum=0.1,
             bn_track_running_stats=True):
         super(BaseSupernet, self).__init__()
+
+        self._init_model_config(classes)
+
         self.search_strategy = search_strategy
 
         self.classes = classes
@@ -185,3 +188,6 @@ class BaseSupernet(nn.Module):
                 n = m.weight.size(1)
                 m.weight.data.normal_(0, 0.01)
                 m.bias.data.zero_()
+
+    def _init_model_config(self, classes):
+        raise NotImplemented

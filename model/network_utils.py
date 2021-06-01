@@ -61,6 +61,7 @@ def get_block(block_type,
         block = GlobalAveragePooling()
 
     elif block_type == "Conv":
+        group = kwargs["group"] if "group" in kwargs else 1
         block = ConvBNAct(in_channels=in_channels,
                           out_channels=out_channels,
                           kernel_size=kernel_size,
@@ -68,7 +69,7 @@ def get_block(block_type,
                           activation=activation,
                           bn_momentum=bn_momentum,
                           bn_track_running_stats=bn_track_running_stats,
-                          group=1,
+                          group=group,
                           pad=(kernel_size // 2))
 
     elif block_type == "Skip":
@@ -192,6 +193,8 @@ class ConvBNAct(nn.Sequential):
             self.add_module("relu", nn.ReLU6(inplace=True))
         elif activation == "hswish":
             self.add_module("hswish", HSwish())
+        elif activation == "prelu":
+            self.add_module("prelu", nn.PReLU(out_channels))
 
 
 class SEModule(nn.Module):

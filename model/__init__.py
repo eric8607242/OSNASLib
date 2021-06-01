@@ -8,6 +8,7 @@ from .model import Model
 from .fbnet import FBNetSSupernet, FBNetLSupernet
 from .spos import SPOSSupernet
 from .proxylessnas import ProxylessNASSupernet
+from .mobilefacenet import MobileFaceNetSupernet
 
 
 def load_architecture(path_to_architecture):
