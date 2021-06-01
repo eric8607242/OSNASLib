@@ -28,7 +28,7 @@ class MetaAgent:
                                                                 self.config["dataset"]["num_workers"], 
                                                                 train_portion=self.config["dataset"]["train_portion"])
 
-        self.criterion = get_criterion(config["agent"]["criterion_agent"])
+        self.criterion = get_criterion(config["agent"]["criterion_agent"], config["criterion"])
 
         self.top1 = AverageMeter()
         self.top5 = AverageMeter()

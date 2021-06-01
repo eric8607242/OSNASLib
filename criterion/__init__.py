@@ -5,11 +5,17 @@ from torch.nn import MSELoss
 
 from .lscrossentropy import LabelSmoothingCrossEntropy
 
-def get_criterion(name):
+def get_criterion(name, criterion_config):
     criterion_class = getattr(sys.modules[__name__], name)
-    return criterion_class()
+    try:
+        return criterion_class(criterion_config=criterion_config)
+    except:
+        return criterion_class()
 
-def get_hc_criterion(name):
+def get_hc_criterion(name, criterion_config):
     criterion_class = getattr(sys.modules[__name__], name)
-    return criterion_class()
+    try:
+        return criterion_class(criterion_config=criterion_config)
+    except:
+        return criterion_class()
 

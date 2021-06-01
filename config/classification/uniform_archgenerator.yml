@@ -1,7 +1,7 @@
 agent:
     main_agent: "SearchAgent"
-    training_strategy_agent: "DifferentiableSampler"
-    search_strategy_agent: "DifferentiableSearcher"
+    training_strategy_agent: "UniformSampler"
+    search_strategy_agent: "ArchitectureGeneratorSearcher"
     supernet_agent: "ProxylessNASSupernet"
 
     criterion_agent: "LabelSmoothingCrossEntropy"
@@ -10,21 +10,33 @@ agent:
 target_hc: 100
 
 search_utility:
-    directly_search: False
-    search_strategy: "differentiable"
+    directly_search: True
+    search_strategy: "architecture_generator"
+    random_iteration: 10
     info_metric: "flops"
+    lowest_hardware_constraint: 80
+    highest_hardware_constraint: 120
     prior_pool_size: 1
 
+
+generator:
+    hc_dim: 10
+    tau_decay: 0.95
+    epochs: 50
 
 train:
     resume: False
     random_seed: 42
     device: "cuda"
     ngpu: 1
-    epochs: 100
+    epochs: 5
 
     bn_track_running_stats: True
     bn_momentum: 0.1
+
+criterion:
+    hc_weight: 0.0003
+ 
 
 dataset:
     dataset: "cifar100"
@@ -32,8 +44,8 @@ dataset:
     classes: 100
     input_size: 32
 
-    batch_size: 128
-    num_workers: 0
+    batch_size: 32
+    num_workers: 4
     train_portion: 0.8
 
 optim:
@@ -49,7 +61,6 @@ optim:
     decay_ratio: 0.1
 
 arch_optim:
-    hc_weight: 0.0003
     a_optimizer: "adam"
     a_lr: 0.001
     a_weight_decay: 0
@@ -61,6 +72,7 @@ logs_path:
     logger_path: "./logs/"
     writer_path: "./logs/tb/"
 
+
 experiment_path:
     resume_path: "./best_checkpoint.pth"
     checkpoint_root_path: "./checkpoints/"
@@ -68,6 +80,11 @@ experiment_path:
 
     lookup_table_path: "./lookup_table.json"
     searched_model_path: "./searched_model_architecture.npy"
+
+    best_loss_generator_checkpoint_path: "./best_loss_generator_checkpoint.pth"
+    best_acc_generator_checkpoint_path: "./best_acc_generator_checkpoint_path.pth"
+    final_generator_checkpoint_path: "./final_generator_checkpoint.pth"
+    generator_evaluate_path: "./generator_evaluate.csv"
 
 
 

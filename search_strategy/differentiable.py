@@ -23,7 +23,7 @@ class DifferentiableSearcher(BaseSearcher):
             beta=self.config["arch_optim"]["a_beta"])
 
         self.criterion = get_criterion(self.config["agent"]["criterion_agent"])
-        self.hc_criterion = get_hc_criterion(self.config["agent"]["hc_criterion_agent"])
+        self.hc_criterion = get_hc_criterion(self.config["agent"]["hc_criterion_agent"], self.config["criterion"])
 
         self.top1 = AverageMeter()
         self.top5 = AverageMeter()
@@ -48,7 +48,7 @@ class DifferentiableSearcher(BaseSearcher):
             architecture_parameter)
 
         target_hc_tensor = torch.tensor(self.target_hc, dtype=torch.float).to(self.device)
-        hc_loss = self.hc_criterion(architecture_info, target_hc_tensor)*self.config["arch_optim"]["hc_weight"]
+        hc_loss = self.hc_criterion(architecture_info, target_hc_tensor)*self.config["criterion"]["hc_weight"]
 
         X, y = next(iter(self.val_loader))
         X, y = X.to(

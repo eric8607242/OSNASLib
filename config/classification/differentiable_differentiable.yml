@@ -1,20 +1,19 @@
 agent:
     main_agent: "SearchAgent"
-    training_strategy_agent: "UniformSampler"
-    search_strategy_agent: "EvolutionSearcher"
+    training_strategy_agent: "DifferentiableSampler"
+    search_strategy_agent: "DifferentiableSearcher"
     supernet_agent: "ProxylessNASSupernet"
 
     criterion_agent: "LabelSmoothingCrossEntropy"
+    hc_criterion_agent: "MSELoss"
 
 target_hc: 100
 
 search_utility:
-    directly_search: True
-    search_strategy: "evolution"
-    generation_num: 10
-    population_num: 10
-    parent_num: 5
+    directly_search: False
+    search_strategy: "differentiable"
     info_metric: "flops"
+    prior_pool_size: 1
 
 
 train:
@@ -22,10 +21,13 @@ train:
     random_seed: 42
     device: "cuda"
     ngpu: 1
-    epochs: 5
+    epochs: 100
 
     bn_track_running_stats: True
     bn_momentum: 0.1
+
+criterion:
+    hc_weight: 0.0003
 
 
 dataset:
@@ -35,7 +37,7 @@ dataset:
     input_size: 32
 
     batch_size: 128
-    num_workers: 4
+    num_workers: 0
     train_portion: 0.8
 
 optim:
@@ -51,18 +53,16 @@ optim:
     decay_ratio: 0.1
 
 arch_optim:
-    hc_weight: ""
-    a_optimizer: ""
-    a_lr: ""
-    a_weight_decay: ""
-    a_momentum: ""
+    a_optimizer: "adam"
+    a_lr: 0.001
+    a_weight_decay: 0
+    a_momentum: 0
     a_alpha: ""
-    a_beta: ""
+    a_beta: 0.5
 
 logs_path:
     logger_path: "./logs/"
     writer_path: "./logs/tb/"
-
 
 experiment_path:
     resume_path: "./best_checkpoint.pth"

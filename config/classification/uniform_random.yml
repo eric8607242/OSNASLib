@@ -1,17 +1,31 @@
 agent:
-    main_agent: "EvaluateAgent"
-    criterion_agent: "LabelSmoothingCrossEntropy"
+    main_agent: "SearchAgent"
+    training_strategy_agent: "UniformSampler"
+    search_strategy_agent: "RandomSearcher"
     supernet_agent: "ProxylessNASSupernet"
 
+    criterion_agent: "LabelSmoothingCrossEntropy"
+
+target_hc: 100
+
+search_utility:
+    directly_search: True
+    search_strategy: "random_search"
+    random_iteration: 10
+    info_metric: "flops"
+
+
 train:
-    resume: False
+    resume: True
     random_seed: 42
     device: "cuda"
     ngpu: 1
-    epochs: 10
+    epochs: 5
 
     bn_track_running_stats: True
     bn_momentum: 0.1
+
+criterion:
 
 dataset:
     dataset: "cifar100"
@@ -20,7 +34,7 @@ dataset:
     input_size: 32
 
     batch_size: 128
-    num_workers: 0
+    num_workers: 4
     train_portion: 0.8
 
 optim:
@@ -34,6 +48,15 @@ optim:
     scheduler: "cosine"
     decay_step: 10
     decay_ratio: 0.1
+
+arch_optim:
+    hc_weight: ""
+    a_optimizer: ""
+    a_lr: ""
+    a_weight_decay: ""
+    a_momentum: ""
+    a_alpha: ""
+    a_beta: ""
 
 logs_path:
     logger_path: "./logs/"

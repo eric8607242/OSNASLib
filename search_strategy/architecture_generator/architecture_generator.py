@@ -32,7 +32,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
                         beta=self.config["arch_optim"]["a_beta"])
 
         self.criterion = get_criterion(self.config["agent"]["criterion_agent"])
-        self.hc_criterion = get_hc_criterion(self.config["agent"]["hc_criterion_agent"])
+        self.hc_criterion = get_hc_criterion(self.config["agent"]["hc_criterion_agent"], self.config["criterion"])
 
         self.arch_param_nums = self.supernet.get_arch_param_nums()
         self.prior_pool = PriorPool(self.lookup_table, self.arch_param_nums, self.config, self.logger)
@@ -94,7 +94,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
             arch_param_hardware_constraint = self.lookup_table.get_model_info(arch_param)
             self.logger.info(f"Generating architecture parameter hardware constraint: {arch_param_hardware_constraint.item()}")
 
-            hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint)* self.config["arch_optim"]["hc_weight"]
+            hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint)* self.config["criterion"]["hc_weight"]
 
             X, y = X.to(self.device, non_blocking=True), y.to(self.device, non_blocking=True)
             N = X.shape[0]

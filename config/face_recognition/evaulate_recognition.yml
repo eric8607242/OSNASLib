@@ -1,0 +1,53 @@
+agent:
+    main_agent: "EvaluateAgent"
+    criterion_agent: "LabelSmoothingCrossEntropy"
+    supernet_agent: "ProxylessNASSupernet"
+
+train:
+    resume: False
+    random_seed: 42
+    device: "cuda"
+    ngpu: 1
+    epochs: 10
+
+    bn_track_running_stats: True
+    bn_momentum: 0.1
+
+criterion:
+
+dataset:
+    dataset: "cifar100"
+    dataset_path: "./data/"
+    classes: 100
+    input_size: 32
+
+    batch_size: 128
+    num_workers: 0
+    train_portion: 0.8
+
+optim:
+    optimizer: "sgd"
+    lr: 0.045
+    weight_decay: 0.00004
+    momentum: 0.9
+    alpha: 0.9
+    beta: 0.99
+
+    scheduler: "cosine"
+    decay_step: 10
+    decay_ratio: 0.1
+
+logs_path:
+    logger_path: "./logs/"
+    writer_path: "./logs/tb/"
+
+experiment_path:
+    resume_path: "./best_checkpoint.pth"
+    checkpoint_root_path: "./checkpoints/"
+    best_checkpoint_path: "./best_checkpoint.pth"
+
+    lookup_table_path: "./lookup_table.json"
+    searched_model_path: "./searched_model_architecture.npy"
+
+
+

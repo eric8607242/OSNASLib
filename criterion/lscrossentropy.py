@@ -11,11 +11,12 @@ class LabelSmoothingCrossEntropy(nn.Module):
     """
     Reference : https://arxiv.org/pdf/1512.00567.pdf
     """
-    def __init__(self, smoothing=0.1):
+    def __init__(self, criterion_config, smoothing=0.1):
         super(LabelSmoothingCrossEntropy, self).__init__()
         assert smoothing < 1.0
         self.smoothing = smoothing
         self.confidence = 1. - smoothing
+        self.criterion_config = criterion_config
 
     def forward(self, x, target):
         logprobs = F.log_softmax(x, dim=-1)
