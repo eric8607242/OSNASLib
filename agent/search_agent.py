@@ -12,8 +12,8 @@ from search_strategy import get_search_strategy
 from training_strategy import get_training_strategy
 
 class SearchAgent(MetaAgent):
-    def __init__(self, config):
-        super(SearchAgent, self).__init__(config, "search")
+    def __init__(self, config, title):
+        super(SearchAgent, self).__init__(config, title, "search")
 
         # Construct model and correspond optimizer ======================================
         supernet_class = get_supernet(self.config["agent"]["supernet_agent"])

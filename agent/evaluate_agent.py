@@ -9,31 +9,31 @@ from utils import get_optimizer, get_lr_scheduler, resume_checkpoint
 from model import Model, load_architecture, get_supernet
 
 class EvaluateAgent(MetaAgent):
-    def __init__(self, config):
-        super(EvaluateAgent, self).__init__(config, "evaluate")
+    def __init__(self, config, title):
+        super(EvaluateAgent, self).__init__(config, title, "evaluate")
 
         # Construct model and correspond optimizer ======================================
-        architecture = load_architecture(self.config.searched_model_path)
+        architecture = load_architecture(self.config["experiment_path"]["searched_model_path"])
 
         supernet_class = get_supernet(self.config["agent"]["supernet_agent"])
         supernet = supernet_class(
             self.config["dataset"]["classes"],
             self.config["dataset"]["dataset"],
-            self.config["search_utility"]["search_strategy"],
+            None,
             bn_momentum=self.config["train"]["bn_momentum"],
             bn_track_running_stats=self.config["train"]["bn_track_running_stats"])
-        self.macro_cfg, self.micro_cfg = self.supernet.get_model_cfg()
+        self.macro_cfg, self.micro_cfg = supernet.get_model_cfg()
 
         model = Model(
             self.macro_cfg,
             self.micro_cfg,
             architecture,
-            self.config["dataset"]["classes"]
+            self.config["dataset"]["classes"],
             self.config["dataset"]["dataset"])
         self.model = model.to(self.device)
 
         self.optimizer = get_optimizer(
-            self.supernet.parameters(),
+            self.model.parameters(),
             self.config["optim"]["optimizer"],
             learning_rate=self.config["optim"]["lr"],
             weight_decay=self.config["optim"]["weight_decay"],
@@ -83,14 +83,14 @@ class EvaluateAgent(MetaAgent):
             self.test_loader,
             self.optimizer,
             self.lr_scheduler)
-        logger.info(
+        self.logger.info(
             "Total search time : {:.2f}".format(
                 time.time() - start_time))
 
     def inference(self):
         start_time = time.time()
         top1_acc = self.validate(self.model, self.test_loader, 0)
-        logger.info("Final Top1 accuracy : {}".format(top1_acc))
-        logger.info(
+        self.logger.info("Final Top1 accuracy : {}".format(top1_acc))
+        self.logger.info(
             "Total search time : {:.2f}".format(
                 time.time() - start_time))

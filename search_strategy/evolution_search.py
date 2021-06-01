@@ -60,7 +60,7 @@ class EvolutionSearcher(BaseSearcher):
                 offspring = self.crossover(parents)
                 offspring = self.mutation(offspring)
 
-                offspring_hc = self.lookup_table.get_model_info(offspring)
+                offspring_hc = self.lookup_table.get_model_info(offspring[0])
 
                 if offspring_hc <= self.target_hc:
                     offspring_evolution.extend(offspring)

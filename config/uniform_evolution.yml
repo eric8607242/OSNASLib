@@ -18,7 +18,7 @@ search_utility:
 
 
 train:
-    resume: True
+    resume: False
     random_seed: 42
     device: "cuda"
     ngpu: 1

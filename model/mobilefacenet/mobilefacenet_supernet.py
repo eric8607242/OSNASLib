@@ -28,7 +28,7 @@ class MobileFaceNetSupernet(BaseSupernet):
                        [128, 128, 1],
                        [128, 128, 2],
                        [128, 128, 1],
-                       [128, 128, 1]]
+                       [128, 128, 1]],
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
             "last": [
                      ["Conv", 128, 512, 1, 1, "prelu", False, {}],

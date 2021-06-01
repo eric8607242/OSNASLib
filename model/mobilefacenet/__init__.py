@@ -1,1 +1,1 @@
-from .mobilefacenet import MobileFaceNetSupernet
+from .mobilefacenet_supernet import MobileFaceNetSupernet
