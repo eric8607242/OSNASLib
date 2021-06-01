@@ -24,6 +24,7 @@ class MetaAgent:
 
         self.train_loader, self.val_loader, self.test_loader = get_dataloader(self.config["dataset"]["dataset"], 
                                                                 self.config["dataset"]["dataset_path"], 
+                                                                self.config["dataset"]["input_size"],
                                                                 self.config["dataset"]["batch_size"], 
                                                                 self.config["dataset"]["num_workers"], 
                                                                 train_portion=self.config["dataset"]["train_portion"])

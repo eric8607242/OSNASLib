@@ -10,17 +10,17 @@ from . import build_loader
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
-def get_imagenet_dataloader(dataset_name, dataset_path, batch_size, num_workers, train_portion=1):
+def get_imagenet_dataloader(dataset_name, dataset_path, input_size, batch_size, num_workers, train_portion=1):
     train_transform = transforms.Compose([
-        transforms.RandomResizedCrop(224, scale=(0.2, 1.0)),
+        transforms.RandomResizedCrop(input_size, scale=(0.2, 1.0)),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD)
     ])
 
     test_transform = transforms.Compose([
-        transforms.Resize(256),
-        transforms.CenterCrop(224),
+        transforms.Resize(input_size+32),
+        transforms.CenterCrop(input_size),
         transforms.ToTensor(),
         transforms.Normalize(IMAGENET_MEAN, IMAGENET_STD)
     ])

@@ -21,6 +21,7 @@ def build_loader(dataset, shuffle, batch_size, num_workers, sampler=None):
 
 from .cifar import get_CIFAR_dataloader
 from .imagenet import get_imagenet_dataloader
+from .face import get_face_dataloader
 
 
 def get_dataloader(dataset_name, dataset_path, batch_size, num_workers, train_portion=1):

@@ -2,14 +2,14 @@ agent:
     main_agent: "SearchAgent"
     training_strategy_agent: "UniformSampler"
     search_strategy_agent: "EvolutionSearcher"
-    supernet_agent: "ProxylessNASSupernet"
+    supernet_agent: "MobileFaceNetSupernet"
 
-    criterion_agent: "LabelSmoothingCrossEntropy"
+    criterion_agent: "OnlineTripletLoss"
 
 target_hc: 100
 
 search_utility:
-    directly_search: True
+    directly_search: False
     search_strategy: "evolution"
     generation_num: 10
     population_num: 10
@@ -36,8 +36,8 @@ dataset:
     dataset_path: "./data/"
     
     # Embedding channels
-    classes: 100
-    input_size: 32
+    classes: 128
+    input_size: 112
 
     batch_size: 128
     num_workers: 4

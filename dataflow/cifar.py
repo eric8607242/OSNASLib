@@ -11,9 +11,9 @@ from . import build_loader
 CIFAR_MEAN = [0.49139968, 0.48215827, 0.44653124]
 CIFAR_STD = [0.203, 0.1994, 0.2010]
 
-def get_CIFAR_dataloader(dataset_name, dataset_path, batch_size, num_workers, train_portion=1):
+def get_CIFAR_dataloader(dataset_name, dataset_path, input_size, batch_size, num_workers, train_portion=1):
     train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
+        transforms.RandomCrop(input_size, padding=4),
         transforms.RandomHorizontalFlip(),
         transforms.ToTensor(),
         transforms.Normalize(CIFAR_MEAN, CIFAR_STD)
