@@ -33,13 +33,17 @@ def get_face_dataloader(dataset_name, dataset_path, input_size, batch_size, num_
                                 transform=test_transform)
     if train_portion != 1:
         train_len = len(train_dataset)
+        lables = np.array([s[1] for s in train_dataset.samples])
+
         indices = list(range(train_len))
         random.shuffle(indices)
         split = int(np.floor(train_portion * train_len))
-        train_idx, val_idx = indices[:split], indices[split:]
 
-        train_sampler = SubsetRandomSampler(train_idx)
-        val_sampler = SubsetRandomSampler(val_idx)
+        train_idx, val_idx = indices[:split], indices[split:]
+        train_labels, val_labels = labels[train_idx], labels[val_idx]
+
+        train_sampler = BalancedBatchSampler(train_idx, train_labels, batch_size)
+        val_sampler = BalancedBatchSampler(val_idx, val_labels, batch_size)
 
         train_loader = build_loader(
             train_dataset,
@@ -54,12 +58,20 @@ def get_face_dataloader(dataset_name, dataset_path, input_size, batch_size, num_
             num_workers,
             sampler=val_sampler)
     else:
+        train_len = len(train_dataset)
+        lables = np.array([s[1] for s in train_dataset.samples])
+
+        indices = list(range(train_len))
+        random.shuffle(indices)
+
+        train_sampler = BalancedBatchSampler(indices, labels, batch_size)
+
         train_loader = build_loader(
             train_dataset,
             True,
             batch_size,
             num_workers,
-            sampler=None)
+            sampler=train_sampler)
         val_loader = None
     test_loader = build_loader(test_dataset, False, batch_size, num_workers, sampler=None)
 
@@ -88,3 +100,51 @@ class PairFaceDataset:
         if self.transform is not None:
             img1 = self.transform(img1)
             img2 = self.transform(img2)
+
+
+class BalancedBatchSampler(Sampler):
+    def __init__(self, data_idx, labels, batch_size, P=16):
+        self.labels = labels
+        self.n_samples = len(labels)
+        self.P = P
+        self.K = batch_size // P
+        self.batch_size = batch_size
+
+        self.data_idx = data_idx
+
+        # Construct lookup table
+        self.label_set = list(set(labels))
+        self.label_to_indices = {label: data_idx[np.where(np.array(labels) == label)[0]]
+                                    for label in self.label_set}
+        for l in self.label_set:
+            np.random.shuffle(self.label_to_indices[l])
+
+        # dynamic information
+        self.used_label_indices_count = { label: 0 for label in self.label_set }
+        self.count = 0
+
+    def __iter__(self):
+        self.count = 0
+        return self
+
+    def __next__(self):
+        if self.count + self.batch_size > self.n_samples:
+            raise StopIteration
+
+        target_labels = np.random.choice(self.label_set, self.P, replace=False)
+        indices = []
+        for target_label in target_labels:
+            search_ptr = self.used_label_indices_count[target_label]
+            indices.extend(self.label_to_indices[target_label][search_ptr:search_ptr+self.K])
+            self.used_label_indices_count[target_label] += self.K
+
+            if self.used_label_indices_count[target_label] + self.K > len(self.label_to_indices[target_label]):
+                np.random.shuffle(self.label_to_indices[target_label])
+                self.used_label_indices_count[target_label] = 0
+
+        self.count += self.batch_size
+
+        return indices
+
+    def __len__(self):
+        return self.n_samples // self.batch_size
