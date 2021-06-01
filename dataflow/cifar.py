@@ -5,8 +5,8 @@ import torch
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
+from torch.utils.data import DataLoader
 
-from . import build_loader
 
 CIFAR_MEAN = [0.49139968, 0.48215827, 0.44653124]
 CIFAR_STD = [0.203, 0.1994, 0.2010]
@@ -48,26 +48,31 @@ def get_CIFAR_dataloader(dataset_name, dataset_path, input_size, batch_size, num
         train_sampler = SubsetRandomSampler(train_idx)
         val_sampler = SubsetRandomSampler(val_idx)
 
-        train_loader = build_loader(
-            train_dataset,
-            True,
-            batch_size,
-            num_workers,
-            sampler=train_sampler)
-        val_loader = build_loader(
-            train_dataset,
-            False,
-            batch_size,
-            num_workers,
-            sampler=val_sampler)
+        train_loader = DataLoader(
+            dataset=train_dataset,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            sampler=train_sampler,
+            pin_memory=True)
+        val_loader = DataLoader(
+            dataset=train_dataset,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            sampler=val_sampler,
+            pin_memory=True)
     else:
-        train_loader = build_loader(
-            train_dataset,
-            True,
-            batch_size,
-            num_workers,
-            sampler=None)
+        train_loader = DataLoader(
+            dataset=train_dataset,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            shuffle=True,
+            pin_memory=True)
         val_loader = None
 
-    test_loader = build_loader(test_dataset, False, batch_size, num_workers, sampler=None)
+    test_loader = DataLoader(
+            dataset=test_dataset,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            shuffle=True,
+            pin_memory=True)
     return train_loader, val_loader, test_loader

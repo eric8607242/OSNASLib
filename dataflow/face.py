@@ -8,9 +8,8 @@ from PIL import Image
 import torch
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
-from torch.utils.data.sampler import SubsetRandomSampler
-
-from . import build_loader
+from torch.utils.data.sampler import Sampler
+from torch.utils.data import DataLoader
 
 FACE_MEAN = [0.485, 0.456, 0.406]
 FACE_STD = [0.229, 0.224, 0.225]
@@ -33,9 +32,9 @@ def get_face_dataloader(dataset_name, dataset_path, input_size, batch_size, num_
                                 transform=test_transform)
     if train_portion != 1:
         train_len = len(train_dataset)
-        lables = np.array([s[1] for s in train_dataset.samples])
+        labels = np.array([s[1] for s in train_dataset.samples])
 
-        indices = list(range(train_len))
+        indices = np.arange(train_len)
         random.shuffle(indices)
         split = int(np.floor(train_portion * train_len))
 
@@ -45,36 +44,34 @@ def get_face_dataloader(dataset_name, dataset_path, input_size, batch_size, num_
         train_sampler = BalancedBatchSampler(train_idx, train_labels, batch_size)
         val_sampler = BalancedBatchSampler(val_idx, val_labels, batch_size)
 
-        train_loader = build_loader(
+        train_loader = DataLoader(
             train_dataset,
-            True,
-            batch_size,
-            num_workers,
-            sampler=train_sampler)
-        val_loader = build_loader(
+            num_workers=num_workers,
+            batch_sampler=train_sampler)
+        val_loader = DataLoader(
             train_dataset,
-            False,
-            batch_size,
-            num_workers,
-            sampler=val_sampler)
+            num_workers=num_workers,
+            batch_sampler=val_sampler)
     else:
         train_len = len(train_dataset)
-        lables = np.array([s[1] for s in train_dataset.samples])
+        labels = np.array([s[1] for s in train_dataset.samples])
 
-        indices = list(range(train_len))
+        indices = np.arange(train_len)
         random.shuffle(indices)
 
         train_sampler = BalancedBatchSampler(indices, labels, batch_size)
 
-        train_loader = build_loader(
+        train_loader = DataLoader(
             train_dataset,
-            True,
-            batch_size,
-            num_workers,
-            sampler=train_sampler)
+            num_workers=num_workers,
+            batch_sampler=train_sampler)
         val_loader = None
-    test_loader = build_loader(test_dataset, False, batch_size, num_workers, sampler=None)
-
+    test_loader = DataLoader(
+            dataset=test_dataset, 
+            shuffle=False, 
+            batch_size=batch_size, 
+            num_workers=num_workers)
+    
     return train_loader, val_loader, test_loader
 
 
@@ -114,8 +111,9 @@ class BalancedBatchSampler(Sampler):
 
         # Construct lookup table
         self.label_set = list(set(labels))
-        self.label_to_indices = {label: data_idx[np.where(np.array(labels) == label)[0]]
+        self.label_to_indices = {label: data_idx[np.where(np.array(labels) == label)[0]].tolist()
                                     for label in self.label_set}
+        
         for l in self.label_set:
             np.random.shuffle(self.label_to_indices[l])
 
@@ -143,7 +141,6 @@ class BalancedBatchSampler(Sampler):
                 self.used_label_indices_count[target_label] = 0
 
         self.count += self.batch_size
-
         return indices
 
     def __len__(self):

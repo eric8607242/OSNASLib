@@ -4,8 +4,7 @@ import torch
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
 from torch.utils.data.sampler import SubsetRandomSampler
-
-from . import build_loader
+from torch.utils.data import DataLoader
 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
@@ -34,8 +33,23 @@ def get_imagenet_dataloader(dataset_name, dataset_path, input_size, batch_size, 
     val_dataset = datasets.ImageFolder(val_dataset_path, test_transform)
     test_dataset = datasets.ImageFolder(test_dataset_path, test_transform)
 
-    train_loader = build_loader(train_dataset, True, batch_size, num_workers, sampler=None)
-    val_loader = build_loader(val_dataset, True, batch_size, num_workers, sampler=None)
-    test_loader = build_loader(test_dataset, False, batch_size, num_workers, sampler=None)
+    train_loader = DataLoader(
+            dataset=train_dataset,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            shuffle=True,
+            pin_memory=True)
+    val_loader = DataLoader(
+            dataset=val_dataset,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            shuffle=True,
+            pin_memory=True)
+    test_loader = DataLoader(
+            dataset=test_dataset,
+            batch_size=batch_size,
+            num_workers=num_workers,
+            shuffle=False,
+            pin_memory=True)
 
     return train_loader, val_loader, test_loader
