@@ -1,5 +1,5 @@
 agent:
-    main_agent: "SearchAgent"
+    main_agent: "CFSearchAgent"
     training_strategy_agent: "DifferentiableSampler"
     search_strategy_agent: "DifferentiableSearcher"
     supernet_agent: "ProxylessNASSupernet"

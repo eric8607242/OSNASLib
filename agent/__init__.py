@@ -1,7 +1,6 @@
 import sys
 
-from .evaluate_agent import EvaluateAgent
-from .search_agent import SearchAgent
+from .classification_agent import CFSearchAgent, CFEvaluateAgent
 
 def get_agent_cls(name):
     return getattr(sys.modules[__name__], name)

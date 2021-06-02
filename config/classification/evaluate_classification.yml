@@ -1,5 +1,5 @@
 agent:
-    main_agent: "EvaluateAgent"
+    main_agent: "CFEvaluateAgent"
     criterion_agent: "LabelSmoothingCrossEntropy"
     supernet_agent: "ProxylessNASSupernet"
 

@@ -24,8 +24,7 @@ class OnlineTripletLoss(nn.Module):
             - labels (torch.LongTensor): target labels shape (batch,)
 
         Return:
-            average triplet loss & and number of triplet samples used for
-            computing triplet loss.
+            average triplet loss
         """
         target_embeddings = embeddings.detach().cpu().numpy()
         target_labels = labels.detach().cpu().numpy()
