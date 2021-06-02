@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 
 from utils import AverageMeter, accuracy
+from agent import get_agent_cls
 
 class BaseSearcher:
     def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, logger):
@@ -34,20 +35,9 @@ class BaseSearcher:
     def _evaluate(self):
         self.supernet.eval()
 
-        with torch.no_grad():
-            for step, (X, y) in enumerate(self.val_loader):
-                X, y = X.to(
-                    self.device, non_blocking=True), y.to(
-                    self.device, non_blocking=True)
-                N = X.shape[0]
-
-                outs = self.supernet(X)
-                prec1, prec5 = accuracy(outs, y, topk=(1, 5))
-                self.top1.update(prec1.item(), N)
-
-        top1_avg = self.top1.get_avg()
-        self.top1.reset()
-        return top1_avg
+        agent_cls = get_agent_cls(self.config["agent"]["main_agent"])
+        acc_info = agent_cls.validate_step(self.supernet, self.val_loader, self.device, self.criterion)
+        return acc_info[0]
 
     def evaluate_architectures(self, architectures_list):
         architectures_top1_acc = []

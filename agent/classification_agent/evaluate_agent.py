@@ -10,6 +10,9 @@ class CFEvaluateAgent(CFMetaAgent):
         self.evaluate()
         self.inference()
 
+    def _iteration_preprocess(self):
+        pass
+
     def evaluate(self):
         start_time = time.time()
         self.logger.info("Evaluating process start!")

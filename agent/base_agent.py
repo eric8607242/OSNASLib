@@ -133,34 +133,9 @@ class MetaAgent:
     def validate(self, model, val_loader, epoch, inference=True):
         raise NotImplementedError
 
-
     @abstractmethod
-    def _epoch_stats_logging(
-            self,
-            start_time,
-            epoch,
-            val_or_train,
-            info_for_writer=""):
-        raise NotImplementedError
-
-
-    @abstractmethod
-    def _intermediate_stats_logging(
-            self,
-            outs,
-            y,
-            loss,
-            step,
-            epoch,
-            N,
-            len_loader,
-            val_or_train,
-            print_freq=100):
-        raise NotImplementedError
-
-
-    @abstractmethod
-    def _reset_average_tracker(self):
+    @staticmethod
+    def validate_step(self, model, val_loader, device, criterion):
         raise NotImplementedError
 
 

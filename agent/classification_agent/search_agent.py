@@ -11,6 +11,9 @@ class CFSearchAgent(CFMetaAgent):
     def fit(self):
         self.search()
 
+    def _iteration_preprocess(self):
+        self.search_strategy.step()
+        self.training_strategy.step()
 
     def search(self):
         start_time = time.time()
