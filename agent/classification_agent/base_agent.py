@@ -1,8 +1,6 @@
 import os
 import time
 
-from abc import ABC, abstractmethod
-
 import torch
 
 from utils import AverageMeter, accuracy, save
@@ -17,15 +15,11 @@ class CFMetaAgent(MetaAgent):
 
     def train_loop(self, model,
                          train_loader,
-                         val_loader,
-                         optimizer,
-                         lr_scheduler):
+                         val_loader):
         best_top1_acc = 0.0
         for epoch in range(self.start_epochs, self.epochs):
-            self.logger.info("Start to train for epoch {}".format(epoch))
-            self.logger.info(
-                "Learning Rate : {:.8f}".format(
-                    optimizer.param_groups[0]["lr"]))
+            self.logger.info(f"Start to train for epoch {epoch}")
+            self.logger.info(f"Learning Rate : {self.optimizer.param_groups[0]["lr"]:.8f}")
 
             self._training_step(
                 model,
@@ -37,31 +31,23 @@ class CFMetaAgent(MetaAgent):
                 epoch)
 
             if val_top1 > best_top1_acc:
-                self.logger.info(
-                    "Best validation top1-acc : {}. Save model!".format(val_top1 * 100))
+                self.logger.info(f"Best validation top1-acc : {val_top1*100}. Save model!")
                 best_top1_acc = val_top1
                 save(
                     model,
                     self.config["experiment_path"]["best_checkpoint_path"],
-                    optimizer,
-                    lr_scheduler,
+                    self.optimizer,
+                    self.lr_scheduler,
                     epoch + 1)
 
             save(
                 model,
                 os.path.join(
                     self.config["experiment_path"]["checkpoint_root_path"],
-                    "{}_{}.pth".format(
-                        self.agent_state,
-                        epoch)),
-                optimizer,
-                lr_scheduler,
+                    f"{self.agent_state}_{epoch}.pth"),
+                self.optimizer,
+                self.lr_scheduler,
                 epoch + 1)
-
-    @abstractmethod
-    def _iteration_preprocess(self):
-        raise NotImplementedError
-
 
     def _training_step(
             self,
@@ -118,7 +104,7 @@ class CFMetaAgent(MetaAgent):
         model.eval()
         start_time = time.time()
 
-        top1_avg, top5_avg, losses_avg = self.validate_step(model, val_loader, self.device, self.criterion)
+        top1_avg, top5_avg, losses_avg = self.searching_evaluate(model, val_loader, self.device, self.criterion)
 
         self.writer.add_scalar("Valid/_loss/", losses_avg, epoch)
         self.writer.add_scalar("Valid/_top1/", top1_avg, epoch)
@@ -132,7 +118,7 @@ class CFMetaAgent(MetaAgent):
         return top1_avg
 
     @staticmethod
-    def validate_step(model, val_loader, device, criterion):
+    def searching_evaluate(model, val_loader, device, criterion):
         top1 = AverageMeter()
         top5 = AverageMeter()
         losses = AverageMeter()

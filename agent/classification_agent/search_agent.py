@@ -23,21 +23,15 @@ class CFSearchAgent(CFMetaAgent):
             self.train_loop(
                 self.supernet,
                 self.train_loader,
-                self.val_loader,
-                self.optimizer,
-                self.lr_scheduler)
+                self.val_loader)
 
         best_architecture, best_architecture_hc, best_architecture_top1 = self.search_strategy.search()
 
-        self.logger.info("Best architectrue : {}".format(best_architecture))
-        self.logger.info(
-            "Best architectrue top1 : {:.3f}".format(
-                best_architecture_top1 * 100))
-        self.logger.info("Best architectrue hc : {}".format(best_architecture_hc))
+        self.logger.info(f"Best architectrue : {best_architecture}")
+        self.logger.info(f"Best architectrue top1 : {best_architecture_top1*100:.3f}")
+        self.logger.info(f"Best architectrue hc : {best_architecture_hc}")
 
         save_architecture(self.config["experiment_path"]["searched_model_path"], best_architecture)
-        self.logger.info(
-            "Total search time : {:.2f}".format(
-                time.time() - start_time))
+        self.logger.info(f"Total search time : {time.time()-start_time:.2f}")
 
 

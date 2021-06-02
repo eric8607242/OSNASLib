@@ -134,7 +134,11 @@ class MetaAgent:
         raise NotImplementedError
 
     @abstractmethod
-    def validate_step(self, model, val_loader, device, criterion):
+    def searching_evaluate(self, model, val_loader, device, criterion):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _iteration_preprocess(self):
         raise NotImplementedError
 
 
