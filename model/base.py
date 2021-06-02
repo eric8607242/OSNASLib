@@ -1,5 +1,7 @@
 import math
 
+from abc import ABC, abstractmethod
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -41,8 +43,7 @@ class BaseSupernet(nn.Module):
             bn_momentum=0.1,
             bn_track_running_stats=True):
         super(BaseSupernet, self).__init__()
-
-        self._init_model_config(classes)
+        self.macro_cfg, self.micro_cfg = self.get_model_cfg(classes)
 
         self.search_strategy = search_strategy
 
@@ -141,9 +142,6 @@ class BaseSupernet(nn.Module):
 
         return (macro_len, micro_len)
 
-    def get_model_cfg(self):
-        return self.macro_cfg, self.micro_cfg
-
     def set_activate_architecture(self, architecture):
         """
         Activate the path based on the passed architecture.
@@ -189,5 +187,8 @@ class BaseSupernet(nn.Module):
                 m.weight.data.normal_(0, 0.01)
                 m.bias.data.zero_()
 
-    def _init_model_config(self, classes):
+    @abstractmethod
+    def get_model_cfg(self, classes):
         raise NotImplemented
+
+

@@ -39,7 +39,7 @@ class FRSearchAgent(FRMetaAgent):
         model.eval()
         start_time = time.time()
 
-        minus_losses_avg = self.searching_evaluate(model, val_loader, self.device, self.criterion)
+        minus_losses_avg = self.searching_evaluate(model, val_loader, self.device, self.criterion)[0]
 
         self.writer.add_scalar("Valid/_losses/", -minus_losses_avg, epoch)
 

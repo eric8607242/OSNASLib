@@ -1,15 +1,16 @@
 from ..base import BaseSupernet
 
 class ProxylessNASSupernet(BaseSupernet):
-    def _init_model_config(self, classes):
-        self.micro_cfg =  [["Mobile", 3, False, "relu", {"expansion_rate": 3}],
+    @staticmethod
+    def get_model_cfg(classes):
+        micro_cfg =  [["Mobile", 3, False, "relu", {"expansion_rate": 3}],
                           ["Mobile", 3, False, "relu", {"expansion_rate": 6}],
                           ["Mobile", 5, False, "relu", {"expansion_rate": 3}],
                           ["Mobile", 5, False, "relu", {"expansion_rate": 6}],
                           ["Mobile", 7, False, "relu", {"expansion_rate": 3}],
                           ["Mobile", 7, False, "relu", {"expansion_rate": 6}],
                           ["Skip", 0, False, "relu", {}]]
-        self.macro_cfg = {
+        macro_cfg = {
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
             "first": [["Conv", 3, 32, 2, 3, "relu", False, {}],  # stride 1 for CIFAR
                       ["Mobile", 32, 16, 1, 3, "relu", False, {"expansion_rate": 1}]],
@@ -40,3 +41,4 @@ class ProxylessNASSupernet(BaseSupernet):
                      ["global_average", 0, 0, 0, 0, 0, 0, {}],
                      ["classifier", 1280, classes, 0, 0, 0, 0, {}]]
         }
+        return macro_cfg, micro_cfg
