@@ -7,8 +7,8 @@ from criterion import get_hc_criterion, get_criterion
 from .base import BaseSearcher
 
 class DifferentiableSearcher(BaseSearcher):
-    def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, logger):
-        super(DifferentiableSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, logger)
+    def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger):
+        super(DifferentiableSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger)
 
         # Init architecture parameter optimizer
         self.a_optimizer = get_optimizer(

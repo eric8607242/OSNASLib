@@ -7,8 +7,8 @@ from .base import BaseSearcher
 
 
 class RandomSearcher(BaseSearcher):
-    def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, logger):
-        super(RandomSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, logger)
+    def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger):
+        super(RandomSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger)
 
         self.random_iteration = self.config["search_utility"]["random_iteration"]
 

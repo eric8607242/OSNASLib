@@ -76,7 +76,7 @@ class MetaAgent:
                 self.val_loader, 
                 self.lookup_table, 
                 self.training_strategy, 
-                self.device, self.logger)
+                self.device, self.criterion, self.logger)
 
         # Resume checkpoint ===============================================================
         self._resume(self.supernet)
@@ -134,7 +134,6 @@ class MetaAgent:
         raise NotImplementedError
 
     @abstractmethod
-    @staticmethod
     def validate_step(self, model, val_loader, device, criterion):
         raise NotImplementedError
 

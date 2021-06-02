@@ -7,8 +7,8 @@ import torch.nn as nn
 from .base import BaseSearcher
 
 class EvolutionSearcher(BaseSearcher):
-    def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, logger):
-        super(EvolutionSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, logger)
+    def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger):
+        super(EvolutionSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger)
 
         self.generation_num = self.config["search_utility"]["generation_num"]
         self.population_num = self.config["search_utility"]["population_num"]

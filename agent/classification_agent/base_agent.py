@@ -30,8 +30,6 @@ class CFMetaAgent(MetaAgent):
             self._training_step(
                 model,
                 train_loader,
-                optimizer,
-                lr_scheduler,
                 epoch)
             val_top1 = self.validate(
                 model,
@@ -69,7 +67,8 @@ class CFMetaAgent(MetaAgent):
             self,
             model,
             train_loader,
-            epoch):
+            epoch,
+            print_freq=100):
         top1 = AverageMeter()
         top5 = AverageMeter()
         losses = AverageMeter()
@@ -100,17 +99,17 @@ class CFMetaAgent(MetaAgent):
             top1.update(prec1.item(), N)
             top5.update(prec5.item(), N)
 
-        if (step > 1 and step % print_freq == 0) or step == len_loader - 1:
-            self.logger.info(f"{Train} : [{epoch+1:3d}/{self.epochs}]"
-                             f"Step {step:03d}/{len_loader-1:03d} Loss {losses.get_avg():.3f}"
-                             f"Prec@(1, 5) ({top1.get_avg:.1%}, {top5.get_avg():.1%})")
+            if (step > 1 and step % print_freq == 0) or (step == len(train_loader) - 1):
+                self.logger.info(f"Train : [{(epoch+1):3d}/{self.epochs}]"
+                                 f"Step {step:3d}/{len(train_loader)-1:3d} Loss {losses.get_avg():.3f}"
+                                 f"Prec@(1, 5) ({top1.get_avg():.1%}, {top5.get_avg():.1%})")
 
-        self.writer.add_scalar("Valid/_loss/", losses.get_avg(), epoch)
-        self.writer.add_scalar("Valid/_top1/", top1.get_avg(), epoch)
-        self.writer.add_scalar("Valid/_top5/", top5.get_avg(), epoch)
+        self.writer.add_scalar("Train/_loss/", losses.get_avg(), epoch)
+        self.writer.add_scalar("Train/_top1/", top1.get_avg(), epoch)
+        self.writer.add_scalar("Train/_top5/", top5.get_avg(), epoch)
 
         self.logger.info(
-            f"Train: [{epoch+1:3d}/{self.epochs}] Final Loss {losses_avg:.3f}" 
+            f"Train: [{epoch+1:3d}/{self.epochs}] Final Loss {losses.get_avg():.3f}" 
             f"Final Prec@(1, 5) ({top1.get_avg():.1%}, {top5.get_avg():.1%})"
             f"Time {time.time() - start_time:.2f}")
 
@@ -133,7 +132,7 @@ class CFMetaAgent(MetaAgent):
         return top1_avg
 
     @staticmethod
-    def validate_step(self, model, val_loader, device, criterion):
+    def validate_step(model, val_loader, device, criterion):
         top1 = AverageMeter()
         top5 = AverageMeter()
         losses = AverageMeter()

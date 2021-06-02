@@ -15,8 +15,8 @@ from .generator import Generator
 from .prior_pool import PriorPool
 
 class ArchitectureGeneratorSearcher(BaseSearcher):
-    def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, logger):
-        super(ArchitectureGeneratorSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, logger)
+    def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger):
+        super(ArchitectureGeneratorSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger)
 
         generator = Generator(self.config["generator"]["hc_dim"])
         self.generator = generator.to(self.device)
@@ -31,7 +31,6 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
                         alpha=self.config["arch_optim"]["a_alpha"],
                         beta=self.config["arch_optim"]["a_beta"])
 
-        self.criterion = get_criterion(self.config["agent"]["criterion_agent"])
         self.hc_criterion = get_hc_criterion(self.config["agent"]["hc_criterion_agent"], self.config["criterion"])
 
         self.arch_param_nums = self.supernet.get_arch_param_nums()
