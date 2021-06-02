@@ -1,8 +1,9 @@
 from ..base import BaseSupernet
 
 class FBNetSSupernet(BaseSupernet):
-    def _init_model_config(self, classes):
-        self.micro_cfg = [["Mobile", 3, False, "relu", {"expansion_rate": 1, "point_group": 1}],
+    @staticmethod
+    def get_model_cfg(classes):
+        micro_cfg = [["Mobile", 3, False, "relu", {"expansion_rate": 1, "point_group": 1}],
                            ["Mobile", 3, False, "relu", {
                                "expansion_rate": 1, "point_group": 2}],
                            ["Mobile", 3, False, "relu", {
@@ -18,7 +19,7 @@ class FBNetSSupernet(BaseSupernet):
                            ["Mobile", 5, False, "relu", {
                                "expansion_rate": 6, "point_group": 1}],
                            ["Skip", 0, False, "relu", {}]]
-        self.macro_cfg = {
+        macro_cfg = {
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
             "first": [["Conv", 3, 16, 2, 3, "relu", False, {}]],  # stride 1 for CIFAR
             # in_channels, out_channels, stride
@@ -49,11 +50,13 @@ class FBNetSSupernet(BaseSupernet):
                      ["global_average", 0, 0, 0, 0, 0, 0, {}],
                      ["classifier", 1504, classes, 0, 0, 0, 0, {}]]
         }
+    return macro_cfg, micro_cfg
 
 
 class FBNetLSupernet(BaseSupernet):
-    def _init_model_config(self, classes):
-        self.micro_cfg = [["Mobile", 3, False, "relu", {"expansion_rate": 1, "point_group": 1}],
+    @staticmethod
+    def get_model_cfg(classes):
+        micro_cfg = [["Mobile", 3, False, "relu", {"expansion_rate": 1, "point_group": 1}],
                            ["Mobile", 3, False, "relu", {
                                "expansion_rate": 1, "point_group": 2}],
                            ["Mobile", 3, False, "relu", {
@@ -69,7 +72,7 @@ class FBNetLSupernet(BaseSupernet):
                            ["Mobile", 5, False, "relu", {
                                "expansion_rate": 6, "point_group": 1}],
                            ["Skip", 0, False, "relu", {}]]
-        self.macro_cfg = {
+        macro_cfg = {
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
             "first": [["Conv", 3, 16, 2, 3, "relu", False, {}]],  # stride 1 for CIFAR
             # in_channels, out_channels, stride
@@ -100,4 +103,4 @@ class FBNetLSupernet(BaseSupernet):
                      ["global_average", 0, 0, 0, 0, 0, 0, {}],
                      ["classifier", 1984, classes, 0, 0, 0, 0, {}]]
         }
-
+        return macro_cfg, micro_cfg

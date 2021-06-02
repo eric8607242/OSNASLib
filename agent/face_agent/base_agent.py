@@ -16,10 +16,10 @@ class FRMetaAgent(MetaAgent):
     def train_loop(self, model,
                          train_loader,
                          val_loader):
-        best_val_metric = 0.0
+        best_val_metric = -10000
         for epoch in range(self.start_epochs, self.epochs):
             self.logger.info(f"Start to train for epoch {epoch}")
-            self.logger.info(f"Learning Rate : {self.optimizer.param_groups[0]["lr"]:.8f}")
+            self.logger.info(f"Learning Rate : {self.optimizer.param_groups[0]['lr']:.8f}")
 
             self._training_step(
                 model,

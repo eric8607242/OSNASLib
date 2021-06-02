@@ -1,15 +1,16 @@
 from ..base import BaseSupernet
 
 class MobileFaceNetSupernet(BaseSupernet):
-    def _init_model_config(self, classes):
-        self.micro_cfg = [["Mobile", 3, False, "prelu", {"expansion_rate": 2}],
+    @staticmethod
+    def get_model_cfg(classes):
+        micro_cfg = [["Mobile", 3, False, "prelu", {"expansion_rate": 2}],
                            ["Mobile", 3, False, "prelu", {"expansion_rate": 4}],
                            ["Mobile", 3, False, "prelu", {"expansion_rate": 6}],
                            ["Mobile", 5, False, "prelu", {"expansion_rate": 2}],
                            ["Mobile", 5, False, "prelu", {"expansion_rate": 4}],
                            ["Mobile", 5, False, "prelu", {"expansion_rate": 6}],
                            ["Skip", 0, False, "prelu", {}]]
-        self.macro_cfg = {
+        macro_cfg = {
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
             "first": [["Conv", 3, 64, 2, 3, "prelu", False, {}],
                 ["Conv", 64, 64, 1, 3, "prelu", False, {"group":64}]],  # stride 1 for CIFAR
@@ -36,4 +37,4 @@ class MobileFaceNetSupernet(BaseSupernet):
                      ["Conv", 512, classes, 1, 1, None, False, {}],
                      ["global_average", 0, 0, 0, 0, 0, 0, {}]]
         }
-
+        return macro_cfg, micro_cfg
