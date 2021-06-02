@@ -1,15 +1,8 @@
 import time
 
-import torch
-import torch.nn as nn
+from model import save_architecture
 
 from .base_agent import CFMetaAgent
-
-from utils import get_optimizer, get_lr_scheduler, resume_checkpoint
-from model import save_architecture, LookUpTable, get_supernet
-
-from search_strategy import get_search_strategy
-from training_strategy import get_training_strategy
 
 class CFSearchAgent(CFMetaAgent):
     """ Classification search agent

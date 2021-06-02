@@ -11,7 +11,7 @@ target_hc: 100
 search_utility:
     directly_search: True
     search_strategy: "evolution"
-    generation_num: 10
+    generation_num: 2
     population_num: 10
     parent_num: 5
     info_metric: "flops"

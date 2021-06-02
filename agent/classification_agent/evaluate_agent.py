@@ -1,12 +1,6 @@
 import time
 
-import torch
-import torch.nn as nn
-
 from .base_agent import CFMetaAgent
-
-from utils import get_optimizer, get_lr_scheduler, resume_checkpoint
-from model import Model, load_architecture, get_supernet
 
 class CFEvaluateAgent(CFMetaAgent):
     """Classification evaluate agent

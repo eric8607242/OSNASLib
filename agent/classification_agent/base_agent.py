@@ -1,12 +1,11 @@
+import os
 import time
 
 import torch
-import torch.nn as nn
+
+from utils import AverageMeter, accuracy, save
 
 from ..base_agent import MetaAgent
-
-from utils import get_optimizer, get_lr_scheduler, resume_checkpoint
-from model import Model, load_architecture, get_supernet
 
 class CFMetaAgent(MetaAgent):
     def __init__(self, config, title):
@@ -83,7 +82,7 @@ class CFMetaAgent(MetaAgent):
 
         for step, (X, y) in enumerate(train_loader):
 
-            if self.agent_state == "search":
+            if self.agent_state == "search_agent":
                 # If search strategy is "differentiable". Update architecture
                 # parameter.
                 self.search_strategy.step()
@@ -95,7 +94,7 @@ class CFMetaAgent(MetaAgent):
 
             optimizer.zero_grad()
 
-            if self.agent_state == "search":
+            if self.agent_state == "search_agent":
                 self.training_strategy.step()
 
             outs = model(X)

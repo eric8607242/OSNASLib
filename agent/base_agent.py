@@ -1,11 +1,19 @@
 import os
 import time
 
-import torch
+from abc import ABC, abstractmethod
 
-from utils import get_logger, get_writer, set_random_seed, AverageMeter, accuracy, save
+import torch
+import torch.nn as nn
+
+from utils import get_logger, get_writer, set_random_seed, AverageMeter, accuracy, save, get_optimizer, get_lr_scheduler, resume_checkpoint
+from model import Model, load_architecture, get_supernet, LookUpTable
 from criterion import get_criterion
 from dataflow import get_dataloader
+
+from search_strategy import get_search_strategy
+from training_strategy import get_training_strategy
+
 
 class MetaAgent:
     def __init__(self, config, title):
@@ -43,9 +51,11 @@ class MetaAgent:
     def search_agent(self):
         # Construct model and correspond optimizer ======================================
         supernet = self._construct_supernet()
+        self.macro_cfg, self.micro_cfg = supernet.get_model_cfg()
+        
         self.supernet = supernet.to(self.device)
+        self.supernet = self._parallel_process(self.supernet)
 
-        self.macro_cfg, self.micro_cfg = self.supernet.get_model_cfg()
         self._optimizer_init(self.supernet)
 
         # Construct search utility ========================================================
@@ -70,8 +80,7 @@ class MetaAgent:
 
         # Resume checkpoint ===============================================================
         self._resume(self.supernet)
-        self.supernet = self._parallel_process(self.supernet)
-
+        
 
     def evaluate_agent(self):
         # Construct model and correspond optimizer ======================================
@@ -87,13 +96,14 @@ class MetaAgent:
             self.config["dataset"]["classes"],
             self.config["dataset"]["dataset"])
         self.model = model.to(self.device)
+        self.model = self._parallel_process(self.model)
 
         self._optimizer_init(self.model)
         # =================================================================================
 
         # Resume checkpoint ===============================================================
         self._resume(self.model)
-        self.model = self._parallel_process(self.model)
+        
 
     @abstractmethod
     def fit(self):
@@ -190,6 +200,8 @@ class MetaAgent:
         if self.device.type == "cuda" and self.config["train"]["ngpu"] >= 1:
             return nn.DataParallel(
                 model, list(range(self.config["train"]["ngpu"])))
+        else:
+            return model
 
     def _construct_supernet(self):
         supernet_class = get_supernet(self.config["agent"]["supernet_agent"])
