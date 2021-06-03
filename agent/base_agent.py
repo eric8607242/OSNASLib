@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 
 from utils import get_logger, get_writer, set_random_seed, AverageMeter, accuracy, save, get_optimizer, get_lr_scheduler, resume_checkpoint
-from model import Model, load_architecture, get_supernet, LookUpTable
+from model import Model, load_architecture, get_supernet, LookUpTable, calculate_model_efficient
 from criterion import get_criterion
 from dataflow import get_dataloader
 
@@ -95,6 +95,9 @@ class MetaAgent:
             architecture,
             self.config["dataset"]["classes"],
             self.config["dataset"]["dataset"])
+
+        calculate_model_efficient(model, 3, self.config["dataset"]["input_size"], self.logger)
+
         self.model = model.to(self.device)
         self.model = self._parallel_process(self.model)
 

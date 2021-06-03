@@ -178,6 +178,15 @@ class LookUpTable:
         return architecture_parameter
 
 
+def calculate_latency(model, in_channels, input_size):
+    input_sample = torch.randn((1, in_channels, input_size, input_size))
+
+    start_time = time.time()
+    model(input_sample)
+    latency = time.time() - start_time
+    return latency
+
+
 def calculate_param_nums(model):
     total_params = sum(p.numel()
                        for p in model.parameters() if p.requires_grad)
@@ -192,3 +201,14 @@ def calculate_flops(model, in_channels, input_size):
     counter = FLOPS_Counter(model, [1, in_channels, input_size, input_size])
     flops = counter.print_summary()["total_gflops"] * 1000
     return flops
+
+def calculate_model_efficient(model, in_channels, input_size, logger):
+    flops = calculate_flops(model, in_channels, input_size)
+    param_nums = calculate_param_nums(model)
+    latency = calculate_latency(model, input_channel, input_size)
+
+    self.logger.info("Model efficient calculating ===================== \n"
+                     f"FLOPs : {flops}M\n"
+                     f"Parameter number : {param_nums}\n"
+                     f"Latency : {latency}\n"
+                     "==================================================")

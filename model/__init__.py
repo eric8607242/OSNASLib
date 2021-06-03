@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 
-from .lookup_table_builder import LookUpTable
+from .lookup_table_builder import LookUpTable, calculate_model_efficient
 from .network_utils import get_block
 from .model import Model
 
