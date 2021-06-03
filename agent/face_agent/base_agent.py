@@ -32,7 +32,7 @@ class FRMetaAgent(MetaAgent):
 
             if val_metric > best_val_metric:
                 self.logger.info(f"Best validation metric : {val_metric}. Save model!")
-                best_top1_acc = val_top1
+                best_val_metric = val_metric
                 save(
                     model,
                     self.config["experiment_path"]["best_checkpoint_path"],
@@ -81,14 +81,14 @@ class FRMetaAgent(MetaAgent):
             losses.update(loss.item(), N)
 
             if (step > 1 and step % print_freq == 0) or (step == len(train_loader) - 1):
-                self.logger.info(f"Train : [{(epoch+1):3d}/{self.epochs}]"
-                                 f"Step {step:3d}/{len(train_loader)-1:3d} Loss {losses.get_avg():.3f}")
+                self.logger.info(f"Train : [{(epoch+1):3d}/{self.epochs}] "
+                                 f"Step {step:3d}/{len(train_loader)-1:3d} Loss {losses.get_avg():.3f} ")
 
         self.writer.add_scalar("Train/_loss/", losses.get_avg(), epoch)
 
         self.logger.info(
-            f"Train: [{epoch+1:3d}/{self.epochs}] Final Loss {losses.get_avg():.3f}" 
-            f"Time {time.time() - start_time:.2f}")
+            f"Train: [{epoch+1:3d}/{self.epochs}] Final Loss {losses.get_avg():.3f} " 
+            f"Time {time.time() - start_time:.2f} ")
 
     @staticmethod
     def searching_evaluate(model, val_loader, device, criterion):

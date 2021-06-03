@@ -1,4 +1,7 @@
 import time
+import numpy as np
+
+import torch
 
 from .base_agent import FRMetaAgent
 from .face_evaluate import evaluate
@@ -41,8 +44,8 @@ class FREvaluateAgent(FRMetaAgent):
         self.writer.add_scalar("Valid/_thresh/", thresh_avg, epoch)
 
         self.logger.info(
-            f"Valid : [{epoch+1:3d}/{self.epochs}]" 
-            f"Final Acc : {acc_avg:.2f} Final Thresh : {thresh_avg:.2f}"
+            f"Valid : [{epoch+1:3d}/{self.epochs}] " 
+            f"Final Acc : {acc_avg:.2f} Final Thresh : {thresh_avg:.2f} "
             f"Time {time.time() - start_time:.2f}")
 
         return acc_avg
@@ -52,7 +55,7 @@ class FREvaluateAgent(FRMetaAgent):
         all_embeds1, all_embeds2 = [], []
 
         with torch.no_grad():
-            for idx, ((imgs1, imgs2), labels) in enumerate(self.val_loader):
+            for idx, ((imgs1, imgs2), labels) in enumerate(val_loader):
                 # Move data sample
                 batch_size = labels.size(0)
                 imgs1 = imgs1.to(self.device)

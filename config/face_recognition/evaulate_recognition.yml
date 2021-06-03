@@ -1,7 +1,7 @@
 agent:
     main_agent: "FREvaluateAgent"
-    criterion_agent: "LabelSmoothingCrossEntropy"
-    supernet_agent: "ProxylessNASSupernet"
+    criterion_agent: "OnlineTripletLoss"
+    supernet_agent: "MobileFaceNetSupernet"
 
 train:
     resume: False
@@ -14,15 +14,16 @@ train:
     bn_momentum: 0.1
 
 criterion:
+    margin: 0.3 # Margin of triplet loss
 
 dataset:
-    dataset: "cifar100"
+    dataset: "face"
     dataset_path: "./data/"
-    classes: 100
-    input_size: 32
+    classes: 128 # Embedding channels
+    input_size: 112
 
     batch_size: 128
-    num_workers: 0
+    num_workers: 4
     train_portion: 0.8
 
 optim:

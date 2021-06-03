@@ -50,7 +50,7 @@ class FBNetSSupernet(BaseSupernet):
                      ["global_average", 0, 0, 0, 0, 0, 0, {}],
                      ["classifier", 1504, classes, 0, 0, 0, 0, {}]]
         }
-    return macro_cfg, micro_cfg
+        return macro_cfg, micro_cfg
 
 
 class FBNetLSupernet(BaseSupernet):
