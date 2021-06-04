@@ -76,15 +76,18 @@ def get_block(block_type,
         if in_channels != out_channels:
             block = ConvBNAct(in_channels=in_channels,
                               out_channels=out_channels,
-                              kernel_size=3,
+                              kernel_size=1,
                               stride=stride,
-                              activation="relu",
+                              activation=None,
                               bn_momentum=bn_momentum,
                               bn_track_running_stats=bn_track_running_stats,
                               group=1,
-                              pad=(3 // 2))
+                              pad=0)
         else:
-            block = nn.Sequential()
+            if stride != 1:
+                block = nn.AvgPool2d(stride, stride=stride)
+            else:
+                block = nn.Sequential()
 
     else:
         raise NotImplementedError

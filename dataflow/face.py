@@ -56,10 +56,12 @@ def get_face_dataloader(dataset_name, dataset_path, input_size, batch_size, num_
         train_len = len(train_dataset)
         labels = np.array([s[1] for s in train_dataset.samples])
 
-        indices = np.arange(train_len)
-        random.shuffle(indices)
-
-        train_sampler = BalancedBatchSampler(indices, labels, batch_size)
+        train_idx = np.arange(train_len)
+        random.shuffle(train_idx)
+        
+        train_labels = labels[train_idx]
+        
+        train_sampler = BalancedBatchSampler(train_idx, train_labels, batch_size)
 
         train_loader = DataLoader(
             train_dataset,
@@ -102,7 +104,7 @@ class PairFaceDataset:
 
 
 class BalancedBatchSampler(Sampler):
-    def __init__(self, data_idx, labels, batch_size, P=16):
+    def __init__(self, data_idx, labels, batch_size, P=32):
         self.labels = labels
         self.n_samples = len(labels)
         self.P = P

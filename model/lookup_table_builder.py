@@ -1,4 +1,5 @@
 import os
+import time
 import json
 
 import torch
@@ -41,7 +42,6 @@ class LookUpTable:
                 architecture_parameter)
         else:
             architecture_parameter = architecture_parameter.reshape(len(self.macro_cfg["search"]), len(self.micro_cfg))
-
         model_info = []
         for i, l_ap in enumerate(architecture_parameter):
             model_info.extend(
@@ -66,8 +66,10 @@ class LookUpTable:
 
         first_stage = []
         first_in_channels = None
+        global_stride = 1
         for l, l_cfg in enumerate(macro_cfg["first"]):
             block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
+            global_stride *= stride
             first_in_channels = in_channels if first_in_channels is None else first_in_channels
             layer = get_block(block_type=block_type,
                               in_channels=in_channels,
@@ -84,10 +86,11 @@ class LookUpTable:
         first_stage = nn.Sequential(*first_stage)
         base_info = self._get_block_info(
             first_stage, first_in_channels, input_size, info_metric_list)
-        input_size = input_size if stride == 1 else input_size // 2
+        input_size = input_size if global_stride == 1 else input_size // global_stride
         for k, v in base_info.items():
             base_info_table["base_{}".format(k)] += v
-
+            
+            
         for l, l_cfg in enumerate(macro_cfg["search"]):
             in_channels, out_channels, stride = l_cfg
             layer_info = {metric: [] for metric in info_metric_list}
@@ -163,7 +166,7 @@ class LookUpTable:
             elif metric == "param":
                 block_info["param"] = calculate_param_nums(block)
             elif metric == "latency":
-                pass
+                block_info["latency"] = calculate_latency(block, in_channels, input_size)
             else:
                 raise NotImplementedError
 
@@ -205,10 +208,10 @@ def calculate_flops(model, in_channels, input_size):
 def calculate_model_efficient(model, in_channels, input_size, logger):
     flops = calculate_flops(model, in_channels, input_size)
     param_nums = calculate_param_nums(model)
-    latency = calculate_latency(model, input_channel, input_size)
+    latency = calculate_latency(model, in_channels, input_size)
 
-    self.logger.info("Model efficient calculating ===================== \n"
-                     f"FLOPs : {flops}M\n"
-                     f"Parameter number : {param_nums}\n"
-                     f"Latency : {latency}\n"
-                     "==================================================")
+    logger.info("Model efficient calculating =====================")
+    logger.info(f"FLOPs : {flops}M")
+    logger.info(f"Parameter number : {param_nums}")
+    logger.info(f"Latency : {latency:.5f}")
+    logger.info("==================================================")

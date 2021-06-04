@@ -112,7 +112,6 @@ class BaseSupernet(nn.Module):
     def forward(self, x):
         for i, l in enumerate(self.first_stages):
             x = l(x)
-
         for i, l in enumerate(self.search_stages):
             if self.forward_state == "sum":
                 weight = F.gumbel_softmax(
