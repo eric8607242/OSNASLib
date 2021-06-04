@@ -9,18 +9,18 @@ class CFSearchAgent(CFMetaAgent):
     """
     agent_state = "search_agent"
     def fit(self):
-        self.search()
+        self._search()
 
     def _iteration_preprocess(self):
         self.search_strategy.step()
         self.training_strategy.step()
 
-    def search(self):
+    def _search(self):
         start_time = time.time()
         self.logger.info("Searching process start!")
 
         if not self.config["search_utility"]["directly_search"]:
-            self.train_loop(
+            self._train_loop(
                 self.supernet,
                 self.train_loader,
                 self.val_loader)

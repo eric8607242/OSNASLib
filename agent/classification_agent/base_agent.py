@@ -10,45 +10,7 @@ from ..base_agent import MetaAgent
 class CFMetaAgent(MetaAgent):
     """Classification meta agent
     """
-    def __init__(self, config, title):
-        super(CFMetaAgent, self).__init__(config, title)
-
-    def train_loop(self, model,
-                         train_loader,
-                         val_loader):
-        best_top1_acc = 0.0
-        for epoch in range(self.start_epochs, self.epochs):
-            self.logger.info(f"Start to train for epoch {epoch}")
-            self.logger.info(f"Learning Rate : {self.optimizer.param_groups[0]['lr']:.8f}")
-
-            self._training_step(
-                model,
-                train_loader,
-                epoch)
-            val_top1 = self.validate(
-                model,
-                val_loader,
-                epoch)
-
-            if val_top1 > best_top1_acc:
-                self.logger.info(f"Best validation top1-acc : {val_top1*100}. Save model!")
-                best_top1_acc = val_top1
-                save(
-                    model,
-                    self.config["experiment_path"]["best_checkpoint_path"],
-                    self.optimizer,
-                    self.lr_scheduler,
-                    epoch + 1)
-
-            save(
-                model,
-                os.path.join(
-                    self.config["experiment_path"]["checkpoint_root_path"],
-                    f"{self.agent_state}_{epoch}.pth"),
-                self.optimizer,
-                self.lr_scheduler,
-                epoch + 1)
-
+    evaluate_metric = "top1-acc"
     def _training_step(
             self,
             model,
@@ -100,7 +62,7 @@ class CFMetaAgent(MetaAgent):
             f"Time {time.time() - start_time:.2f}")
 
 
-    def validate(self, model, val_loader, epoch):
+    def _validate(self, model, val_loader, epoch):
         model.eval()
         start_time = time.time()
 

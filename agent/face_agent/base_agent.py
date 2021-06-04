@@ -10,46 +10,7 @@ from ..base_agent import MetaAgent
 class FRMetaAgent(MetaAgent):
     """Face recognition meta agent
     """
-    def __init__(self, config, title):
-        super(FRMetaAgent, self).__init__(config, title)
-
-    def train_loop(self, model,
-                         train_loader,
-                         val_loader):
-        best_val_metric = -10000
-        for epoch in range(self.start_epochs, self.epochs):
-            self.logger.info(f"Start to train for epoch {epoch}")
-            self.logger.info(f"Learning Rate : {self.optimizer.param_groups[0]['lr']:.8f}")
-
-            self._training_step(
-                model,
-                train_loader,
-                epoch)
-            val_metric = self.validate(
-                model,
-                val_loader,
-                epoch)
-
-            if val_metric > best_val_metric:
-                self.logger.info(f"Best validation metric : {val_metric}. Save model!")
-                best_val_metric = val_metric
-                save(
-                    model,
-                    self.config["experiment_path"]["best_checkpoint_path"],
-                    self.optimizer,
-                    self.lr_scheduler,
-                    epoch + 1)
-
-            save(
-                model,
-                os.path.join(
-                    self.config["experiment_path"]["checkpoint_root_path"],
-                    f"{self.agent_state}_{epoch}.pth"),
-                self.optimizer,
-                self.lr_scheduler,
-                epoch + 1)
-
-
+    evaluate_metric = "acc"
     def _training_step(
             self,
             model,

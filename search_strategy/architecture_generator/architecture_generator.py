@@ -21,7 +21,6 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
         generator = Generator(self.config["generator"]["hc_dim"])
         self.generator = generator.to(self.device)
 
-
         self.g_optimizer = get_optimizer(self.generator.parameters(),
                         self.config["arch_optim"]["a_optimizer"],
                         learning_rate=self.config["arch_optim"]["a_lr"],
@@ -36,12 +35,6 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
         self.arch_param_nums = self.supernet.get_arch_param_nums()
         self.prior_pool = PriorPool(self.lookup_table, self.arch_param_nums, self.config, self.logger)
 
-        self.top1 = AverageMeter()
-        self.top5 = AverageMeter()
-        self.losses = AverageMeter()
-        self.hc_losses = AverageMeter()
-        self.ce_losses = AverageMeter()
-
         self.hardware_constraint_pool = [i for i in range(self.config["search_utility"]["lowest_hardware_constraint"], self.config["search_utility"]["highest_hardware_constraint"], 5)]
         self.hardware_constraint_index = 0
         random.shuffle(self.hardware_constraint_pool)
@@ -55,34 +48,38 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
     def search(self):
         tau = 5
         
-        best_loss = float("inf")
-        best_top1 = 0
+        best_hc_loss = float("inf")
+        best_ce_loss = float("inf")
         for epoch in range(self.search_epochs):
             self.logger.info(f"Start to train the architecture generator for epoch {epoch}")
             self.logger.info(f"Tau : {tau}")
 
             self._generator_training_step(tau, epoch=epoch)
             target_val_hardware_constraint = (self.config["search_utility"]["lowest_hardware_constraint"] + self.config["search_utility"]["highest_hardware_constraint"]) / 2
-            top1_avg = self._generator_validate(target_hardware_constraint=target_val_hardware_constraint, epoch=epoch)
+            ce_loss = self._generator_validate(target_hardware_constraint=target_val_hardware_constraint, epoch=epoch)
 
-            evaluate_metric, total_loss, kendall_tau = self._evaluate_generator()
+            evaluate_metric, total_hc_loss, kendall_tau = self._evaluate_generator()
             self.logger.info(f"The evaluating total loss : {total_loss}")
             self.logger.info(f"The Kendall Tau : {kendall_tau}")
 
-            if total_loss < best_loss:
-                self.logger.info(f"The newest best loss achieve {total_loss}! Save model.")
+            if total_hc_loss < best_hc_loss:
+                self.logger.info(f"The newest best hc loss achieve {total_hc_loss}! Save model.")
                 save(self.generator, self.config["experiment_path"]["best_loss_generator_checkpoint_path"], self.g_optimizer, None, epoch+1)
-                best_loss = total_loss
+                best_hc_loss = total_hc_loss
 
-            if best_top1 < top1_avg:
-                self.logger.info(f"The newest best top1 accuracy achieve {top1_avg}! Save model.")
+            if ce_loss < best_ce_loss:
+                self.logger.info(f"The newest best ce loss achieve {ce_loss}! Save model.")
                 save(self.generator, self.config["experiment_path"]["best_acc_generator_checkpoint_path"], self.g_optimizer, None, epoch+1)
-                best_top1 = top1_avg
+                best_ce_loss = ce_loss
 
             tau *= self.config["generator"]["tau_decay"]
 
 
-    def _generator_training_step(self, tau, epoch):
+    def _generator_training_step(self, tau, epoch, print_freq=100):
+        losses = AverageMeter()
+        hc_losses = AverageMeter()
+        ce_losses = AverageMeter()
+
         for step, (X, y) in enumerate(self.val_loader):
             self.g_optimizer.zero_grad() 
             target_hardware_constraint = self._get_target_hardware_constraint()
@@ -107,20 +104,18 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
             total_loss.backward()
             self.g_optimizer.step()
 
-            self._intermediate_stats_logging(
-                outs,
-                y,
-                ce_loss,
-                hc_loss,
-                step,
-                epoch,
-                N,
-                len_loader=len(self.val_loader),
-                val_or_train="Generator_Train")
-        self._reset_average_tracker()
+            losses.update(total_loss.item(), N)
+            hc_losses.update(hc_loss.item(), N)
+            ce_losses.update(ce_loss.item(), N)
+
+            if (step > 1 and step % print_freq == 0) or step == len(self.val_loader) - 1:
+                self.logger.info(f"ArchGenerator Train : Step {step:03d}/{len(self.val_loader)-1:03d} "
+                                 f"Loss {losses.get_avg():.3f} CE Loss {ce_losses.get_avg():.3f} HC Loss {hc_losses.get_avg():.3f}")
 
 
     def _generator_validate(self, target_hardware_constraint, epoch):
+        ce_losses = AverageMeter()
+
         with torch.no_grad():
             target_hardware_constraint = self._get_target_hardware_constraint(target_hardware_constraint)
             arch_param = self._get_arch_param(target_hardware_constraint)
@@ -139,20 +134,14 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
                 outs = self.supernet(X)
                 ce_loss = self.criterion(outs, y)
 
-                self._intermediate_stats_logging(
-                    outs,
-                    y,
-                    ce_loss,
-                    hc_loss,
-                    step,
-                    epoch,
-                    N,
-                    len_loader=len(self.val_loader),
-                    val_or_train="Generator_Valid")
-        top1_avg = self.top1.get_avg()
-        self._reset_average_tracker()
+                ce_losses.update(ce_loss.item(), N)
 
-        return top1_avg
+                if (step > 1 and step % print_freq == 0) or step == len(self.val_loader) - 1:
+                    self.logger.info(f"ArchGenerator Valid: Step {step:03d}/{len(self.val_loader)-1:03d} "
+                                     f"CE Loss {ce_losses.get_avg():.3f}")
+
+        ce_loss = ce_losses.get_avg()
+        return ce_loss
 
 
     def _get_target_hardware_constraint(self, target_hardware_constraint=None):
@@ -193,36 +182,6 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
         arch_param = self.generator(prior, normalize_hardware_constraint)
         arch_param = arch_param.reshape(self.arch_param_nums)
         return arch_param
-
-    
-    def _intermediate_stats_logging(self, outs, y, ce_loss, hc_loss, step, epoch, N, len_loader, val_or_train, print_freq=100):
-        total_loss = ce_loss + hc_loss
-        prec1, prec5 = accuracy(outs, y, topk=(1, 5))
-
-        self.losses.update(total_loss.item(), N)
-        self.hc_losses.update(hc_loss.item(), N)
-        self.ce_losses.update(ce_loss.item(), N)
-
-        self.top1.update(prec1.item(), N)
-        self.top5.update(prec5.item(), N)
-
-        if (step > 1 and step % print_freq == 0) or step == len_loader - 1:
-            self.logger.info("{} : [{:3d}/{}] Step {:03d}/{:03d} Loss {:.3f} CE Loss {:.3f} HC Loss {:.3f} Prec@(1, 5) ({:.1%}, {:.1%})" .format(
-                    val_or_train,
-                    epoch + 1,
-                    self.search_epochs,
-                    step,
-                    len_loader - 1,
-                    self.losses.get_avg(),
-                    self.ce_losses.get_avg(),
-                    self.hc_losses.get_avg(),
-                    self.top1.get_avg(),
-                    self.top5.get_avg()))
-
-
-    def _reset_average_tracker(self):
-        for tracker in [self.top1, self.top5, self.losses, self.ce_losses, self.hc_losses]:
-            tracker.reset()
 
     def _evaluate_generator(self):
         evaluate_metric = {"gen_hardware_constraint":[], "target_hardware_constraint":[]}
