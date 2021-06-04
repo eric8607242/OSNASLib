@@ -7,8 +7,8 @@ from utils import AverageMeter, accuracy, save
 
 from ..base_agent import MetaAgent
 
-class {{customize_name}}MetaAgent(MetaAgent):
-    """{{customize_name}} meta agent
+class {{customize_class}}MetaAgent(MetaAgent):
+    """{{customize_class}} meta agent
     """
     evaluate_metric = ""
     def _training_step(

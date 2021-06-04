@@ -1,9 +1,9 @@
 import time
 
-from .base_agent import {{customize_name}}MetaAgent
+from .base_agent import {{customize_class}}MetaAgent
 
-class {{customize_name}}EvaluateAgent({{customize_name}}):
-    """{{customize_name}} evaluate agent
+class {{customize_class}}EvaluateAgent({{customize_class}}MetaAgent):
+    """{{customize_class}} evaluate agent
     """
     agent_state = "evaluate_agent"
     def fit(self):
