@@ -77,7 +77,7 @@ class MetaAgent:
         """
         # Construct model and correspond optimizer ======================================
         supernet = self._construct_supernet()
-        self.macro_cfg, self.micro_cfg = supernet.get_model_cfg()
+        self.macro_cfg, self.micro_cfg = supernet.get_model_cfg(self.config["dataset"]["classes"])
         
         self.supernet = supernet.to(self.device)
         self.supernet = self._parallel_process(self.supernet)
@@ -137,7 +137,7 @@ class MetaAgent:
         
     def _train_loop(self, model,
                          train_loader,
-                         val_loader)
+                         val_loader):
         best_val_metric = -10000
         for epoch in range(self.start_epochs, self.epochs):
             self.logger.info(f"Start to train for epoch {epoch}")
