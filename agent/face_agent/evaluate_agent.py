@@ -14,27 +14,27 @@ class FREvaluateAgent(FRMetaAgent):
         pass
 
     def fit(self):
-        self.evaluate()
-        self.inference()
+        self._evaluate()
+        self._inference()
 
-    def evaluate(self):
+    def _evaluate(self):
         start_time = time.time()
         self.logger.info("Evaluating process start!")
 
-        self.train_loop(
+        self._train_loop(
             self.model,
             self.train_loader,
             self.test_loader)
         self.logger.info(f"Total search time : {time.time()-start_time:.2f}")
 
 
-    def inference(self):
+    def _inference(self):
         start_time = time.time()
-        acc_avg = self.validate(self.model, self.test_loader, 0)
+        acc_avg = self._validate(self.model, self.test_loader, 0)
         self.logger.info(f"Final Acc : {acc_avg}")
         self.logger.info(f"Total inference time : {time.time()-start_time:.2f}")
 
-    def validate(self, model, val_loader, epoch):
+    def _validate(self, model, val_loader, epoch):
         model.eval()
         start_time = time.time()
 

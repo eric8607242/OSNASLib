@@ -48,7 +48,33 @@ class MetaAgent:
         getattr(self, self.agent_state)()
 
 
+    @abstractmethod
+    def fit(self):
+        """Train model for searching or evaluating.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _training_step(self, model, train_loader, epoch, print_freq=100):
+        raise NotImplementedError
+
+    @abstractmethod
+    def _validate(self, model, val_loader, epoch):
+        raise NotImplementedError
+
+    @abstractmethod
+    def searching_evaluate(model, val_loader, device, criterion):
+        """ Evaluating method for search strategy. Note that this method should be static.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _iteration_preprocess(self):
+        raise NotImplementedError
+
     def search_agent(self):
+        """Initialize for searching process.
+        """
         # Construct model and correspond optimizer ======================================
         supernet = self._construct_supernet()
         self.macro_cfg, self.micro_cfg = supernet.get_model_cfg()
@@ -83,6 +109,8 @@ class MetaAgent:
         
 
     def evaluate_agent(self):
+        """Initialize for evaluating agent (Train from scratch).
+        """
         # Construct model and correspond optimizer ======================================
         architecture = load_architecture(self.config["experiment_path"]["searched_model_path"])
 
@@ -107,43 +135,41 @@ class MetaAgent:
         # Resume checkpoint ===============================================================
         self._resume(self.model)
         
-
-    @abstractmethod
-    def fit(self):
-        raise NotImplementedError
-
-
-    @abstractmethod
-    def train_loop(self, model,
+    def _train_loop(self, model,
                          train_loader,
-                         val_loader,
-                         optimizer,
-                         lr_scheduler):
-        raise NotImplementedError
+                         val_loader)
+        best_val_metric = -10000
+        for epoch in range(self.start_epochs, self.epochs):
+            self.logger.info(f"Start to train for epoch {epoch}")
+            self.logger.info(f"Learning Rate : {self.optimizer.param_groups[0]['lr']:.8f}")
 
-    @abstractmethod
-    def _training_step(
-            self,
-            model,
-            train_loader,
-            optimizer,
-            lr_scheduler,
-            epoch):
-        raise NotImplementedError
+            self._training_step(
+                model,
+                train_loader,
+                epoch)
+            val_metric = self._validate(
+                model,
+                val_loader,
+                epoch)
 
+            if val_metric > best_val_metric:
+                self.logger.info(f"Best validation {self.evaluate_metric}: {val_metric}. Save model!")
+                best_val_metric = val_metric
+                save(
+                    model,
+                    self.config["experiment_path"]["best_checkpoint_path"],
+                    self.optimizer,
+                    self.lr_scheduler,
+                    epoch + 1)
 
-    @abstractmethod
-    def validate(self, model, val_loader, epoch, inference=True):
-        raise NotImplementedError
-
-    @abstractmethod
-    def searching_evaluate(self, model, val_loader, device, criterion):
-        raise NotImplementedError
-
-    @abstractmethod
-    def _iteration_preprocess(self):
-        raise NotImplementedError
-
+            save(
+                model,
+                os.path.join(
+                    self.config["experiment_path"]["checkpoint_root_path"],
+                    f"{self.agent_state}_{epoch}.pth"),
+                self.optimizer,
+                self.lr_scheduler,
+                epoch + 1)
 
     def _optimizer_init(self, model):
         self.optimizer = get_optimizer(
