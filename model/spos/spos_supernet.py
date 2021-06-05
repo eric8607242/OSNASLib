@@ -3,10 +3,10 @@ from ..base import BaseSupernet
 class SPOSSupernet(BaseSupernet):
     @staticmethod
     def get_model_cfg(classes):
-        micro_cfg = [["Shuffle", 3, False, "relu", {}],
-                          ["Shuffle", 5, False, "relu", {}],
-                          ["Shuffle", 7, False, "relu", {}],
-                          ["ShuffleX", 0, False, "relu", {}]]
+        micro_cfg = [["shuffle", 3, False, "relu", {}],
+                          ["shuffle", 5, False, "relu", {}],
+                          ["shuffle", 7, False, "relu", {}],
+                          ["shuffleX", 0, False, "relu", {}]]
         macro_cfg = {
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
             "first": [["Conv", 3, 16, 2, 3, "relu", False, {}]],  # stride 1 for CIFAR
@@ -32,7 +32,7 @@ class SPOSSupernet(BaseSupernet):
                        [640, 640, 1],
                        [640, 640, 1]],
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
-            "last": [["Conv", 640, 1024, 1, 1, "relu", False, {}],
+            "last": [["conv", 640, 1024, 1, 1, "relu", False, {}],
                      ["global_average", 0, 0, 0, 0, 0, 0, {}],
                      ["classifier", 1024, classes, 0, 0, 0, 0, {}]]
         }
