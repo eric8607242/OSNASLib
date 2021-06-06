@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 FACE_MEAN = [0.485, 0.456, 0.406]
 FACE_STD = [0.229, 0.224, 0.225]
 
-def get_face_dataloader(dataset_name, dataset_path, input_size, batch_size, num_workers, train_portion=1):
+def get_face_dataloader(dataset_path, input_size, batch_size, num_workers, train_portion=1):
     train_transform = transforms.Compose([
                         transforms.Resize(input_size),
                         transforms.RandomHorizontalFlip(),

@@ -11,7 +11,30 @@ from torch.utils.data import DataLoader
 CIFAR_MEAN = [0.49139968, 0.48215827, 0.44653124]
 CIFAR_STD = [0.203, 0.1994, 0.2010]
 
-def get_CIFAR_dataloader(dataset_name, dataset_path, input_size, batch_size, num_workers, train_portion=1):
+
+def get_cifar10_dataloader(dataset_path, input_size, batch_size, num_workers, train_portion=1):
+    train_transform, test_transform = _get_transform()
+
+    train_dataset = datasets.CIFAR10(root=dataset_path, train=True,
+                                     download=True, transform=train_transform)
+    test_dataset = datasets.CIFAR10(root=dataset_path, train=False,
+                                     download=True, transform=test_transform)
+    
+    return _get_cifar_dataloader(train_dataset, test_dataset, batch_size, num_workers, train_portion)
+
+
+def get_cifar100_dataloader(dataset_path, input_size, batch_size, num_workers, train_portion=1):
+    train_transform, test_transform = _get_transform()
+
+    train_dataset = datasets.CIFAR100(root=dataset_path, train=True,
+                                     download=True, transform=train_transform)
+    test_dataset = datasets.CIFAR100(root=dataset_path, train=False,
+                                     download=True, transform=test_transform)
+
+    return _get_cifar_dataloader(train_dataset, test_dataset, batch_size, num_workers, train_portion)
+
+
+def _get_transform(input_size):
     train_transform = transforms.Compose([
         transforms.RandomCrop(input_size, padding=4),
         transforms.RandomHorizontalFlip(),
@@ -23,21 +46,10 @@ def get_CIFAR_dataloader(dataset_name, dataset_path, input_size, batch_size, num
         transforms.ToTensor(),
         transforms.Normalize(CIFAR_MEAN, CIFAR_STD)
     ])
-
-    if dataset_name == "cifar10":
-        train_dataset = datasets.CIFAR10(root=dataset_path, train=True,
-                                         download=True, transform=train_transform)
-        test_dataset = datasets.CIFAR10(root=dataset_path, train=False,
-                                         download=True, transform=test_transform)
-    elif dataset_name == "cifar100":
-        train_dataset = datasets.CIFAR100(root=dataset_path, train=True,
-                                         download=True, transform=train_transform)
-        test_dataset = datasets.CIFAR100(root=dataset_path, train=False,
-                                         download=True, transform=test_transform)
-    else:
-        raise 
+    return train_transform, test_transform
 
 
+def _get_cifar_dataloader(train_dataset, test_dataset, batch_size, num_workers, train_portion=1):
     if train_portion != 1:
         train_len = len(train_dataset)
         indices = list(range(train_len))

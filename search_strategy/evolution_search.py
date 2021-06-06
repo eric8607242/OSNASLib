@@ -14,6 +14,8 @@ class EvolutionSearcher(BaseSearcher):
         self.population_num = self.config["search_utility"]["population_num"]
         self.parent_num = self.config["search_utility"]["parent_num"]
 
+    def step(self):
+        pass
 
     def search(self):
         # Population initialization

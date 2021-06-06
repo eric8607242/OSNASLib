@@ -12,6 +12,8 @@ class RandomSearcher(BaseSearcher):
 
         self.random_iteration = self.config["search_utility"]["random_iteration"]
 
+    def step(self):
+        pass
 
     def search(self):
         random_architectures = []

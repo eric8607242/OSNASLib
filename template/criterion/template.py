@@ -1,10 +1,6 @@
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-
-class {{customize_name}}(nn.Module):
+class {{customize_class}}(nn.Module):
     def __init__(self, criterion_config):
-        super({{customize_name}}, self).__init__()
+        super({{customize_class}}, self).__init__()
         self.criterion_config = criterion_config
 
     def forward(self, x, target):

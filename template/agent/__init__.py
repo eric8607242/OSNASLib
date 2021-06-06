@@ -2,9 +2,11 @@ import os
 import sys
 from jinja2 import Environment, FileSystemLoader
 
-from template import render_file
+from template import render_file, render_import
 
-def build_template(customize_name):
+def build_template(customize_name, customize_class=None):
+    assert customize_class is None
+
     template_path = os.path.dirname(os.path.realpath(__file__))
     root_path = os.path.join(os.getcwd(), "agent", customize_name)
 
@@ -12,17 +14,22 @@ def build_template(customize_name):
         os.mkdir(root_path)
 
     env = Environment(loader=FileSystemLoader(template_path))
-    # Create meta template
-    meta_template = env.get_template("meta_template.py")
-    render_file(meta_template.render(customize_name=customize_name), os.path.join(root_path, "meta_agent.py"))
+    # Create training template
+    training_template = env.get_template("training_template.py")
+    render_file(training_template.render(customize_class=customize_class), \
+                os.path.join(root_path, "training_agent.py"))
 
-    # Create evaulate template
-    evaluate_template = env.get_template("evaluate_template.py")
-    render_file(evaluate_template.render(customize_name=customize_name), os.path.join(root_path, "evaluate_agent.py"))
+    # Create agents template
+    agents_template = env.get_template("agents_template.py")
+    render_file(agents_template.render(customize_class=customize_class), \
+                os.path.join(root_path, "agents.py"))
+
+    # Create init template
+    init_template = env.get_template("init_template.py")
+    render_file(init_template.render(customize_class=customize_class), \
+                os.path.join(root_path, "__init__.py"))
     
-    # Create search template
-    search_template = env.get_template("search_template.py")
-    render_file(search_template.render(customize_name=customize_name), os.path.join(root_path, "search_agent.py"))
 
-    # Create __init__ file
-    render_file("", os.path.join(root_path, "__init__.py"))
+    # Add import in agent __init__
+    render_import(f"from .{customize_name}_agent import {customize_class}SearchAgent, {customize_class}EvaluateAgent", \
+                os.path.join(root_path, "__init__.py"))
