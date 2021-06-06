@@ -114,7 +114,7 @@ class MetaAgent:
         # Construct model and correspond optimizer ======================================
         architecture = load_architecture(self.config["experiment_path"]["searched_model_path"])
 
-        supernet_class = get_supernet(self.config["agent"]["supernet_agent"])
+        supernet_class = get_supernet_class(self.config["agent"]["supernet_agent"])
         self.macro_cfg, self.micro_cfg = supernet_class.get_model_cfg(self.config["dataset"]["classes"])
 
         model = Model(
@@ -211,11 +211,10 @@ class MetaAgent:
             return model
 
     def _construct_supernet(self):
-        supernet_class = get_supernet(self.config["agent"]["supernet_agent"])
+        supernet_class = get_supernet_class(self.config["agent"]["supernet_agent"])
         supernet = supernet_class(
             self.config["dataset"]["classes"],
             self.config["dataset"]["dataset"],
-            self.config["search_utility"]["search_strategy"],
             bn_momentum=self.config["train"]["bn_momentum"],
             bn_track_running_stats=self.config["train"]["bn_track_running_stats"])
         return supernet

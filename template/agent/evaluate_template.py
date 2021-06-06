@@ -1,5 +1,3 @@
-import time
-
 from .base_agent import {{customize_class}}MetaAgent
 
 class {{customize_class}}EvaluateAgent({{customize_class}}MetaAgent):

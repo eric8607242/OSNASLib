@@ -1,5 +1,3 @@
-import time
-
 from model import save_architecture
 
 from .base_agent import {{customize_class}}MetaAgent

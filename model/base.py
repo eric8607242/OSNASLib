@@ -39,13 +39,10 @@ class BaseSupernet(nn.Module):
             self,
             classes,
             dataset,
-            search_strategy,
             bn_momentum=0.1,
             bn_track_running_stats=True):
         super(BaseSupernet, self).__init__()
         self.macro_cfg, self.micro_cfg = self.get_model_cfg(classes)
-
-        self.search_strategy = search_strategy
 
         self.classes = classes
         self.dataset = dataset
@@ -104,29 +101,33 @@ class BaseSupernet(nn.Module):
             self.last_stages.append(layer)
 
         self._initialize_weights()
-        if self.search_strategy == "differentiable_gumbel" or self.search_strategy == "differentiable":
-            self._initialize_arch_param()
-        else:
-            self.architecture = None
 
     def forward(self, x):
         for i, l in enumerate(self.first_stages):
             x = l(x)
+
         for i, l in enumerate(self.search_stages):
-            if self.forward_state == "sum":
-                weight = F.gumbel_softmax(
-                    self.arch_param[i],
-                    dim=0) if self.search_strategy == "differentiable_gumbel" else F.softmax(
-                    self.arch_param[i],
-                    dim=0)
-                x = sum(p * b(x) for p, b in zip(weight, l))
-            elif self.forward_state == "single":
-                x = l[self.architecture[i]](x)
+            self._forward_step(x)
 
         for i, l in enumerate(self.last_stages):
             x = l(x)
 
         return x
+
+    def _forward_step(self, x):
+        if self.forward_state == "gumbel_sum":
+            weight = F.gumbel_softmax(self.arch_param[i], dim=0) 
+            x = sum(p * b(x) for p, b in zip(weight, l))
+
+        elif self.forward_state == "sum":
+            weight = F.softmax(self.arch_param[i], dim=0)
+            x = sum(p * b(x) for p, b in zip(weight, l))
+
+        elif self.forward_state == "single":
+            x = l[self.architecture[i]](x)
+
+        return x
+
 
     def set_arch_param(self, arch_param):
         """
@@ -147,7 +148,7 @@ class BaseSupernet(nn.Module):
         """
         self.architecture = architecture
 
-    def _initialize_arch_param(self):
+    def initialize_arch_param(self):
         micro_len = len(self.micro_cfg)
         macro_len = len(self.macro_cfg["search"])
 

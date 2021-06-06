@@ -1,51 +1,38 @@
 # How to customize your training strategy
 In OSNASLib, we cover serveral basic training strategy (e.g., differentiable training strategy, uniform training strategy and fairstrictness training strategy) to train the supernet. Besides, we also provide flexible API interface to customize for any your specific tasks or the novel training strategy. In this document, we will briefly introduce how to customize the training strategy in `./training_strategy/` easily.
 
-## Create `customize.py` File
-First of all, you should create a new file for your training strategy.
+
+## Generate Template
 ```
-touch ./training_strategy/customize.py
+python3 build_template.py -t training_strategy --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
 ```
 
-## Training Strategy Class
-For customizing the training strategy, you can utilize the API following in your training strategy file.
-In OSNASLib, all training strategy inherited by `BaseSampler` in `./training_strategy/base.py`.
+After generating the training strategy template, the file `[CUSTOMIZE NAME].py` will be created in `training_strategy/` and the corresponding import will be create automatically.
 
-```python
-# ./training_strategy/customize.py
+
+## Training Strategy Interface
+For customizing training strategy, the interface class `[CUSTOMIZE CLASS]Sampler` in `[CUSTOMIZE NAME].py` should inherited the base class `BaseSampler`. You shoud implement `step()` method for setting the architecture to train the supernet..
+
+
+```python3
+# ./training_strategy/[CUSTOMIZE NAME].py
+import torch
+import torch.nn as nn
+
 from .base import BaseSampler
 
-class CustomizerSampler(BaseSampler):
-    def generate_training_architecture(self):
-        """
-            In this function, the sampler should generate an architecture and return. 
-            With the generated architecture, the sampler can set activate architecture 
-            in the supernet to forward and update.
-            
-        """
-        return architecture
-    
+class {{customize_class}}Sampler(BaseSampler):
+    def __init__(self, micro_len, macro_len, model):
+        super({{customize_class}}, self).__init__(micro_len, macro_len, model)
+
     def step(self):
-        """
-            During training supernet, this function will be called before each supernet 
-            training iteration to set the activate architecture in the supernet.
-        """
-        architecture = self.generate_training_architecture()
+        pass
 ```
 
-## Import Your Training Strategy
-After creating your training strategy, the class should be imported to in `./training_strategy/__init__.py`.
-
-
-```python
-# ./training_strategy/__init__.py
-from .customizer import CustomizerSampler
-```
-
-## Setting The Training Strategy Agent In Config File
-To utilize the customizing training strategy, you should set the agent in the config file as following.
+## Setting Config File
+After customizing for your training strategy, you can utilize your training strategy by setting the training strategy in the config file easily.
 
 ```python
 agent:
-    training_strategy_agent: "CustomizerSampler"
+    training_strategy_agent: "[CUSTOMIZE CLASS]Sampler"
 ```

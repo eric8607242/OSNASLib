@@ -10,10 +10,13 @@ class DifferentiableSearcher(BaseSearcher):
     def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger):
         super(DifferentiableSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger)
 
-        # Init architecture parameter optimizer
+        # Init architecture parameters
+        self.supernet.initialize_arch_param()
+
+        # Init architecture parameters optimizer
         self.a_optimizer = get_optimizer(
-            [supernet.module.get_arch_param() if isinstance(supernet, nn.DataParallel) \
-                    else supernet.get_arch_param()],
+            [self.supernet.module.get_arch_param() if isinstance(self.supernet, nn.DataParallel) \
+                    else self.supernet.get_arch_param()],
             self.config["arch_optim"]["a_optimizer"],
             learning_rate=self.config["arch_optim"]["a_lr"],
             weight_decay=self.config["arch_optim"]["a_weight_decay"],

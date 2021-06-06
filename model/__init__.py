@@ -15,7 +15,7 @@ def save_architecture(path_to_architecture, architecture):
     np.save(path_to_architecture, architecture)
 
 
-def get_supernet(name):
+def get_supernet_class(name):
     return getattr(sys.modules[__name__], name)
 
 

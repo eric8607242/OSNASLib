@@ -13,6 +13,7 @@ After generating the criterion template, the file `CUSTOMIZE NAME` will be creat
 For customizing criterion, the interface should iherited the class `nn.Module`. Besides, to provide more flexibility, you can pass any kind of hyperparameter by `criterion_config`, which is set in the config file.
 
 ```python3
+# ./criterion/[CUSTOMIZE NAME].py
 class [CUSTOMIZE_CLASS](nn.Module):
     def __init__(self, criterion_config):
         super(CUSTOMIZE_CLASS, self).__init__()
@@ -24,7 +25,7 @@ class [CUSTOMIZE_CLASS](nn.Module):
 ```
 
 ## Setting Config File
-After customing for your criterion, you can utilize your criterion by setting the criterion in the config file easily.
+After customizing for your criterion, you can utilize your criterion by setting the criterion in the config file easily.
 
 ```python3
 agent:

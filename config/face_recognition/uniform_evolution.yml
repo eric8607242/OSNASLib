@@ -10,7 +10,6 @@ target_hc: 100
 
 search_utility:
     directly_search: False
-    search_strategy: "evolution"
     generation_num: 10
     population_num: 10
     parent_num: 5

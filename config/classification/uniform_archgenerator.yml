@@ -11,7 +11,6 @@ target_hc: 100
 
 search_utility:
     directly_search: True
-    search_strategy: "architecture_generator"
     random_iteration: 10
     info_metric: "flops"
     lowest_hardware_constraint: 80

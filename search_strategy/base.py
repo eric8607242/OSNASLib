@@ -25,8 +25,9 @@ class BaseSearcher:
 
         self.target_hc = self.config["target_hc"]
 
+    @abc.abstractmethod(self):
     def step(self):
-        pass
+        return NotImplemented
 
     @abc.abstractmethod
     def search(self):

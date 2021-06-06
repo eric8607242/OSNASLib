@@ -6,16 +6,17 @@ In OSNASLib, we cover serveral basic search space (e.g., FBNet, ProxylessNAS, an
 python3 build_template.py -t model --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
 ```
 
-After generating the model template, the directory `CUSTOMIZE NAME` will be created in `model/`, and the corresponding files (`__init__.py` and `[CUSTOMIZE NAME]_supernet.py`) are created in the directory `CUSTOMIZE NAME`.
+After generating the model template, the directory `[CUSTOMIZE NAME]/` will be created in `model/`, and the corresponding files (`__init__.py` and `[CUSTOMIZE NAME]_supernet.py`) are created in the directory `[CUSTOMIZE NAME]/`.
 
 
 ## Model Interface
-For customizing model, the interface in `[CUSTOMIZE NAME]_supernet.py` should inherit the class `BaseSupernet` and implement the staticmethod `get_model_cfg` to return `macro_cfg` and `micro_cfg`.
+For customizing model, the interface class `[CUSTOMIZE CLASS]Supernet` in `[CUSTOMIZE NAME]_supernet.py` should inherit the class `BaseSupernet` and implement the staticmethod `get_model_cfg` to return `macro_cfg` and `micro_cfg`.
 
 ```python3
+# ./model/[CUSTOMIZE NAME]/[CUSTOMIZE NAME]_supernet.py
 from ..base import BaseSupernet
 
-class [CUSTOMIZE_CLASS]Supernet(BaseSupernet):
+class [CUSTOMIZE CLASS]Supernet(BaseSupernet):
     @staticmethod
     def get_model_cfg(classes):
         return macro_cfg, micro_cfg
@@ -25,5 +26,5 @@ class [CUSTOMIZE_CLASS]Supernet(BaseSupernet):
 After customizing for your search space, you can utilize your search space by setting the search space into the config file easily.
 ```
 agent:
-    supernet_agent: "[CUSTOMIZE_CLASS]Supernet"
+    supernet_agent: "[CUSTOMIZE CLASS]Supernet"
 ```

@@ -10,7 +10,6 @@ target_hc: 100
 
 search_utility:
     directly_search: True
-    search_strategy: "random_search"
     random_iteration: 10
     info_metric: "flops"
 
