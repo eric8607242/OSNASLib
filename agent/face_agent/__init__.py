@@ -1,2 +1,1 @@
-from .search_agent import FRSearchAgent
-from .evaluate_agent import FREvaluateAgent
+from .agents import FRSearchAgent, FREvaluateAgent

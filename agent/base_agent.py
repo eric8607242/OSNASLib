@@ -16,6 +16,9 @@ from training_strategy import get_training_strategy
 
 
 class MetaAgent:
+    """The abstract class for the agent of each class. 
+    Initialization for searching or evaluating agent.
+    """
     def __init__(self, config, title):
         self.config = config
 
@@ -44,132 +47,11 @@ class MetaAgent:
 
         self.config = config
 
-        # Init agent
-        getattr(self, self.agent_state)()
-
-
     @abstractmethod
     def fit(self):
-        """Train model for searching or evaluating.
+        """Fit agent for searching or evaluating.
         """
         raise NotImplementedError
-
-    @abstractmethod
-    def _training_step(self, model, train_loader, epoch, print_freq=100):
-        raise NotImplementedError
-
-    @abstractmethod
-    def _validate(self, model, val_loader, epoch):
-        raise NotImplementedError
-
-    @abstractmethod
-    def searching_evaluate(model, val_loader, device, criterion):
-        """ Evaluating method for search strategy. Note that this method should be static.
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def _iteration_preprocess(self):
-        raise NotImplementedError
-
-    def search_agent(self):
-        """Initialize for searching process.
-        """
-        # Construct model and correspond optimizer ======================================
-        supernet = self._construct_supernet()
-        self.macro_cfg, self.micro_cfg = supernet.get_model_cfg(self.config["dataset"]["classes"])
-        
-        self.supernet = supernet.to(self.device)
-        self.supernet = self._parallel_process(self.supernet)
-
-        self._optimizer_init(self.supernet)
-
-        # Construct search utility ========================================================
-        training_strategy_class = get_training_strategy(self.config["agent"]["training_strategy_agent"])
-        self.training_strategy = training_strategy_class(len(self.micro_cfg), len(self.macro_cfg["search"]), self.supernet)
-
-        self.lookup_table = LookUpTable(
-            self.macro_cfg,
-            self.micro_cfg,
-            self.config["experiment_path"]["lookup_table_path"],
-            self.config["dataset"]["input_size"],
-            info_metric=self.config["search_utility"]["info_metric"])
-
-        search_strategy_class = get_search_strategy(self.config["agent"]["search_strategy_agent"])
-        self.search_strategy = search_strategy_class(
-                self.config, 
-                self.supernet, 
-                self.val_loader, 
-                self.lookup_table, 
-                self.training_strategy, 
-                self.device, self.criterion, self.logger)
-
-        # Resume checkpoint ===============================================================
-        self._resume(self.supernet)
-        
-
-    def evaluate_agent(self):
-        """Initialize for evaluating agent (Train from scratch).
-        """
-        # Construct model and correspond optimizer ======================================
-        architecture = load_architecture(self.config["experiment_path"]["searched_model_path"])
-
-        supernet_class = get_supernet_class(self.config["agent"]["supernet_agent"])
-        self.macro_cfg, self.micro_cfg = supernet_class.get_model_cfg(self.config["dataset"]["classes"])
-
-        model = Model(
-            self.macro_cfg,
-            self.micro_cfg,
-            architecture,
-            self.config["dataset"]["classes"],
-            self.config["dataset"]["dataset"])
-
-        calculate_model_efficient(model, 3, self.config["dataset"]["input_size"], self.logger)
-
-        self.model = model.to(self.device)
-        self.model = self._parallel_process(self.model)
-
-        self._optimizer_init(self.model)
-        # =================================================================================
-
-        # Resume checkpoint ===============================================================
-        self._resume(self.model)
-        
-    def _train_loop(self, model,
-                         train_loader,
-                         val_loader):
-        best_val_metric = -10000
-        for epoch in range(self.start_epochs, self.epochs):
-            self.logger.info(f"Start to train for epoch {epoch}")
-            self.logger.info(f"Learning Rate : {self.optimizer.param_groups[0]['lr']:.8f}")
-
-            self._training_step(
-                model,
-                train_loader,
-                epoch)
-            val_metric = self._validate(
-                model,
-                val_loader,
-                epoch)
-
-            if val_metric > best_val_metric:
-                self.logger.info(f"Best validation {self.evaluate_metric}: {val_metric}. Save model!")
-                best_val_metric = val_metric
-                save(
-                    model,
-                    self.config["experiment_path"]["best_checkpoint_path"],
-                    self.optimizer,
-                    self.lr_scheduler,
-                    epoch + 1)
-
-            save(
-                model,
-                os.path.join(
-                    self.config["experiment_path"]["checkpoint_root_path"],
-                    f"{self.agent_state}_{epoch}.pth"),
-                self.optimizer,
-                self.lr_scheduler,
-                epoch + 1)
 
     def _optimizer_init(self, model):
         self.optimizer = get_optimizer(

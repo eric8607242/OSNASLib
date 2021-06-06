@@ -1,2 +1,1 @@
-from .search_agent import {{customize_class}}SearchAgent
-from .evaluate_agent import {{customize_class}}EvaluateAgent
+from .agents import {{customize_class}}SearchAgent, {{customize_class}}EvaluateAgent
