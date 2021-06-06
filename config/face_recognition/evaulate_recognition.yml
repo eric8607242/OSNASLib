@@ -7,7 +7,7 @@ train:
     resume: False
     random_seed: 42
     device: "cuda"
-    ngpu: 1
+    ngpu: 4
     epochs: 10
 
     bn_track_running_stats: True
@@ -22,14 +22,14 @@ dataset:
     classes: 128 # Embedding channels
     input_size: 112
 
-    batch_size: 128
-    num_workers: 4
-    train_portion: 0.8
+    batch_size: 256
+    num_workers: 8
+    train_portion: 1
 
 optim:
-    optimizer: "sgd"
-    lr: 0.045
-    weight_decay: 0.00004
+    optimizer: "adam"
+    lr: 0.001
+    weight_decay: 0.0001
     momentum: 0.9
     alpha: 0.9
     beta: 0.99
