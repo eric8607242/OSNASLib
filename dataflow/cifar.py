@@ -13,7 +13,7 @@ CIFAR_STD = [0.203, 0.1994, 0.2010]
 
 
 def get_cifar10_dataloader(dataset_path, input_size, batch_size, num_workers, train_portion=1):
-    train_transform, test_transform = _get_transform()
+    train_transform, test_transform = _get_transform(input_size)
 
     train_dataset = datasets.CIFAR10(root=dataset_path, train=True,
                                      download=True, transform=train_transform)
@@ -24,7 +24,7 @@ def get_cifar10_dataloader(dataset_path, input_size, batch_size, num_workers, tr
 
 
 def get_cifar100_dataloader(dataset_path, input_size, batch_size, num_workers, train_portion=1):
-    train_transform, test_transform = _get_transform()
+    train_transform, test_transform = _get_transform(input_size)
 
     train_dataset = datasets.CIFAR100(root=dataset_path, train=True,
                                      download=True, transform=train_transform)

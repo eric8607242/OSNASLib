@@ -25,7 +25,7 @@ class BaseSearcher:
 
         self.target_hc = self.config["target_hc"]
 
-    @abc.abstractmethod(self):
+    @abc.abstractmethod
     def step(self):
         return NotImplemented
 
@@ -38,7 +38,7 @@ class BaseSearcher:
         self.supernet.eval()
 
         agent_cls = get_agent_cls(self.config["agent"]["main_agent"])
-        acc_info = agent_cls.searching_evaluate(self.supernet, self.val_loader, self.device, self.criterion)
+        acc_info = agent_cls.training_agent.searching_evaluate(self.supernet, self.val_loader, self.device, self.criterion)
         return acc_info[0]
 
     def evaluate_architectures(self, architectures_list):

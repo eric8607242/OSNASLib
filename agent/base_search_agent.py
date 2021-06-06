@@ -1,4 +1,11 @@
+import time
+
 from .base_agent import MetaAgent
+
+from model import get_supernet_class, LookUpTable, save_architecture
+
+from search_strategy import get_search_strategy
+from training_strategy import get_training_strategy
 
 class MetaSearchAgent(MetaAgent):
     def _init_agent_state(self):
@@ -37,17 +44,15 @@ class MetaSearchAgent(MetaAgent):
         self._resume(self.supernet)
 
     def fit(self):
-        self._search()
-
-    def _search(self):
         start_time = time.time()
         self.logger.info("Searching process start!")
 
         if not self.config["search_utility"]["directly_search"]:
-            self._train_loop(
+            self.training_agent.train_loop(
                 self.supernet,
                 self.train_loader,
-                self.val_loader)
+                self.val_loader,
+                self)
 
         best_architecture, best_architecture_hc, best_architecture_top1 = self.search_strategy.search()
 

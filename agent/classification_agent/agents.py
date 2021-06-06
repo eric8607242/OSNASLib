@@ -1,5 +1,6 @@
 from .training_agent import CFTrainingAgent
-from ..base_agent import MetaSearchAgent, MetaEvaluateAgent
+from ..base_search_agent import MetaSearchAgent
+from ..base_evaluate_agent import MetaEvaluateAgent
 
 class CFSearchAgent(MetaSearchAgent):
     agent_state = "search"

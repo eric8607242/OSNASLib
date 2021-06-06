@@ -6,14 +6,10 @@ from abc import ABC, abstractmethod
 import torch
 import torch.nn as nn
 
-from utils import get_logger, get_writer, set_random_seed, AverageMeter, accuracy, save, get_optimizer, get_lr_scheduler, resume_checkpoint
-from model import Model, load_architecture, get_supernet, LookUpTable, calculate_model_efficient
+from utils import get_logger, get_writer, set_random_seed, get_optimizer, get_lr_scheduler, resume_checkpoint
+from model import Model, get_supernet_class, LookUpTable, calculate_model_efficient
 from criterion import get_criterion
 from dataflow import get_dataloader
-
-from search_strategy import get_search_strategy
-from training_strategy import get_training_strategy
-
 
 class MetaAgent:
     """The abstract class for the agent of each class. 
@@ -46,6 +42,8 @@ class MetaAgent:
         self.start_epochs = 0
 
         self.config = config
+        
+        self._init_agent_state()
 
     @abstractmethod
     def fit(self):

@@ -107,27 +107,22 @@ class BaseSupernet(nn.Module):
             x = l(x)
 
         for i, l in enumerate(self.search_stages):
-            self._forward_step(x)
+            if self.forward_state == "gumbel_sum":
+                weight = F.gumbel_softmax(self.arch_param[i], dim=0) 
+                x = sum(p * b(x) for p, b in zip(weight, l))
+
+            elif self.forward_state == "sum":
+                weight = F.softmax(self.arch_param[i], dim=0)
+                x = sum(p * b(x) for p, b in zip(weight, l))
+
+            elif self.forward_state == "single":
+                x = l[self.architecture[i]](x)
 
         for i, l in enumerate(self.last_stages):
             x = l(x)
 
         return x
-
-    def _forward_step(self, x):
-        if self.forward_state == "gumbel_sum":
-            weight = F.gumbel_softmax(self.arch_param[i], dim=0) 
-            x = sum(p * b(x) for p, b in zip(weight, l))
-
-        elif self.forward_state == "sum":
-            weight = F.softmax(self.arch_param[i], dim=0)
-            x = sum(p * b(x) for p, b in zip(weight, l))
-
-        elif self.forward_state == "single":
-            x = l[self.architecture[i]](x)
-
-        return x
-
+    
 
     def set_arch_param(self, arch_param):
         """

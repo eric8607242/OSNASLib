@@ -10,7 +10,7 @@ class CFTrainingAgent:
     """
     def train_loop(self, model, train_loader, val_loader, agent):
         training_step = getattr(self, f"_{agent.agent_state}_training_step")
-        validate_step = getattr(self, f"{agent.agent_state}_validate_step")
+        validate_step = getattr(self, f"_{agent.agent_state}_validate_step")
 
         best_val_performance = -float("inf")
         for epoch in range(agent.start_epochs, agent.epochs):
@@ -22,7 +22,7 @@ class CFTrainingAgent:
                 train_loader,
                 agent,
                 epoch)
-            val_performance = validate(
+            val_performance = validate_step(
                 model,
                 val_loader,
                 agent,
@@ -61,7 +61,7 @@ class CFTrainingAgent:
         return self._validate(model ,val_loader, agent, epoch)
 
     @staticmethod
-    def searching_evaluate():
+    def searching_evaluate(model, val_loader, device, criterion):
         top1 = AverageMeter()
         top5 = AverageMeter()
         losses = AverageMeter()
@@ -82,7 +82,7 @@ class CFTrainingAgent:
         return top1.get_avg(), top5.get_avg(), losses.get_avg()
 
 
-    def _training_step(self, model, train_loader, agent, epoch):
+    def _training_step(self, model, train_loader, agent, epoch, print_freq=100):
         top1 = AverageMeter()
         top5 = AverageMeter()
         losses = AverageMeter()
@@ -115,7 +115,7 @@ class CFTrainingAgent:
             top5.update(prec5.item(), N)
 
             if (step > 1 and step % print_freq == 0) or (step == len(train_loader) - 1):
-                agent.logger.info(f"Train : [{(epoch+1):3d}/{self.epochs}]"
+                agent.logger.info(f"Train : [{(epoch+1):3d}/{agent.epochs}]"
                                  f"Step {step:3d}/{len(train_loader)-1:3d} Loss {losses.get_avg():.3f}"
                                  f"Prec@(1, 5) ({top1.get_avg():.1%}, {top5.get_avg():.1%})")
 
@@ -124,12 +124,12 @@ class CFTrainingAgent:
         agent.writer.add_scalar("Train/_top5/", top5.get_avg(), epoch)
 
         agent.logger.info(
-            f"Train: [{epoch+1:3d}/{self.epochs}] Final Loss {losses.get_avg():.3f}" 
+            f"Train: [{epoch+1:3d}/{agent.epochs}] Final Loss {losses.get_avg():.3f}" 
             f"Final Prec@(1, 5) ({top1.get_avg():.1%}, {top5.get_avg():.1%})"
             f"Time {time.time() - start_time:.2f}")
 
 
-    def _validate(self, model, val_loader, agent):
+    def _validate(self, model, val_loader, agent, epoch):
         model.eval()
         start_time = time.time()
 
@@ -140,7 +140,7 @@ class CFTrainingAgent:
         agent.writer.add_scalar("Valid/_top5/", top5_avg, epoch)
 
         agent.logger.info(
-            f"Valid : [{epoch+1:3d}/{self.epochs}] Final Loss {losses_avg:.3f}" 
+            f"Valid : [{epoch+1:3d}/{agent.epochs}] Final Loss {losses_avg:.3f}" 
             f"Final Prec@(1, 5) ({top1_avg:.1%}, {top5_avg:.1%})"
             f"Time {time.time() - start_time:.2f}")
 

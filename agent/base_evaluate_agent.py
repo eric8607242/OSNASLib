@@ -1,4 +1,9 @@
+import time
+
 from .base_agent import MetaAgent
+
+from model import Model, get_supernet_class, LookUpTable, load_architecture, calculate_model_efficient
+
 
 class MetaEvaluateAgent(MetaAgent):
     def _init_agent_state(self):
@@ -30,23 +35,14 @@ class MetaEvaluateAgent(MetaAgent):
 
 
     def fit(self):
-        self._evaluate()
-        self._inference()
-
-    def _evaluate(self):
         start_time = time.time()
         self.logger.info("Evaluating process start!")
 
-        self._train_loop(
+        self.training_agent.train_loop(
             self.model,
             self.train_loader,
-            self.test_loader)
+            self.test_loader,
+            self)
         self.logger.info(f"Total search time : {time.time()-start_time:.2f}")
 
-
-    def _inference(self):
-        start_time = time.time()
-        acc_avg = self._validate(self.model, self.test_loader, 0)
-        self.logger.info(f"Final Acc : {acc_avg}")
-        self.logger.info(f"Total inference time : {time.time()-start_time:.2f}")
 
