@@ -1,18 +1,20 @@
 import os
 import time
 
+import numpy as np
+
 import torch
 
 from utils import AverageMeter, save
 
-from .face_evaluate import evaluate_roc
+from .face_evaluate import evaluate
 
 class FRTrainingAgent:
     """The training agent to train the supernet and the searched architecture.
     """
     def train_loop(self, model, train_loader, val_loader, agent):
         training_step = getattr(self, f"_{agent.agent_state}_training_step")
-        validate_step = getattr(self, f"{agent.agent_state}_validate_step")
+        validate_step = getattr(self, f"_{agent.agent_state}_validate_step")
 
         best_val_performance = -float("inf")
         for epoch in range(agent.start_epochs, agent.epochs):
@@ -24,7 +26,7 @@ class FRTrainingAgent:
                 train_loader,
                 agent,
                 epoch)
-            val_performance = validate(
+            val_performance = validate_step(
                 model,
                 val_loader,
                 agent,
@@ -57,12 +59,13 @@ class FRTrainingAgent:
         model.eval()
         start_time = time.time()
 
-        minus_losses_avg = self.searching_evaluate(model, val_loader, self.device, self.criterion)[0]
+        agent._iteration_preprocess()
+        minus_losses_avg = self.searching_evaluate(model, val_loader, agent.device, agent.criterion)[0]
 
-        self.writer.add_scalar("Valid/_losses/", -minus_losses_avg, epoch)
+        agent.writer.add_scalar("Valid/_losses/", -minus_losses_avg, epoch)
 
-        self.logger.info(
-            f"Valid : [{epoch+1:3d}/{self.epochs}]" 
+        agent.logger.info(
+            f"Valid : [{epoch+1:3d}/{agent.epochs}]" 
             f"Final Losses: {-minus_losses_avg:.2f}"
             f"Time {time.time() - start_time:.2f}")
 
@@ -82,9 +85,9 @@ class FRTrainingAgent:
             for idx, ((imgs1, imgs2), labels) in enumerate(val_loader):
                 # Move data sample
                 batch_size = labels.size(0)
-                imgs1 = imgs1.to(self.device)
-                imgs2 = imgs2.to(self.device)
-                labels = labels.to(self.device)
+                imgs1 = imgs1.to(agent.device)
+                imgs2 = imgs2.to(agent.device)
+                labels = labels.to(agent.device)
                 # Extract embeddings
                 embeds1 = model(imgs1)
                 embeds2 = model(imgs2)
@@ -102,11 +105,11 @@ class FRTrainingAgent:
         acc_avg = accs.mean()
         thresh_avg = best_thresholds.mean()
 
-        self.writer.add_scalar("Valid/_acc/", acc_avg, epoch)
-        self.writer.add_scalar("Valid/_thresh/", thresh_avg, epoch)
+        agent.writer.add_scalar("Valid/_acc/", acc_avg, epoch)
+        agent.writer.add_scalar("Valid/_thresh/", thresh_avg, epoch)
 
-        self.logger.info(
-            f"Valid : [{epoch+1:3d}/{self.epochs}] " 
+        agent.logger.info(
+            f"Valid : [{epoch+1:3d}/{agent.epochs}] " 
             f"Final Acc : {acc_avg:.2f} Final Thresh : {thresh_avg:.2f} "
             f"Time {time.time() - start_time:.2f}")
 
@@ -161,13 +164,13 @@ class FRTrainingAgent:
             losses.update(loss.item(), N)
 
             if (step > 1 and step % print_freq == 0) or (step == len(train_loader) - 1):
-                agent.logger.info(f"Train : [{(epoch+1):3d}/{self.epochs}] "
+                agent.logger.info(f"Train : [{(epoch+1):3d}/{agent.epochs}] "
                                  f"Step {step:3d}/{len(train_loader)-1:3d} Loss {losses.get_avg():.3f} ")
 
         agent.writer.add_scalar("Train/_loss/", losses.get_avg(), epoch)
 
         agent.logger.info(
-            f"Train: [{epoch+1:3d}/{self.epochs}] Final Loss {losses.get_avg():.3f} " 
+            f"Train: [{epoch+1:3d}/{agent.epochs}] Final Loss {losses.get_avg():.3f} " 
             f"Time {time.time() - start_time:.2f} ")
 
 
