@@ -10,7 +10,7 @@ class {{customize_class}}TrainingAgent:
     """
     def train_loop(self, model, train_loader, val_loader, agent):
         training_step = getattr(self, f"_{agent.agent_state}_training_step")
-        validate_step = getattr(self, f"{agent.agent_state}_validate_step")
+        validate_step = getattr(self, f"_{agent.agent_state}_validate_step")
 
         best_val_performance = -float("inf")
         for epoch in range(agent.start_epochs, agent.epochs):
@@ -22,7 +22,7 @@ class {{customize_class}}TrainingAgent:
                 train_loader,
                 agent,
                 epoch)
-            val_performance = validate(
+            val_performance = validate_step(
                 model,
                 val_loader,
                 agent,
