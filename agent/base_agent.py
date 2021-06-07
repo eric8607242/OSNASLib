@@ -12,7 +12,7 @@ from criterion import get_criterion
 from dataflow import get_dataloader
 
 class MetaAgent:
-    """The abstract class for the agent of each class. 
+    """ The abstract class for the agent of each class. 
     Initialization for searching or evaluating agent.
     """
     def __init__(self, config, title):
@@ -47,7 +47,7 @@ class MetaAgent:
 
     @abstractmethod
     def fit(self):
-        """Fit agent for searching or evaluating.
+        """ Fit agent for searching or evaluating.
         """
         raise NotImplementedError
 
@@ -73,6 +73,8 @@ class MetaAgent:
             total_epochs=self.config["train"]["epochs"])
 
     def _resume(self, model):
+        """ Load the checkpoint of model, optimizer, and lr scheduler.
+        """
         if self.config["train"]["resume"]:
             self.start_epochs = resume_checkpoint(
                     model,
@@ -91,6 +93,10 @@ class MetaAgent:
             return model
 
     def _construct_supernet(self):
+        """
+        Return:
+            supernet (nn.Module): The supernet constructed based on search space.
+        """
         supernet_class = get_supernet_class(self.config["agent"]["supernet_agent"])
         supernet = supernet_class(
             self.config["dataset"]["classes"],

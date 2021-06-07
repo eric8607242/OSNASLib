@@ -8,32 +8,35 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class OnlineTripletLoss(nn.Module):
-    """Triplet loss with associated triplet selector"""
+    """ Triplet loss with associated triplet selector"""
     def __init__(self, criterion_config):
+        """
+        Args: criterion_config (dict): The config for criterion
+        """
         super().__init__()
         self.criterion_config = criterion_config
 
         self.margin = self.criterion_config["margin"]
         self.triplet_selector = RandomNegativeTripletSelector(margin=self.margin)
 
-    def forward(self, embeddings, labels):
-        """Compute triplet loss
+    def forward(self, x, target):
+        """ Compute triplet loss
 
         Arguments:
-            - embeddings (torch.Tensor): embeddings of shape (batch, embedding_dim)
-            - labels (torch.LongTensor): target labels shape (batch,)
+            x (torch.Tensor): embeddings of shape (batch, embedding_dim)
+            target (torch.Tensor): target labels shape (batch,)
 
         Return:
             average triplet loss
         """
-        target_embeddings = embeddings.detach().cpu().numpy()
-        target_labels = labels.detach().cpu().numpy()
+        target_embeddings = x.detach().cpu().numpy()
+        target_labels = target.detach().cpu().numpy()
         triplets = self.triplet_selector.get_triplets(target_embeddings, target_labels)
         triplets = torch.LongTensor(triplets)
-        triplets = triplets.to(embeddings.device)
+        triplets = triplets.to(x.device)
 
-        ap_distances = (embeddings[triplets[:, 0]] - embeddings[triplets[:, 1]]).pow(2).sum(1)
-        an_distances = (embeddings[triplets[:, 0]] - embeddings[triplets[:, 2]]).pow(2).sum(1)
+        ap_distances = (x[triplets[:, 0]] - x[triplets[:, 1]]).pow(2).sum(1)
+        an_distances = (x[triplets[:, 0]] - x[triplets[:, 2]]).pow(2).sum(1)
         losses = F.relu(ap_distances - an_distances + self.margin)
 
         return losses.mean()

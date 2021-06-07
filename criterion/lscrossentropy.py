@@ -8,10 +8,13 @@ import torch.nn.functional as F
 
 
 class LabelSmoothingCrossEntropy(nn.Module):
-    """Smoothing cross entropy loss
+    """ Smoothing cross entropy loss
     Reference : https://arxiv.org/pdf/1512.00567.pdf
     """
     def __init__(self, criterion_config, smoothing=0.1):
+        """
+        Args: criterion_config (dict): The config for criterion
+        """
         super(LabelSmoothingCrossEntropy, self).__init__()
         assert smoothing < 1.0
         self.smoothing = smoothing
@@ -19,14 +22,14 @@ class LabelSmoothingCrossEntropy(nn.Module):
         self.criterion_config = criterion_config
 
     def forward(self, x, target):
-        """Compute smoothing cross entropy loss
+        """ Compute smoothing cross entropy loss
 
-        Arguments:
-            - x (torch.Tensor): 
-            - target 
+        Args:
+            x (torch.Tensor): 
+            target (torch.Tensor)
 
         Return:
-            average cross entropy loss
+            loss (torch.Tensor)
         """
         logprobs = F.log_softmax(x, dim=-1)
         

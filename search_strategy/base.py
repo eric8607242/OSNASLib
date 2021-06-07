@@ -8,6 +8,8 @@ import torch.nn as nn
 from utils import AverageMeter, accuracy
 
 class BaseSearcher:
+    """The abstract class for each search strategy.
+    """
     def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger):
         self.config = config
         self.logger = logger
@@ -33,22 +35,26 @@ class BaseSearcher:
     def search(self):
         return NotImplemented
 
-    def _evaluate(self):
-        from agent import get_agent_cls
-        self.supernet.eval()
-
-        agent_cls = get_agent_cls(self.config["agent"]["main_agent"])
-        acc_info = agent_cls.training_agent.searching_evaluate(self.supernet, self.val_loader, self.device, self.criterion)
-        return acc_info[0]
-
     def evaluate_architectures(self, architectures_list):
+        """Evaluate architectures list to get the performance of each architecture.
+
+        Args:
+            architectures_list (list): List of architectures
+
+        Return:
+            architectures_acc (list): List of the performance of each architecture in architectures_list
+        """
+        from agent import get_agent_cls
+
         architectures_acc = []
         for i, architecture in enumerate(architectures_list):
             self.supernet.module.set_activate_architecture(architecture) if isinstance(
                 self.supernet, nn.DataParallel) else self.supernet.set_activate_architecture(architecture)
 
-            acc = self._evaluate()
-            architectures_acc.append(acc)
+            agent_cls = get_agent_cls(self.config["agent"]["main_agent"])
+            acc_info = agent_cls.training_agent.searching_evaluate(self.supernet, self.val_loader, self.device, self.criterion)
+
+            architectures_acc.append(acc_info[0])
             self.logger.info(f"Evaluate {i} architecture acc-avg : {acc}")
 
         architectures_acc = np.array(architectures_acc)

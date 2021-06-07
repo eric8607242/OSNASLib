@@ -7,6 +7,8 @@ import torch.nn as nn
 from .base import BaseSearcher
 
 class EvolutionSearcher(BaseSearcher):
+    """ The searcher for the evolution algorithm search strategy.
+    """
     def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger):
         super(EvolutionSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger)
 
@@ -15,9 +17,18 @@ class EvolutionSearcher(BaseSearcher):
         self.parent_num = self.config["search_utility"]["parent_num"]
 
     def step(self):
+        """ The searcher step before each iteration. 
+        """
         pass
 
     def search(self):
+        """ Searching the best architecture based on the hardware constraints and the supernet.
+
+        Return:
+            best_architecture (np.ndarray)
+            best_architecture_hc (float)
+            best_architecture_top1 (float)
+        """
         # Population initialization
         new_population = []
         population_info = []

@@ -10,6 +10,20 @@ IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
 def get_imagenet_dataloader(dataset_path, input_size, batch_size, num_workers, train_portion=1):
+    """ Prepare dataset for training and evaluating pipeline
+
+    Args:
+        dataset_path (str)
+        input_size (int)
+        batch_size (int)
+        num_workers (int)
+        train_portion (float)
+
+    Return:
+        train_loader (torch.utils.data.DataLoader)
+        val_loader (torch.utils.data.DataLoader)
+        test_loader (torch.utils.data.DataLoader)
+    """
     train_transform = transforms.Compose([
         transforms.RandomResizedCrop(input_size, scale=(0.2, 1.0)),
         transforms.RandomHorizontalFlip(),

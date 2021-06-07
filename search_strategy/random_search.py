@@ -7,15 +7,26 @@ from .base import BaseSearcher
 
 
 class RandomSearcher(BaseSearcher):
+    """ The searcher for the random search search strategy.
+    """
     def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger):
         super(RandomSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger)
 
         self.random_iteration = self.config["search_utility"]["random_iteration"]
 
     def step(self):
+        """ The searcher step before each iteration. 
+        """
         pass
 
     def search(self):
+        """ Searching the best architecture based on the hardware constraints and the supernet.
+
+        Return:
+            best_architecture (np.ndarray)
+            best_architecture_hc (float)
+            best_architecture_top1 (float)
+        """
         random_architectures = []
         for i in range(self.random_iteration):
             self.logger.info("Architecture index : {}".format(i))

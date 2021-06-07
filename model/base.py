@@ -16,6 +16,19 @@ def construct_supernet_layer(
         stride,
         bn_momentum,
         bn_track_running_stats):
+    """ Construct all candidate blocks in one layer of supernet based on the configurations.
+
+    Args:
+        micro_cfg (list): The configurations in each layer of supernet.
+        in_channels (int): The input channel size of this layer.
+        out_channels (int): The output channel size of this layer.
+        stride (int)
+        bn_momentum (float)
+        bn_track_running_stats (bool): Whether using the running stats in BN layer.
+
+    Return:
+        supernet_layer (nn.ModuleList): The modulelist contain all candidate block of this layer.
+    """
     supernet_layer = nn.ModuleList()
     for b_cfg in micro_cfg:
         block_type, kernel_size, se, activation, kwargs = b_cfg
@@ -35,6 +48,8 @@ def construct_supernet_layer(
 
 
 class BaseSupernet(nn.Module):
+    """ The abstract class of supernet.
+    """
     def __init__(
             self,
             classes,
@@ -125,21 +140,19 @@ class BaseSupernet(nn.Module):
     
 
     def set_arch_param(self, arch_param):
-        """
-        Set architecture parameter directly
+        """ Set architecture parameter directly
+
+        Args:
+            arch_param (torch.tensor)
         """
         self.arch_param = arch_param
         
 
-    def get_arch_param_nums(self):
-        micro_len = len(self.micro_cfg)
-        macro_len = len(self.macro_cfg["search"])
-
-        return (macro_len, micro_len)
-
     def set_activate_architecture(self, architecture):
-        """
-        Activate the path based on the passed architecture.
+        """ Activate the path based on the architecture. Utilizing in single-path NAS.
+
+        Args:
+            architecture (torch.tensor): The block index for each layer.
         """
         self.architecture = architecture
 
@@ -151,19 +164,25 @@ class BaseSupernet(nn.Module):
             1e-3 * torch.randn((macro_len, micro_len), requires_grad=False))
 
     def get_arch_param(self):
+        """ Return architecture parameters.
+
+        Return:
+            self.arch_param (nn.Parameter)
+        """
         return self.arch_param
 
     def get_best_arch_param(self):
-        """
-        Get the best neural architecture by architecture parameters (argmax).
+        """ Get the best neural architecture from architecture parameters (argmax).
         """
         best_architecture = self.arch_param.data.argmax(dim=1)
         best_architecture = best_architecture.cpu().numpy()
         return best_architecture
 
     def set_forward_state(self, state):
-        """
-        Set supernet forward state. ["single", "sum"]
+        """ Set supernet forward state. ["single", "sum"]
+
+        Args:
+            state (str): The state in model forward.
         """
         self.forward_state = state
 

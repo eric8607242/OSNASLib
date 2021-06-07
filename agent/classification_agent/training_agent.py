@@ -62,6 +62,8 @@ class CFTrainingAgent:
 
     @staticmethod
     def searching_evaluate(model, val_loader, device, criterion):
+        model.eval()
+
         top1 = AverageMeter()
         top5 = AverageMeter()
         losses = AverageMeter()

@@ -7,7 +7,7 @@ from model import Model, get_supernet_class, LookUpTable, load_architecture, cal
 
 class MetaEvaluateAgent(MetaAgent):
     def _init_agent_state(self):
-        """Initialize for evaluating agent (Train from scratch).
+        """ Initialize for evaluating agent (Train from scratch).
         """
         # Construct model and correspond optimizer ======================================
         architecture = load_architecture(self.config["experiment_path"]["searched_model_path"])
@@ -35,6 +35,8 @@ class MetaEvaluateAgent(MetaAgent):
 
 
     def fit(self):
+        """ Fit evalating process.
+        """
         start_time = time.time()
         self.logger.info("Evaluating process start!")
 

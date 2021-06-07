@@ -13,6 +13,20 @@ CIFAR_STD = [0.203, 0.1994, 0.2010]
 
 
 def get_cifar10_dataloader(dataset_path, input_size, batch_size, num_workers, train_portion=1):
+    """ Prepare dataset for training and evaluating pipeline
+
+    Args:
+        dataset_path (str)
+        input_size (int)
+        batch_size (int)
+        num_workers (int)
+        train_portion (float)
+
+    Return:
+        train_loader (torch.utils.data.DataLoader)
+        val_loader (torch.utils.data.DataLoader)
+        test_loader (torch.utils.data.DataLoader)
+    """
     train_transform, test_transform = _get_transform(input_size)
 
     train_dataset = datasets.CIFAR10(root=dataset_path, train=True,

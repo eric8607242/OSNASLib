@@ -3,6 +3,16 @@ from ..base import BaseSupernet
 class FBNetSSupernet(BaseSupernet):
     @staticmethod
     def get_model_cfg(classes):
+        """ Return the macro and micro configurations of the search space.
+
+        Args:
+            classes (int): The number of output class (dimension).
+        
+        Return:
+            macro_cfg (dict): The structure of the entire supernet. The structure is split into three parts, "first", "search", "last"
+            micro_cfg (list): The all configurations in each layer of supernet.
+        """
+        # block_type, kernel_size, se, activation, kwargs
         micro_cfg = [["mobile", 3, False, "relu", {"expansion_rate": 1, "point_group": 1}],
                            ["mobile", 3, False, "relu", {
                                "expansion_rate": 1, "point_group": 2}],

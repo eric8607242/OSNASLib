@@ -9,7 +9,7 @@ from training_strategy import get_training_strategy
 
 class MetaSearchAgent(MetaAgent):
     def _init_agent_state(self):
-        """Initialize for searching process.
+        """ Initialize for searching process.
         """
         # Construct model and correspond optimizer ======================================
         supernet = self._construct_supernet()
@@ -44,6 +44,9 @@ class MetaSearchAgent(MetaAgent):
         self._resume(self.supernet)
 
     def fit(self):
+        """ Fit searching process.
+        Training the supernet and searching the architecture by the search strategy.
+        """
         start_time = time.time()
         self.logger.info("Searching process start!")
 
@@ -64,5 +67,8 @@ class MetaSearchAgent(MetaAgent):
         self.logger.info(f"Total search time : {time.time()-start_time:.2f}")
 
     def _iteration_preprocess(self):
+        """ Process at the begin of each iteration.
+        Step the search strategy and training strategy (e.g., set activate path in supernet).
+        """
         self.search_strategy.step()
         self.training_strategy.step()

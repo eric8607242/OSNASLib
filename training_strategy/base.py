@@ -12,5 +12,9 @@ class BaseSampler:
         return NotImplemented
 
     def get_block_len(self):
+        """ Get the number of the candidate blocks.
+        Return:
+            self.micro_len (int)
+        """
         return self.micro_len
 

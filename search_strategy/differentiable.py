@@ -7,6 +7,8 @@ from criterion import get_hc_criterion, get_criterion
 from .base import BaseSearcher
 
 class DifferentiableSearcher(BaseSearcher):
+    """ The searcher for the differentiable search strategy.
+    """
     def __init__(self, config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger):
         super(DifferentiableSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger)
 
@@ -32,6 +34,10 @@ class DifferentiableSearcher(BaseSearcher):
 
 
     def step(self, print_freq=100):
+        """ The searcher step before each iteration. 
+
+        Forward and update the architecture parameters for architecture parameters.
+        """
         losses = AverageMeter()
         hc_losses = AverageMeter()
         ce_losses = AverageMeter()
@@ -79,6 +85,11 @@ class DifferentiableSearcher(BaseSearcher):
 
         
     def search(self):
+        """ Searching the best architecture based on the hardware constraints and the supernet.
+
+        Return:
+            best_architecture (np.ndarray)
+        """
         best_architecture = self.supernet.module.get_best_arch_param() if isinstance(
             self.supernet, nn.DataParallel) else self.supernet.get_best_arch_param()
 
