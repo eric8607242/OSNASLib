@@ -1,3 +1,0 @@
-# Differentiable NAS
-
-## Introduction

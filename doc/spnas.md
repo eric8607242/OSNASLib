@@ -1,3 +1,0 @@
-# Single-Path NAS
-
-## Introduction
