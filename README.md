@@ -45,8 +45,9 @@ Please refer to the documents for more detail of customizing.
 * [How to customize the training strategy](./doc/customize/training_strategy.md)
 * [How to customize the agent](./doc/customize/agent.md)
 
-We provide the example that customizing for different tasks as following:
-* [Customize for Face Recognition](./doc/customize/face.md)
+In OSNASLib, we provide the example for serveral tasks. Please reference for following documents for more detail about the example:
+* [Classification](./doc/example/classification.md)
+* [Face Recognition](./doc/example/face_recognition.md)
 
 ## TODO
 * [ ] Documents
