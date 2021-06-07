@@ -8,6 +8,13 @@ python3 build_template.py -t dataflow --customize-name [CUSTOMIZE NAME] --custom
 
 After generating the criterion template, the file `CUSTOMIZE NAME` will be created in `criterion/`, and the corresponding import will be create automatically.
 
+### Template Struture
+```
+- dataflow/
+    |- [CUSTOMIZE NAME].py
+        ...
+```
+
 ## Dataflow Interface
 For customizing dataflow, the interface should return three pytorch dataloders which are `train_loader`, `val_loader` and `test loader`.
 

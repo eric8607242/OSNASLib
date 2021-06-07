@@ -9,6 +9,14 @@ python3 build_template.py -t search_strategy --customize-name [CUSTOMIZE NAME] -
 
 After generating the search strategy template, the file `[CUSTOMIZE NAME].py` will be created in `searchstrategy/` and the corresponding import will be create automatically.
 
+### Template Struture
+```
+- search_strategy/
+        |- [CUSTOMIZE NAME].py
+            ...
+```
+
+
 ## Search Strategy Interface
 For customizing search strategy, the interface class `[CUSTOMIZE CLASS]Searcher` in `[CUSTOMIZE NAME.py` should inherited the base class `BaseSearcher`. You should implement `step()` and `search()` for searching the architectures. Besides, in `BaseSearcher`, we provide evaluating methods for evaluating the performance of the architectures.
 

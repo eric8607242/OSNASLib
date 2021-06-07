@@ -8,6 +8,12 @@ python3 build_template.py -t criterion --customize-name [CUSTOMIZE NAME] --custo
 
 After generating the criterion template, the file `CUSTOMIZE NAME` will be created in `criterion/`, and the corresponding import will be create automatically.
 
+### Template Struture
+```
+- criterion/
+    |- [CUSTOMIZE NAME].py
+        ...
+```
 
 ## Criterion Interface
 For customizing criterion, the interface should iherited the class `nn.Module`. Besides, to provide more flexibility, you can pass any kind of hyperparameter by `criterion_config`, which is set in the config file.

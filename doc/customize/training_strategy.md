@@ -9,6 +9,13 @@ python3 build_template.py -t training_strategy --customize-name [CUSTOMIZE NAME]
 
 After generating the training strategy template, the file `[CUSTOMIZE NAME].py` will be created in `training_strategy/` and the corresponding import will be create automatically.
 
+### Template Struture
+```
+- training_strategy/
+        |- [CUSTOMIZE NAME].py
+            ...
+```
+
 
 ## Training Strategy Interface
 For customizing training strategy, the interface class `[CUSTOMIZE CLASS]Sampler` in `[CUSTOMIZE NAME].py` should inherited the base class `BaseSampler`. You shoud implement `step()` method for setting the architecture to train the supernet..

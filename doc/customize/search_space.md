@@ -8,6 +8,15 @@ python3 build_template.py -t model --customize-name [CUSTOMIZE NAME] --customize
 
 After generating the model template, the directory `[CUSTOMIZE NAME]/` will be created in `model/`, and the corresponding files (`__init__.py` and `[CUSTOMIZE NAME]_supernet.py`) are created in the directory `[CUSTOMIZE NAME]/`.
 
+### Template Struture
+```
+- model/
+    |- [CUSTOMIZE NAME]/
+    |         |- __init__.py
+    |         |- [CUSTOMIZE NAME]_supernet.py
+            ...
+```
+
 
 ## Model Interface
 For customizing model, the interface class `[CUSTOMIZE CLASS]Supernet` in `[CUSTOMIZE NAME]_supernet.py` should inherit the class `BaseSupernet` and implement the staticmethod `get_model_cfg` to return `macro_cfg` and `micro_cfg`.
