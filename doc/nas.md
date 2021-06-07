@@ -1,6 +1,5 @@
 # What Is Neural Architecture Search (NAS)
 
-## Table of Contents
 * [What Is Neural Architecture Search (NAS)](./nas.md)
 * [What Is One-shot NAS](./one_shot_nas.md)
 
@@ -14,7 +13,7 @@ Generally NAS methods can be categorized according to three dimensions: search s
 ### Search Space
 The search space includes the set of architectures that are considered in the search process. The most common configurations in the search space are kernel size, layer size, and channel size. For example, for VGG16, the search space size is 3\*\*16 if the kernel size in each layer can be implemented by {3, 5, 7}. Designing the search space requires much human intervention. A small search space may possibly exclude the global optimal architecture. 
 
-The common search spaces in recent years are constructed by the inverted residual blocks with linear bottlenecks (MobilenetV2) or the DAG search space (DATRs).
+The common search spaces in recent years are constructed by the inverted residual blocks with linear bottlenecks (MobilenetV2) or the DAG search space (DARTs).
 
 ### Search Strategy
 Given a search space, the objective of NAS is to **search the best architecture under the specific hardware constraint**. The search strategy means the strategy to explore the search space and search the best architecture (e.g., random search, grid search, and evolution algorithm). A good search strategy would facilitate efficiently searching the best architecture. 

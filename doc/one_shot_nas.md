@@ -1,11 +1,11 @@
 # What Is One-shot NAS 
 
-## Table of Contents
 * [What Is Neural Architecture Search (NAS)](./nas.md)
 * [What Is One-shot NAS](./one_shot_nas.md)
 
 To improve searching efficiency, many recent NAS approaches are based on one-shot scheme. Instead of training thousands of architectures to get the true performance of the entire search space, the main idea of one-shot NAS is constructing a supernet to represent performance of the entire search space. Therefore, the term 'one-shot' in one-shot NAS means that only one neural architecture needs to be trained to evaluate the entire search space. Once the supernet is trained, all sub-networks in the supernet can be evaluated by inheriting the weights of the supernet without additional training. To demonstrate the details of how a supernet works, we illustrate supernet construction in the following figure.
-![supernet_encode](../resource/supernet_encode.png "Illustration of supernet construction. The blocks in different colors denote the blocks of different configurations in the search space (e.g., convolution blocks with different kernel sizes {3, 5, 7}). In the supernet, all candidate blocks are constructed layer by layer. Therefore, by activating different blocks in different layers, the supernet can represent all architectures in the entire search space easily.")
+![supernet_encode](../resource/supernet_encode.png)
+> Illustration of supernet construction. The blocks in different colors denote the blocks of different configurations in the search space (e.g., convolution blocks with different kernel sizes {3, 5, 7}). In the supernet, all candidate blocks are constructed layer by layer. Therefore, by activating different blocks in different layers, the supernet can represent all architectures in the entire search space easily.
 
 Therefore, how to train a supernet and how to search the best architecture are very important for one-shot NAS. Such one-shot methods can be generally divided into two categories: differentiable NAS and single-path NAS. Below we will briefly introduce differentiable NAS and single-path NAS.
 

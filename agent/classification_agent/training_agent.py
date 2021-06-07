@@ -7,8 +7,20 @@ from utils import AverageMeter, accuracy, save
 
 class CFTrainingAgent:
     """The training agent to train the supernet and the searched architecture.
+
+    By implementing TrainingAgent class, users can adapt the searching and evaluating agent into
+    various tasks easily.
     """
     def train_loop(self, model, train_loader, val_loader, agent):
+        """ The main training loop.
+
+        Args:
+            model (nn.Module)
+            train_loader (torch.utils.data.DataLoader)
+            val_loader (torch.utils.data.DataLoader)
+            agent (Object)
+        """
+        # Utilize different step method based on differet agent state
         training_step = getattr(self, f"_{agent.agent_state}_training_step")
         validate_step = getattr(self, f"_{agent.agent_state}_validate_step")
 
@@ -49,19 +61,70 @@ class CFTrainingAgent:
 
 
     def _search_training_step(self, model, train_loader, agent, epoch):
+        """ The training step for searching process. Users should step the sampler
+        to decide how to train supernet and step the search strategy to search the architecture.
+
+        Args:
+            model (nn.Module)
+            train_loader (torch.utils.data.DataLoader)
+            agent (Object): The search agent.
+            epoch (int)
+        """
         self._training_step(model, train_loader, agent, epoch)
 
     def _search_validate_step(self, model, val_loader, agent, epoch):
+        """ The validate step for searching process.
+
+        Args:
+            model (nn.Module)
+            val_loader (torch.utils.data.DataLoader)
+            agent (Object): The search agent.
+            epoch (int)
+
+        Return:
+            evaluate_metric (float): The performance of the supernet
+        """
         return self._validate(model ,val_loader, agent, epoch)
 
     def _evaluate_training_step(self, model, train_loader, agent, epoch):
+        """ The training step for evaluating process (training from scratch).
+
+        Args:
+            model (nn.Module)
+            train_loader (torch.utils.data.DataLoader)
+            agent (Object): The evaluate agent
+            epoch (int)
+        """
         self._training_step(model, train_loader, agent, epoch)
 
     def _evaluate_validate_step(self, model, val_loader, agent, epoch):
+        """ The training step for evaluating process (training from scratch).
+
+        Args:
+            model (nn.Module)
+            val_loader (torch.utils.data.DataLoader)
+            agent (Object): The evaluate agent
+            epoch (int)
+
+        Return:
+            evaluate_metric (float): The performance of the searched model.
+        """
         return self._validate(model ,val_loader, agent, epoch)
 
     @staticmethod
     def searching_evaluate(model, val_loader, device, criterion):
+        """ Evaluating the performance of the supernet. The search strategy will evaluate
+        the architectures by this static method to search.
+
+        Args:
+            model (nn.Module)
+            val_loader (torch.utils.data.DataLoader)
+            device (torch.device)
+            criterion (nn.Module)
+
+        Return:
+            evaluate_metric (float): The performance of the supernet.
+        """
         model.eval()
 
         top1 = AverageMeter()

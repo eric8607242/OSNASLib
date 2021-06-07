@@ -45,8 +45,20 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
 
         self.search_epochs = self.config["generator"]["epochs"]
 
+    def step(self):
+        """ The searcher step before each iteration. 
+
+        Forward and update the architecture parameters for architecture parameters.
+        """
+        pass
+
 
     def search(self):
+        """ Searching the best architecture based on the hardware constraints and the supernet.
+
+        Return:
+            best_architecture (np.ndarray)
+        """
         tau = 5
         
         best_hc_loss = float("inf")

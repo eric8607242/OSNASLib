@@ -8,14 +8,30 @@ import torch.nn.functional as F
 
 def get_block(block_type, in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
-    block_method = getattr(sys.modules[__name__], f"get_{block_type}_block")
+    """ The factory to construct the candidate block
+
+    Args:
+        block_type (str)
+        in_channels (int)
+        out_channels (int)
+        kernel_size (int)
+        stride (int)
+        activation (str)
+        se (bool)
+        bn_momentum (float)
+        bn_track_running_stats (bool)
+
+    Return:
+        block (nn.Module)
+    """
+    block_method = getattr(sys.modules[__name__], f"_get_{block_type}_block")
     block = block_method(in_channels, out_channels, kernel_size, 
                 stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs)
 
     return block
 
 
-def get_mobile_block(in_channels, out_channels, kernel_size,
+def _get_mobile_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
     """
     Construct the inverted residual block of MobileNetV2
@@ -36,7 +52,7 @@ def get_mobile_block(in_channels, out_channels, kernel_size,
     return block
 
 
-def get_shuffle_block(in_channels, out_channels, kernel_size,
+def _get_shuffle_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
     """
     Construct the shuffle block of ShuffleNet
@@ -52,7 +68,7 @@ def get_shuffle_block(in_channels, out_channels, kernel_size,
     return block
 
 
-def get_shuffleX_block(in_channels, out_channels, kernel_size,
+def _get_shuffleX_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
     """
     Construct the shuffleX block of ShuffleNet
@@ -67,7 +83,7 @@ def get_shuffleX_block(in_channels, out_channels, kernel_size,
     return block
 
 
-def get_classifier_block(in_channels, out_channels, kernel_size,
+def _get_classifier_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
     """
     Construct the classifier block
@@ -76,7 +92,7 @@ def get_classifier_block(in_channels, out_channels, kernel_size,
     return block
 
 
-def get_global_average_block(in_channels, out_channels, kernel_size,
+def _get_global_average_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
     """
     Construct the global average block
@@ -85,7 +101,7 @@ def get_global_average_block(in_channels, out_channels, kernel_size,
     return block
 
 
-def get_conv_block(in_channels, out_channels, kernel_size,
+def _get_conv_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
     """
     Construct the convolution block
@@ -103,7 +119,7 @@ def get_conv_block(in_channels, out_channels, kernel_size,
     return block
 
 
-def get_skip_block(in_channels, out_channels, kernel_size,
+def _get_skip_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
     """
     Construct the skip connection block
