@@ -8,10 +8,10 @@ In OSNASLib, we cover various components of one-shot NAS (e.g., search space, se
 * [What is neural architecture search (NAS)](./doc/nas.md)
 * [What is one-shot NAS](./doc/one_shot_nas.md)
 
-### Who Requrires OSNASLib?
-* NAS beginner who want to build the codebase of baseline NAS methods.
-* Researchers who want incorporate NAS into various research fields.
-* Researchers who researchs in NAS and want to validate the proposed NAS methods to various fields.
+### Who Requires OSNASLib?
+* NAS beginners who want to build the codebase of baseline one-shot NAS methods quickly.
+* Researchers who want to incorporate NAS into various research fields to improve performance.
+* Researchers whose research focus is on NAS and want to validate the proposed NAS methods to various tasks (e.g., image classification and face recognition).
 
 **We are glad at all contributions to improve this repo. Please feel free to pull request.**
 
