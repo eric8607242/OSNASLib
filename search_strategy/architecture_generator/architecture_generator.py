@@ -32,8 +32,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
 
         self.hc_criterion = get_hc_criterion(self.config["agent"]["hc_criterion_agent"], self.config["criterion"])
 
-        macro_cfg, micro_cfg = self.supernet.get_model_cfg()
-        self.arch_param_nums = (len(macro_cfg["search"]), len(micro_cfg))
+        self.arch_param_nums = self.supernet.get_model_cfg_shape()
         self.prior_pool = PriorPool(self.lookup_table, self.arch_param_nums, self.config, self.logger)
 
         self.hardware_constraint_pool = [i for i in range(self.config["search_utility"]["lowest_hardware_constraint"], self.config["search_utility"]["highest_hardware_constraint"], 5)]

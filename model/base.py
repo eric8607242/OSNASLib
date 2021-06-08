@@ -9,42 +9,75 @@ import torch.nn.functional as F
 from .network_utils import get_block
 
 
-def construct_supernet_layer(
-        micro_cfg,
-        in_channels,
-        out_channels,
-        stride,
-        bn_momentum,
-        bn_track_running_stats):
-    """ Construct all candidate blocks in one layer of supernet based on the configurations.
+def BaseSuperlayer(nn.Module):
+    """ The abstract class of the layer of the supernet """
+    def __init__(self, micro_cfg, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
+        super(BaseSuperlayer, self).__init__()
+        self.micro_cfg = micro_cfg
+        self.forward_state = None
 
-    Args:
-        micro_cfg (list): The configurations in each layer of supernet.
-        in_channels (int): The input channel size of this layer.
-        out_channels (int): The output channel size of this layer.
-        stride (int)
-        bn_momentum (float)
-        bn_track_running_stats (bool): Whether using the running stats in BN layer.
+        self.supernet_layer = self._construct_supernet_layer(in_channels, out_channels, stride, bn_momentum, bn_track_running_stats)
 
-    Return:
-        supernet_layer (nn.ModuleList): The modulelist contain all candidate block of this layer.
-    """
-    supernet_layer = nn.ModuleList()
-    for b_cfg in micro_cfg:
-        block_type, kernel_size, se, activation, kwargs = b_cfg
-        block = get_block(block_type=block_type,
-                          in_channels=in_channels,
-                          out_channels=out_channels,
-                          kernel_size=kernel_size,
-                          stride=stride,
-                          activation=activation,
-                          se=se,
-                          bn_momentum=bn_momentum,
-                          bn_track_running_stats=bn_track_running_stats,
-                          **kwargs
-                          )
-        supernet_layer.append(block)
-    return supernet_layer
+    @abstractmethod
+    def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
+        return supernet_layer
+    
+    @abstractmethod
+    def forward(self, x):
+        return x
+
+    # Single-path NAS
+    @abstractmethod
+    def set_activate_architecture(self, architecture):
+        """ Activate the path based on the architecture. Utilizing in single-path NAS.
+
+        Args:
+            architecture (torch.tensor): The block index for each layer.
+        """
+        raise NotImplemented
+
+    # Differentaible NAS
+    @abstractmethod
+    def set_arch_param(self, arch_param):
+        """ Set architecture parameter directly
+
+        Args:
+            arch_param (torch.tensor)
+        """
+        raise NotImplemented
+        
+    @abstractmethod
+    def initialize_arch_param(self):
+        raise NotImplemented
+
+    @abstractmethod
+    def get_arch_param(self):
+        """ Return architecture parameters.
+
+        Return:
+            self.arch_param (nn.Parameter)
+        """
+        raise NotImplemented
+
+    @abstractmethod
+    def get_best_arch_param(self):
+        """ Get the best neural architecture from architecture parameters (argmax).
+
+        Return:
+            best_architecture (np.ndarray)
+        """
+        raise NotImplemented
+
+    @abstractmethod
+    def set_forward_state(self, state):
+        """ Set supernet forward state. ["single", "sum"]
+
+        Args:
+            state (str): The state in model forward.
+        """
+        raise NotImplemented
+        self.forward_state = state
+
 
 
 class BaseSupernet(nn.Module):
@@ -61,11 +94,6 @@ class BaseSupernet(nn.Module):
 
         self.classes = classes
         self.dataset = dataset
-
-        bn_momentum = bn_momentum
-        bn_track_running_stats = bn_track_running_stats
-
-        self.forward_state = "single"  # [single, sum]
 
         # First Stage
         self.first_stages = nn.ModuleList()
@@ -89,13 +117,12 @@ class BaseSupernet(nn.Module):
         for l_cfg in self.macro_cfg["search"]:
             in_channels, out_channels, stride = l_cfg
 
-            layer = construct_supernet_layer(
-                micro_cfg=self.micro_cfg,
-                in_channels=in_channels,
-                out_channels=out_channels,
-                stride=stride,
-                bn_momentum=bn_momentum,
-                bn_track_running_stats=bn_track_running_stats)
+            layer = self.superlayer_builder(
+                    in_channels=in_channels,
+                    out_channels=out_channels,
+                    stride=stride,
+                    bn_momentum=bn_momentum,
+                    bn_track_running_stats=bn_track_running_stats)
             self.search_stages.append(layer)
 
         # Last Stage
@@ -122,16 +149,7 @@ class BaseSupernet(nn.Module):
             x = l(x)
 
         for i, l in enumerate(self.search_stages):
-            if self.forward_state == "gumbel_sum":
-                weight = F.gumbel_softmax(self.arch_param[i], dim=0) 
-                x = sum(p * b(x) for p, b in zip(weight, l))
-
-            elif self.forward_state == "sum":
-                weight = F.softmax(self.arch_param[i], dim=0)
-                x = sum(p * b(x) for p, b in zip(weight, l))
-
-            elif self.forward_state == "single":
-                x = l[self.architecture[i]](x)
+            x = l(x)
 
         for i, l in enumerate(self.last_stages):
             x = l(x)
@@ -145,7 +163,9 @@ class BaseSupernet(nn.Module):
         Args:
             arch_param (torch.tensor)
         """
-        self.arch_param = arch_param
+        arch_param = arch_param.reshape(len(self.search_stages), -1)
+        for ap, l in zip(arch_param, self.search_stages):
+            l.set_arch_param(ap)
         
 
     def set_activate_architecture(self, architecture):
@@ -154,14 +174,14 @@ class BaseSupernet(nn.Module):
         Args:
             architecture (torch.tensor): The block index for each layer.
         """
-        self.architecture = architecture
+        architecture = architecture.reshape(len(self.search_stages), -1)
+        for a, l in zip(architecture, self.search_stages):
+            l.set_activate_architecture(a)
+
 
     def initialize_arch_param(self):
-        micro_len = len(self.micro_cfg)
-        macro_len = len(self.macro_cfg["search"])
-
-        self.arch_param = nn.Parameter(
-            1e-3 * torch.randn((macro_len, micro_len), requires_grad=False))
+        for l in self.search_stages:
+            l.initialize_arch_param()
 
     def get_arch_param(self):
         """ Return architecture parameters.
@@ -169,13 +189,23 @@ class BaseSupernet(nn.Module):
         Return:
             self.arch_param (nn.Parameter)
         """
-        return self.arch_param
+        arch_param_list = []
+        for l in self.search_stages:
+            arch_param_list.append(l.get_arch_param())
+
+        return torch.cat(arch_param_list)
 
     def get_best_arch_param(self):
         """ Get the best neural architecture from architecture parameters (argmax).
+
+        Return:
+            best_architecture (np.ndarray)
         """
-        best_architecture = self.arch_param.data.argmax(dim=1)
-        best_architecture = best_architecture.cpu().numpy()
+        best_architecture_list = []
+        for l in self.search_stages:
+            best_architecture_list.append(l.get_best_arch_param())
+        
+        best_architecture = np.concatenate(best_architecture_list, axis=1)[0]
         return best_architecture
 
     def set_forward_state(self, state):
@@ -184,7 +214,9 @@ class BaseSupernet(nn.Module):
         Args:
             state (str): The state in model forward.
         """
-        self.forward_state = state
+        for l in self.search_stages:
+            l.set_forward_state(state)
+
 
     def _initialize_weights(self):
         for m in self.modules():
@@ -205,4 +237,6 @@ class BaseSupernet(nn.Module):
     def get_model_cfg(self, classes):
         raise NotImplemented
 
-
+    @abstractmethod
+    def get_model_cfg_shape(self):
+        raise NotImplemented
