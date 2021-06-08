@@ -57,11 +57,11 @@ In OSNASLib, we provide serveral type of candidate block as follows:
 2. ShuffleNet Block
 3. ShuffleNetX Block
 4. Linear (Classifier)
-5. Global Average
+5. Global Average Pooling
 6. Conv BN Activation Block
 7. Skip Connection Block
 
-You can add new candidate block in `./model/network_utils.py` by following the candidate block interface:
+You can crate new candidate block in `./model/block_builder.py` by following candidate block interface:
 ```
 def _get_[CUSTOMIZE NAME]_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):

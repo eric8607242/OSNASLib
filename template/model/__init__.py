@@ -5,7 +5,7 @@ from jinja2 import Environment, FileSystemLoader
 from template import render_file, render_import
 
 def build_template(customize_name, customize_class=None):
-    assert customize_class is None
+    assert customize_class is not None
 
     template_path = os.path.dirname(os.path.realpath(__file__))
     root_path = os.path.join(os.getcwd(), "model", customize_name)
