@@ -55,7 +55,7 @@ class BaseSearcher:
             acc_info = agent_cls.training_agent.searching_evaluate(self.supernet, self.val_loader, self.device, self.criterion)
 
             architectures_acc.append(acc_info[0])
-            self.logger.info(f"Evaluate {i} architecture acc-avg : {acc}")
+            self.logger.info(f"Evaluate {i} architecture acc-avg : {acc_info[0]}")
 
         architectures_acc = np.array(architectures_acc)
         return architectures_acc

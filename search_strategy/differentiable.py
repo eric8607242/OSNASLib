@@ -13,12 +13,14 @@ class DifferentiableSearcher(BaseSearcher):
         super(DifferentiableSearcher, self).__init__(config, supernet, val_loader, lookup_table, training_strategy, device, criterion, logger)
 
         # Init architecture parameters
-        self.supernet.initialize_arch_param()
+        self.supernet.module.initialize_arch_param() if isinstance(
+            self.supernet, nn.DataParallel) else self.supernet.initialize_arch_param()
 
         # Init architecture parameters optimizer
+        _, arch_param_list = self.supernet.module.get_arch_param() if isinstance(self.supernet, nn.DataParallel) \
+                    else self.supernet.get_arch_param()
         self.a_optimizer = get_optimizer(
-            [self.supernet.module.get_arch_param() if isinstance(self.supernet, nn.DataParallel) \
-                    else self.supernet.get_arch_param()],
+            arch_param_list,
             self.config["arch_optim"]["a_optimizer"],
             learning_rate=self.config["arch_optim"]["a_lr"],
             weight_decay=self.config["arch_optim"]["a_weight_decay"],
@@ -27,7 +29,7 @@ class DifferentiableSearcher(BaseSearcher):
             alpha=self.config["arch_optim"]["a_alpha"],
             beta=self.config["arch_optim"]["a_beta"])
 
-        self.criterion = get_criterion(self.config["agent"]["criterion_agent"])
+        self.criterion = get_criterion(self.config["agent"]["criterion_agent"], self.config["criterion"])
         self.hc_criterion = get_hc_criterion(self.config["agent"]["hc_criterion_agent"], self.config["criterion"])
 
         self.step_num = 0
@@ -50,7 +52,7 @@ class DifferentiableSearcher(BaseSearcher):
         # Update architecture parameter
         self.a_optimizer.zero_grad()
 
-        architecture_parameter = self.supernet.module.get_arch_param() if isinstance(
+        architecture_parameter, _ = self.supernet.module.get_arch_param() if isinstance(
             self.supernet, nn.DataParallel) else self.supernet.get_arch_param()
         architecture_info = self.lookup_table.get_model_info(
             architecture_parameter)
@@ -92,5 +94,9 @@ class DifferentiableSearcher(BaseSearcher):
         """
         best_architecture = self.supernet.module.get_best_arch_param() if isinstance(
             self.supernet, nn.DataParallel) else self.supernet.get_best_arch_param()
+    
+        best_architecture_info = self.lookup_table.get_model_info(
+                best_architecture)
 
-        return best_architecture, _, _
+
+        return best_architecture, 0, best_architecture_info

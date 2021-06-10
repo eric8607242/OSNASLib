@@ -1,9 +1,14 @@
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+
 from ..base import BaseSupernet, BaseSuperlayer
+from ..block_builder import get_block
 
 class SPOSSuperlayer(BaseSuperlayer):
     def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
         supernet_layer = nn.ModuleList()
-        for b_cfg in micro_cfg:
+        for b_cfg in self.micro_cfg:
             block_type, kernel_size, se, activation, kwargs = b_cfg
             block = get_block(block_type=block_type,
                               in_channels=in_channels,
@@ -22,14 +27,14 @@ class SPOSSuperlayer(BaseSuperlayer):
     def forward(self, x):
         if self.forward_state == "gumbel_sum":
             weight = F.gumbel_softmax(self.arch_param[i], dim=0) 
-            x = sum(p * b(x) for p, b in zip(weight, l))
+            x = sum(p * b(x) for p, b in zip(weight, self.supernet_layer))
 
         elif self.forward_state == "sum":
             weight = F.softmax(self.arch_param[i], dim=0)
-            x = sum(p * b(x) for p, b in zip(weight, l))
+            x = sum(p * b(x) for p, b in zip(weight, self.supernet_layer))
 
         elif self.forward_state == "single":
-            x = l[self.architecture[i]](x)
+            x = self.supernet_layer[self.architecture](x)
         return x
 
     def set_activate_architecture(self, architecture):
@@ -54,7 +59,7 @@ class SPOSSuperlayer(BaseSuperlayer):
         micro_len = len(self.micro_cfg)
 
         self.arch_param = nn.Parameter(
-            1e-3 * torch.randn((1, micro_len), requires_grad=False))
+            1e-3 * torch.randn((1, micro_len), requires_grad=False, device=next(self.parameters()).device))
 
 
     def get_arch_param(self):

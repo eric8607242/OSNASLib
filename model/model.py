@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .network_utils import get_block
+from .block_builder import get_block
 
 
 class Model(nn.Module):

@@ -1,15 +1,16 @@
 import math
 
+import numpy as np
+
 from abc import ABC, abstractmethod
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .network_utils import get_block
+from .block_builder import get_block
 
-
-def BaseSuperlayer(nn.Module):
+class BaseSuperlayer(nn.Module):
     """ The abstract class of the layer of the supernet """
     def __init__(self, micro_cfg, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
         super(BaseSuperlayer, self).__init__()
@@ -118,6 +119,7 @@ class BaseSupernet(nn.Module):
             in_channels, out_channels, stride = l_cfg
 
             layer = self.superlayer_builder(
+                    micro_cfg=self.micro_cfg,
                     in_channels=in_channels,
                     out_channels=out_channels,
                     stride=stride,
@@ -174,7 +176,7 @@ class BaseSupernet(nn.Module):
         Args:
             architecture (torch.tensor): The block index for each layer.
         """
-        architecture = architecture.reshape(len(self.search_stages), -1)
+        architecture = architecture.reshape(len(self.search_stages))
         for a, l in zip(architecture, self.search_stages):
             l.set_activate_architecture(a)
 
@@ -187,13 +189,14 @@ class BaseSupernet(nn.Module):
         """ Return architecture parameters.
 
         Return:
-            self.arch_param (nn.Parameter)
+            arch_param (torch.tensor)
+            arch_param_list (list)
         """
         arch_param_list = []
         for l in self.search_stages:
             arch_param_list.append(l.get_arch_param())
 
-        return torch.cat(arch_param_list)
+        return torch.cat(arch_param_list), arch_param_list
 
     def get_best_arch_param(self):
         """ Get the best neural architecture from architecture parameters (argmax).
@@ -205,7 +208,7 @@ class BaseSupernet(nn.Module):
         for l in self.search_stages:
             best_architecture_list.append(l.get_best_arch_param())
         
-        best_architecture = np.concatenate(best_architecture_list, axis=1)[0]
+        best_architecture = np.concatenate(best_architecture_list, axis=-1)
         return best_architecture
 
     def set_forward_state(self, state):

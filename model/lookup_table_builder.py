@@ -5,7 +5,7 @@ import json
 import torch
 import torch.nn as nn
 
-from .network_utils import get_block
+from .block_builder import get_block
 from utils import FLOPS_Counter
 
 
