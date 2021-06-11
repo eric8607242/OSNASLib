@@ -32,4 +32,4 @@ def build_template(customize_name, customize_class=None):
 
     # Add import in agent __init__
     render_import(f"from .{customize_name}_agent import {customize_class}SearchAgent, {customize_class}EvaluateAgent", \
-                os.path.join(root_path, "__init__.py"))
+                os.path.join("agent", "__init__.py"))

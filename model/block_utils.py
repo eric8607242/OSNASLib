@@ -77,6 +77,7 @@ class ConvBNAct(nn.Sequential):
                  bn_momentum,
                  bn_track_running_stats,
                  pad,
+                 bn=True,
                  group=1,
                  *args,
                  **kwargs):
@@ -96,12 +97,14 @@ class ConvBNAct(nn.Sequential):
                 pad,
                 groups=group,
                 bias=False))
-        self.add_module(
-            "bn",
-            nn.BatchNorm2d(
-                out_channels,
-                momentum=bn_momentum,
-                track_running_stats=bn_track_running_stats))
+        
+        if bn:
+            self.add_module(
+                "bn",
+                nn.BatchNorm2d(
+                    out_channels,
+                    momentum=bn_momentum,
+                    track_running_stats=bn_track_running_stats))
 
         if activation == "relu":
             self.add_module("relu", nn.ReLU6(inplace=True))

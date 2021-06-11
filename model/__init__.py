@@ -23,3 +23,4 @@ from .fbnet import FBNetSSupernet, FBNetLSupernet
 from .spos import SPOSSupernet
 from .proxylessnas import ProxylessNASSupernet
 from .mobilefacenet import MobileFaceNetSupernet
+from .sgnas import SGNASSupernet

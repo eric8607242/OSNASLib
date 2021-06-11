@@ -15,70 +15,97 @@ class BaseSuperlayer(nn.Module):
     def __init__(self, micro_cfg, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
         super(BaseSuperlayer, self).__init__()
         self.micro_cfg = micro_cfg
-        self.forward_state = None
 
-        self.supernet_layer = self._construct_supernet_layer(in_channels, out_channels, stride, bn_momentum, bn_track_running_stats)
+        self._construct_supernet_layer(in_channels, out_channels, stride, bn_momentum, bn_track_running_stats)
 
     @abstractmethod
     def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
-        return supernet_layer
+        """ Construct the supernet layer module.
+        """
+        raise NotImplemented
     
-    @abstractmethod
     def forward(self, x):
-        return x
+        y = self.state_forward(x)
+
+        return y
 
     # Single-path NAS
-    @abstractmethod
     def set_activate_architecture(self, architecture):
         """ Activate the path based on the architecture. Utilizing in single-path NAS.
 
         Args:
             architecture (torch.tensor): The block index for each layer.
         """
-        raise NotImplemented
+        self.architecture = architecture
 
     # Differentaible NAS
-    @abstractmethod
     def set_arch_param(self, arch_param):
         """ Set architecture parameter directly
 
         Args:
             arch_param (torch.tensor)
         """
-        raise NotImplemented
+        self.arch_param = arch_param
         
-    @abstractmethod
-    def initialize_arch_param(self):
-        raise NotImplemented
 
-    @abstractmethod
+    def initialize_arch_param(self, device):
+        """ Initialize architecture parameters for differentiable based search strategy.
+        
+        Args:
+            device (torch.device)
+        """
+        micro_len = len(self.micro_cfg)
+
+        self.arch_param = nn.Parameter(
+            1e-3 * torch.randn((1, micro_len), requires_grad=False, device=device))
+
+
     def get_arch_param(self):
         """ Return architecture parameters.
 
         Return:
-            self.arch_param (nn.Parameter)
+            (list)
         """
-        raise NotImplemented
+        return [self.arch_param]
 
-    @abstractmethod
+
     def get_best_arch_param(self):
         """ Get the best neural architecture from architecture parameters (argmax).
 
         Return:
             best_architecture (np.ndarray)
         """
-        raise NotImplemented
+        best_architecture = self.arch_param.data.argmax(dim=1)
+        best_architecture = best_architecture.cpu().numpy().tolist()
 
-    @abstractmethod
+        return best_architecture
+
     def set_forward_state(self, state):
-        """ Set supernet forward state. ["single", "sum"]
+        """ Set supernet forward state. ["gumbel_softmax", "softmax", "single", "sum"]
 
         Args:
             state (str): The state in model forward.
         """
-        raise NotImplemented
-        self.forward_state = state
+        self.state_forward = getattr(self, f"_{state}_forward")
 
+    def _gumbel_softmax_forward(self, x):
+        weight = F.gumbel_softmax(self.arch_param[0], dim=0) 
+        y = sum(p * b(x) for p, b in zip(weight, self.supernet_layer))
+        return y
+
+    def _softmax_forward(self, x):
+        weight = F.softmax(self.arch_param[0], dim=0)
+        y = sum(p * b(x) for p, b in zip(weight, self.supernet_layer))
+        return y
+
+    def _single_forward(self, x):
+        y = self.supernet_layer[self.architecture](x)
+        return y
+
+    def _sum_forward(self, x):
+        weight = self.arch_param[0]
+        y = sum(p * b(x) for p, b in zip(weight, self.supernet_layer))
+        return y
 
 
 class BaseSupernet(nn.Module):
@@ -147,16 +174,25 @@ class BaseSupernet(nn.Module):
         self._initialize_weights()
 
     def forward(self, x):
+        y = x
         for i, l in enumerate(self.first_stages):
-            x = l(x)
+            y = l(y)
 
         for i, l in enumerate(self.search_stages):
-            x = l(x)
+            y = l(y)
 
         for i, l in enumerate(self.last_stages):
-            x = l(x)
+            y = l(y)
 
-        return x
+        return y
+
+    @abstractmethod
+    def get_model_cfg(self, classes):
+        raise NotImplemented
+
+    @abstractmethod
+    def get_model_cfg_shape(self):
+        raise NotImplemented
     
 
     def set_arch_param(self, arch_param):
@@ -181,9 +217,14 @@ class BaseSupernet(nn.Module):
             l.set_activate_architecture(a)
 
 
-    def initialize_arch_param(self):
+    def initialize_arch_param(self, device):
+        """ Initialize architecture parameters for differentiable for each layer.
+        
+        Args:
+            device (torch.device)
+        """
         for l in self.search_stages:
-            l.initialize_arch_param()
+            l.initialize_arch_param(device)
 
     def get_arch_param(self):
         """ Return architecture parameters.
@@ -194,7 +235,7 @@ class BaseSupernet(nn.Module):
         """
         arch_param_list = []
         for l in self.search_stages:
-            arch_param_list.append(l.get_arch_param())
+            arch_param_list.extend(l.get_arch_param())
 
         return torch.cat(arch_param_list), arch_param_list
 
@@ -206,9 +247,10 @@ class BaseSupernet(nn.Module):
         """
         best_architecture_list = []
         for l in self.search_stages:
-            best_architecture_list.append(l.get_best_arch_param())
+            best_architecture_list.extend(l.get_best_arch_param())
         
-        best_architecture = np.concatenate(best_architecture_list, axis=-1)
+        #best_architecture = np.concatenate(best_architecture_list, axis=-1)
+        best_architecture = np.array(best_architecture_list)
         return best_architecture
 
     def set_forward_state(self, state):
@@ -235,11 +277,3 @@ class BaseSupernet(nn.Module):
                 n = m.weight.size(1)
                 m.weight.data.normal_(0, 0.01)
                 m.bias.data.zero_()
-
-    @abstractmethod
-    def get_model_cfg(self, classes):
-        raise NotImplemented
-
-    @abstractmethod
-    def get_model_cfg_shape(self):
-        raise NotImplemented

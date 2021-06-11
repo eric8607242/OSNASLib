@@ -16,4 +16,4 @@ def build_template(customize_name, customize_class=None):
     render_file(meta_template.render(customize_class=customize_class), os.path.join(root_path, f"{customize_name}.py"))
 
     # Add import in training strategy __init__
-    render_import(f"from .{customize_name} import {customize_class}Sampler", os.path.join(root_path, "__init__.py"))
+    render_import(f"from .{customize_name} import {customize_class}Sampler", os.path.join("training_strategy", "__init__.py"))

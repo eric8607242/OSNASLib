@@ -118,6 +118,7 @@ def _get_conv_block(in_channels, out_channels, kernel_size,
     Construct the convolution block
     """
     group = kwargs["group"] if "group" in kwargs else 1
+    bn = kwargs["bn"] if "bn" in kwargs else True
     block = ConvBNAct(in_channels=in_channels,
                       out_channels=out_channels,
                       kernel_size=kernel_size,
@@ -125,6 +126,7 @@ def _get_conv_block(in_channels, out_channels, kernel_size,
                       activation=activation,
                       bn_momentum=bn_momentum,
                       bn_track_running_stats=bn_track_running_stats,
+                      bn=bn,
                       group=group,
                       pad=(kernel_size // 2))
     return block

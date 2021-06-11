@@ -14,5 +14,5 @@ def build_template(customize_name, customize_class=None):
     render_file(meta_template.render(customize_name=customize_name), os.path.join(root_path, f"{customize_name}.py"))
 
     # Add import in dataflow __init__
-    render_import(f"from .{customize_name} import get_{customize_name}_dataloader", os.path.join(root_path, "__init__.py"))
+    render_import(f"from .{customize_name} import get_{customize_name}_dataloader", os.path.join("dataflow", "__init__.py"))
 

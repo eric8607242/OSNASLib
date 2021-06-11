@@ -17,4 +17,4 @@ def build_template(customize_name, customize_class=None):
             os.path.join(root_path, f"{customize_name}.py"))
 
     # Add import in criterion __init__
-    render_import(f"from .{customize_name} import {customize_class}", os.path.join(root_path, "__init__.py"))
+    render_import(f"from .{customize_name} import {customize_class}", os.path.join("criterion", "__init__.py"))
