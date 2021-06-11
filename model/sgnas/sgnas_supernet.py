@@ -1,4 +1,8 @@
+import torch
+import torch.nn as nn
+
 from ..base import BaseSupernet, BaseSuperlayer
+from ..block_builder import get_block
 from .sgnas_utils import UnifiedSubBlock
 
 class SGNASSuperlayer(BaseSuperlayer):
@@ -9,15 +13,15 @@ class SGNASSuperlayer(BaseSuperlayer):
         """
         self.use_res_connect = stride == 1 and in_channels == out_channels
 
-        block_type, kernel_size, se, activation, kwargs = self.micro_cfg
+        block_type, kernel_size, se, activation, kwargs = self.micro_cfg[0]
         self.min_expansion_rate = kwargs["min_expansion_rate"]
         self.max_expansion_rate = kwargs["max_expansion_rate"]
         self.kernel_size_list = kwargs["kernel_size_list"]
 
-        hidden_channel = int(in_channels * max_expansion_rate)
+        hidden_channel = int(in_channels * self.max_expansion_rate)
 
 
-        self.point_wise = get_block(block_type="ConvBNAct",
+        self.point_wise = get_block(block_type="conv",
                               in_channels=in_channels,
                               out_channels=hidden_channel,
                               kernel_size=1,
@@ -31,12 +35,12 @@ class SGNASSuperlayer(BaseSuperlayer):
 
 
         # Unified Block ===================================
-        self.block_in_channels = hidden_channel // max_expansion_rate
-        self.block_out_channels = hidden_channel // max_expansion_rate
+        self.block_in_channels = hidden_channel // self.max_expansion_rate
+        self.block_out_channels = hidden_channel // self.max_expansion_rate
 
         self.unified_block = nn.ModuleList()
         for b in range(self.max_expansion_rate):
-            block = UnifiedSubBlock(micro_cfg=kernel_size_list,
+            block = UnifiedSubBlock(micro_cfg=[self.kernel_size_list, activation],
                                     in_channels=self.block_in_channels,
                                     out_channels=self.block_out_channels,
                                     stride=stride,
@@ -46,7 +50,7 @@ class SGNASSuperlayer(BaseSuperlayer):
             self.unified_block.append(block)
         # ====================================================
 
-        self.point_wise_1 = get_block(block_type="ConvBNAct",
+        self.point_wise_1 = get_block(block_type="conv",
                               in_channels=hidden_channel,
                               out_channels=out_channels,
                               kernel_size=1,
@@ -59,7 +63,7 @@ class SGNASSuperlayer(BaseSuperlayer):
                               )
 
         self.sbn = nn.ModuleList()
-        for i in range(max_expansion_rate-min_expansion_rate+1):
+        for i in range(self.max_expansion_rate-self.min_expansion_rate+1):
             self.sbn.append(nn.BatchNorm2d(out_channels))
 
     def forward(self, x):
@@ -170,7 +174,7 @@ class SGNASSupernet(BaseSupernet):
             micro_cfg (list): The all configurations in each layer of supernet.
         """
         # block_type, kernel_size, se, activation, kwargs
-        micro_cfg = [["unified", None, False, "relu", {"min_expansion_rate": 2, "max_expansion_rate": 6, "kernel_size_list": self.kernel_size_list}]]
+        micro_cfg = [["unified", None, False, "relu", {"min_expansion_rate": 2, "max_expansion_rate": 6, "kernel_size_list": [3, 5, 7, "skip"]}]]
 
         macro_cfg = {
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs

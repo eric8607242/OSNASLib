@@ -1,1 +1,1 @@
-from .sgnas import SGNASSupernet
+from .sgnas_supernet import SGNASSupernet
