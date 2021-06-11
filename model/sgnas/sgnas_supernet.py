@@ -13,13 +13,14 @@ class SGNASSuperlayer(BaseSuperlayer):
         """
         self.use_res_connect = stride == 1 and in_channels == out_channels
 
-        block_type, kernel_size, se, activation, kwargs = self.micro_cfg[0]
-        self.min_expansion_rate = kwargs["min_expansion_rate"]
-        self.max_expansion_rate = kwargs["max_expansion_rate"]
-        self.kernel_size_list = kwargs["kernel_size_list"]
+        self.kernel_size_list = []
+        for b_cfg in self.micro_cfg:
+            self.kernel_size_list.append(b_cfg[1])
+
+        self.max_expansion_rate = self.micro_cfg[0][-1]["max_expansion_rate"]
+        self.min_expansion_rate = self.micro_cfg[0][-1]["min_expansion_rate"]
 
         hidden_channel = int(in_channels * self.max_expansion_rate)
-
 
         self.point_wise = get_block(block_type="conv",
                               in_channels=in_channels,
@@ -40,7 +41,7 @@ class SGNASSuperlayer(BaseSuperlayer):
 
         self.unified_block = nn.ModuleList()
         for b in range(self.max_expansion_rate):
-            block = UnifiedSubBlock(micro_cfg=[self.kernel_size_list, activation],
+            block = UnifiedSubBlock(micro_cfg=self.micro_cfg,
                                     in_channels=self.block_in_channels,
                                     out_channels=self.block_out_channels,
                                     stride=stride,
@@ -110,8 +111,8 @@ class SGNASSuperlayer(BaseSuperlayer):
         split_arch_param = torch.split(arch_param, len(self.kernel_size_list))
 
         for block, ap in zip(self.unified_block, split_arch_param):
-            if "skip" in self.kernel_size_list:
-                self.sbn_index += ap[self.kernel_size_list.index("skip")]
+            if 0 in self.kernel_size_list:
+                self.sbn_index += ap[self.kernel_size_list.index(0)]
 
             block.set_arch_param(ap)
         self.sbn_index = round(self.sbn_index)
@@ -136,8 +137,8 @@ class SGNASSuperlayer(BaseSuperlayer):
         arch_param_list = []
         for block in self.unified_block:
             arch_param = block.get_arch_param()
-            if "skip" in self.kernel_size_list:
-                self.sbn_index += arch_param[self.kernel_size_list.index("skip")]
+            if 0 in self.kernel_size_list:
+                self.sbn_index += arch_param[self.kernel_size_list.index(0]
                 
             arch_param_list.append(arch_param)
         self.sbn_index = round(self.sbn_index)
@@ -160,7 +161,6 @@ class SGNASSuperlayer(BaseSuperlayer):
 
 class SGNASSupernet(BaseSupernet):
     superlayer_builder = SGNASSuperlayer
-    kernel_size_list = [3, 5, 7, "skip"]
 
     @staticmethod
     def get_model_cfg(classes):
@@ -174,7 +174,10 @@ class SGNASSupernet(BaseSupernet):
             micro_cfg (list): The all configurations in each layer of supernet.
         """
         # block_type, kernel_size, se, activation, kwargs
-        micro_cfg = [["unified", None, False, "relu", {"min_expansion_rate": 2, "max_expansion_rate": 6, "kernel_size_list": [3, 5, 7, "skip"]}]]
+        micro_cfg = [["conv", 3, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
+                    ["conv", 5, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
+                    ["conv", 7, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
+                    ["skip", 0, False, None, {"max_expansion_rate": 6, "min_expansion_rate": 2}]]
 
         macro_cfg = {
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
@@ -215,12 +218,4 @@ class SGNASSupernet(BaseSupernet):
         Return 
             model_cfg_shape (Tuple)
         """
-        return model_cfg_shape
-
-    def get_model_cfg_shape(self):
-        """ Return the shape of model config for the architecture generator.
-
-        Return 
-            model_cfg_shape (Tuple)
-        """
-        return (len(macro_cfg["search"])*len(self.kernel_size_list), len(self.kernel_size_list))
+        return (len(macro_cfg["search"])*len(self.micro_cfg), len(self.micro_cfg))

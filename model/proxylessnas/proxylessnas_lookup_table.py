@@ -17,11 +17,11 @@ class ProxylessNASLookUpTable(LookUpTable):
         input_size = self.get_search_input_size()
         info_table = {metric: [] for metric in info_metric_list}
 
-        for l, l_cfg in enumerate(macro_cfg["search"]):
+        for l, l_cfg in enumerate(self.macro_cfg["search"]):
             in_channels, out_channels, stride = l_cfg
             layer_info = {metric: [] for metric in info_metric_list}
 
-            for b, b_cfg in enumerate(micro_cfg):
+            for b, b_cfg in enumerate(self.micro_cfg):
                 block_type, kernel_size, se, activation, kwargs = b_cfg
                 block = get_block(block_type=block_type,
                                   in_channels=in_channels,
