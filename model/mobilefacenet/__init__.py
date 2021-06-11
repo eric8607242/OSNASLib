@@ -1,1 +1,2 @@
 from .mobilefacenet_supernet import MobileFaceNetSupernet
+from .mobilefacenet_lookup_table import MobileFaceNetLookUpTable

@@ -1,6 +1,9 @@
 import os
+import sys
 import time
 import json
+
+from abc import abstractmethod
 
 import torch
 import torch.nn as nn
@@ -10,6 +13,8 @@ from utils import FLOPS_Counter
 
 
 class LookUpTable:
+    """ The abstract class of the information lookup table.
+    """
     def __init__(
         self,
         macro_cfg,
@@ -18,23 +23,29 @@ class LookUpTable:
         input_size,
         info_metric="flops"):
 
+        self.macro_cfg = macro_cfg
+        self.micro_cfg = micro_cfg
+
         if os.path.isfile(table_path):
             with open(table_path) as f:
                 self.info_table = json.load(f)
         else:
-            self.info_table = self._construct_info_table(
-                macro_cfg, micro_cfg, input_size)
+            base_info_table = self.construct_base_info_table()
+            self.info_table = self.construct_info_table()
             with open(table_path, "w") as f:
                 json.dump(self.info_table, f)
 
-        self.macro_cfg = macro_cfg
-        self.micro_cfg = micro_cfg
-
+        self.input_size = input_size
         self.info_metric = info_metric
 
     def get_model_info(self, architecture_parameter):
-        """
-        architecture_parameter(matrix) : one-hot of the architecture
+        """ Calculate the model information based on the architecture parameter.
+
+        Args:
+            architecture_parameter (torch.tensor) : The vector or matrix.
+
+        Return:
+            (torch.tensor)
         """
         if len(architecture_parameter.shape) == 1:
             # Get one dim vector, convert to one-hot architecture parameter
@@ -49,25 +60,25 @@ class LookUpTable:
 
 
         return sum(model_info) + self.info_table["base_{}".format(self.info_metric)]
+    
+    def construct_base_info_table(self, info_metric_list=["flops", "param", "latency"]):
+        """ Construct the table of the base information. (e.g., first stage and last stage in macro_cfg).
+        
+        Args:
+            info_metric_list (list)
 
-    def _construct_info_table(
-        self,
-        macro_cfg,
-        micro_cfg,
-        input_size,
-        info_metric_list=[
-            "flops",
-            "param",
-            "latency"]):
+        Return:
+            base_info_table (dict)
+        """
+        input_size = self.input_size
         base_info = 0
-        info_table = {metric: [] for metric in info_metric_list}
         base_info_table = {"base_{}".format(
             metric): 0 for metric in info_metric_list}
 
         first_stage = []
         first_in_channels = None
         global_stride = 1
-        for l, l_cfg in enumerate(macro_cfg["first"]):
+        for l, l_cfg in enumerate(self.macro_cfg["first"]):
             block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
             global_stride *= stride
             first_in_channels = in_channels if first_in_channels is None else first_in_channels
@@ -84,43 +95,18 @@ class LookUpTable:
             first_stage.append(layer)
 
         first_stage = nn.Sequential(*first_stage)
-        base_info = self._get_block_info(
-            first_stage, first_in_channels, input_size, info_metric_list)
+        base_info = self._get_block_info(first_stage, first_in_channels, input_size, info_metric_list)
         input_size = input_size if global_stride == 1 else input_size // global_stride
         for k, v in base_info.items():
             base_info_table["base_{}".format(k)] += v
-            
-            
-        for l, l_cfg in enumerate(macro_cfg["search"]):
+
+        for l, l_cfg in enumerate(self.macro_cfg["search"]):
             in_channels, out_channels, stride = l_cfg
-            layer_info = {metric: [] for metric in info_metric_list}
-
-            for b, b_cfg in enumerate(micro_cfg):
-                block_type, kernel_size, se, activation, kwargs = b_cfg
-                block = get_block(block_type=block_type,
-                                  in_channels=in_channels,
-                                  out_channels=out_channels,
-                                  kernel_size=kernel_size,
-                                  stride=stride,
-                                  activation=activation,
-                                  se=se,
-                                  bn_momentum=0.1,
-                                  bn_track_running_stats=True,
-                                  **kwargs
-                                  )
-
-                block_info = self._get_block_info(
-                    block, in_channels, input_size, info_metric_list)
-                layer_info = self._merge_info_table(
-                    layer_info, block_info, info_metric_list)
-
             input_size = input_size if stride == 1 else input_size // 2
-            info_table = self._merge_info_table(
-                info_table, layer_info, info_metric_list)
-
+        
         last_stage = []
         last_in_channels = None
-        for l, l_cfg in enumerate(macro_cfg["last"]):
+        for l, l_cfg in enumerate(self.macro_cfg["last"]):
             block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
             last_in_channels = in_channels if last_in_channels is None else last_in_channels
 
@@ -143,14 +129,46 @@ class LookUpTable:
         for k, v in base_info.items():
             base_info_table["base_{}".format(k)] += v
 
-        info_table.update(base_info_table)
+        return base_info_table
 
-        return info_table
+    def get_search_input_size(self):
+        """ Get the input size of search stage in macro_cfg
+
+        Return:
+            input_size (int): The input size of search stage
+        """
+        for l, l_cfg in enumerate(self.macro_cfg["first"]):
+            block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
+            global_stride *= stride
+        input_size = input_size if global_stride == 1 else input_size // global_stride
+
+        return input_size
+        
+
+    @abstractmethod
+    def construct_info_table(self, info_metric_list=["flops", "param", "latency"]):
+        """ Construct the info lookup table of search stage in macro config.
+
+        We provide serveral useful method to calculate the info metric and process info
+        metric table. Please refer to `/model/base_lookup_table.py` for more details.
+
+        Args:
+            info_metric_list (list):
+
+        Return:
+            info_table (dict)
+        """
+        raise NotImplemented
 
     def _merge_info_table(self, info_table, new_info, info_metric_list):
-        """Merge a dict with new info in to main info_table
-        info_table(dict) : Main info table
-        new_info(dict)
+        """ Merge a new dict into main dict.
+        
+        Args:
+            info_table (dict)
+            new_info (dict)
+
+        Return:
+            info_table (dict)
         """
         for metric in info_metric_list:
             info_table[metric].append(new_info[metric])
@@ -158,21 +176,33 @@ class LookUpTable:
         return info_table
 
     def _get_block_info(self, block, in_channels, input_size, info_metric_list):
+        """ Calculate block information.
+
+        Args:
+            block (nn.Module)
+            in_channels (int)
+            input_size (int)
+            info_metric_list (list)
+
+        Return:
+            block_info (dict)
+        """
         block_info = {}
         for metric in info_metric_list:
-            if metric == "flops":
-                block_info["flops"] = calculate_flops(
-                    block, in_channels, input_size)
-            elif metric == "param":
-                block_info["param"] = calculate_param_nums(block)
-            elif metric == "latency":
-                block_info["latency"] = calculate_latency(block, in_channels, input_size)
-            else:
-                raise NotImplementedError
+            calculate_info = getattr(sys.modules[__name__], metric)
+            block_info[metric] = calculate_info(block, in_channels, input_size)
 
         return block_info
 
     def _architecture_to_one_hot(self, architecture):
+        """ Transfer the vector architecture index into one-hot architecture_parameter matrix.
+
+        Args:
+            architecture (np.ndarray or torch.tensor or list): The vector that store the block index of each layer.
+        
+        Return:
+            architecture_parameter (torch.tensor): The matrix of one-hot encoding.
+        """
         architecture_parameter = torch.zeros(
             len(self.macro_cfg["search"]), len(self.micro_cfg))
         for l, a in enumerate(architecture):
@@ -190,7 +220,7 @@ def calculate_latency(model, in_channels, input_size):
     return latency
 
 
-def calculate_param_nums(model):
+def calculate_param_nums(model, in_channels, input_size):
     total_params = sum(p.numel()
                        for p in model.parameters() if p.requires_grad)
     return total_params

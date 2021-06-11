@@ -2,7 +2,7 @@ agent:
     main_agent: "CFSearchAgent"
     training_strategy_agent: "UniformSampler"
     search_strategy_agent: "RandomSearcher"
-    supernet_agent: "ProxylessNASSupernet"
+    search_space_agent: "ProxylessNAS"
 
     criterion_agent: "LabelSmoothingCrossEntropy"
 

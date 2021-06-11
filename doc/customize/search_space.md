@@ -14,11 +14,12 @@ After generating the model template, the directory `[CUSTOMIZE NAME]/` will be c
     |- [CUSTOMIZE NAME]/
     |         |- __init__.py
     |         |- [CUSTOMIZE NAME]_supernet.py
+    |         -- [CUSTOMIZE NAME]_lookup_table.py
             ...
 ```
 
 
-## Model Interface
+## Supernet Interface
 For customizing model, the interface class `[CUSTOMIZE CLASS]Supernet` and `[CUSTOMIZE CLASS]Superlayer` in `[CUSTOMIZE NAME]_supernet.py` should inherit the class `BaseSupernet` and `BaseSuperlayer`, respectively. The staticmethod `get_model_cfg` return `macro_cfg` and `micro_cfg`.
 
 To allow each search strategy can search on each seach space. We implement various method in `BaseSuperlayer`. For example, the method `set_activate_architecture()` is utilized by single-path NAS and the method `initialize_arch_param()` is utilized by differentiable NAS. Refer to `./model/base.py` about more detail about the interface for search space design.
@@ -101,11 +102,64 @@ def _get_[CUSTOMIZE NAME]_block(in_channels, out_channels, kernel_size,
     return block
 ```
 
+## LookUpTable Interface
+For the different structure of the lookup table, we allow users to redesign the lookuptable flexibly. To customizing the lookup table, the interface class `[CUSTOMIZE CLASS]LookUpTable` should inherit the class `LookUpTable`. In `[CUSTOMIZE CLASS]LookUpTable`, user should re-implement the method `construct_info_table` to construct the info lookup table of search stage in `macro_cfg`. We provide the basic lookup table building method as default and implement lots of useful method to build the lookup table more easily. Please refer to `model/base_lookup_table.py` for more details about useful methods.
+
+```python3
+from ..base_lookup_table import LookUpTable
+from .block_builder import get_block
+
+class [CUSTOMIZE CLASS]LookUpTable(LookUpTable):
+    def construct_info_table(self, info_metric_list=["flops", "param", "latency"]):
+        """ Construct the info lookup table of search stage in macro config.
+
+        We provide serveral useful method to calculate the info metric and process info
+        metric table. Please refer to `/model/base_lookup_table.py` for more details.
+
+        Args:
+            info_metric_list (list):
+
+        Return:
+            info_table (dict)
+        """
+        input_size = self.get_search_input_size()
+        info_table = {metric: [] for metric in info_metric_list}
+
+        for l, l_cfg in enumerate(macro_cfg["search"]):
+            in_channels, out_channels, stride = l_cfg
+            layer_info = {metric: [] for metric in info_metric_list}
+
+            for b, b_cfg in enumerate(micro_cfg):
+                block_type, kernel_size, se, activation, kwargs = b_cfg
+                block = get_block(block_type=block_type,
+                                  in_channels=in_channels,
+                                  out_channels=out_channels,
+                                  kernel_size=kernel_size,
+                                  stride=stride,
+                                  activation=activation,
+                                  se=se,
+                                  bn_momentum=0.1,
+                                  bn_track_running_stats=True,
+                                  **kwargs
+                                  )
+
+                block_info = self._get_block_info(
+                    block, in_channels, input_size, info_metric_list)
+                layer_info = self._merge_info_table(
+                    layer_info, block_info, info_metric_list)
+
+            input_size = input_size if stride == 1 else input_size // 2
+            info_table = self._merge_info_table(
+                info_table, layer_info, info_metric_list)
+
+
+        return info_table
+```
 
 
 ## Setting Config File
 After customizing for your search space, you can utilize your search space by setting the search space into the config file easily.
 ```
 agent:
-    supernet_agent: "[CUSTOMIZE CLASS]Supernet"
+    search_space_agent: "[CUSTOMIZE CLASS]"
 ```

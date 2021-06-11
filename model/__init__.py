@@ -15,12 +15,15 @@ def save_architecture(path_to_architecture, architecture):
     np.save(path_to_architecture, architecture)
 
 
-def get_supernet_class(name):
-    return getattr(sys.modules[__name__], name)
+def get_search_space_class(name):
+    supernet_class = getattr(sys.modules[__name__], f"{name}Supernet")
+    lookup_table_class = getattr(sys.modules[__name__], f"{name}LookUpTable")
+
+    return supernet_class, lookup_table_class
 
 
-from .fbnet import FBNetSSupernet, FBNetLSupernet
-from .spos import SPOSSupernet
-from .proxylessnas import ProxylessNASSupernet
-from .mobilefacenet import MobileFaceNetSupernet
-from .sgnas import SGNASSupernet
+from .fbnet import FBNetSSupernet, FBNetLSupernet, FBNetLookUpTable
+from .spos import SPOSSupernet, SPOSLookUpTable
+from .proxylessnas import ProxylessNASSupernet, ProxylessNASLookUpTable
+from .mobilefacenet import MobileFaceNetSupernet, MobileFaceNetLookUpTable
+from .sgnas import SGNASSupernet, SGNASLookUpTable

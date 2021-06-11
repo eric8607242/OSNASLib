@@ -2,7 +2,7 @@ import time
 
 from .base_agent import MetaAgent
 
-from model import get_supernet_class, LookUpTable, save_architecture
+from model import get_search_space_class, save_architecture
 
 from search_strategy import get_search_strategy
 from training_strategy import get_training_strategy
@@ -11,8 +11,13 @@ class MetaSearchAgent(MetaAgent):
     def _init_agent_state(self):
         """ Initialize for searching process.
         """
+        supernet_class, lookup_table_class = get_search_space_class(self.config["agent"]["search_space_agent"])
         # Construct model and correspond optimizer ======================================
-        supernet = self._construct_supernet()
+        supernet = supernet_class(
+            self.config["dataset"]["classes"],
+            self.config["dataset"]["dataset"],
+            bn_momentum=self.config["train"]["bn_momentum"],
+            bn_track_running_stats=self.config["train"]["bn_track_running_stats"])
         self.macro_cfg, self.micro_cfg = supernet.get_model_cfg(self.config["dataset"]["classes"])
         
         self.supernet = supernet.to(self.device)
@@ -24,7 +29,7 @@ class MetaSearchAgent(MetaAgent):
         training_strategy_class = get_training_strategy(self.config["agent"]["training_strategy_agent"])
         self.training_strategy = training_strategy_class(len(self.micro_cfg), len(self.macro_cfg["search"]), self.supernet)
 
-        self.lookup_table = LookUpTable(
+        self.lookup_table = lookup_table_class(
             self.macro_cfg,
             self.micro_cfg,
             self.config["experiment_path"]["lookup_table_path"],

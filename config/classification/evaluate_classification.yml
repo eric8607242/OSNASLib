@@ -1,7 +1,7 @@
 agent:
     main_agent: "CFEvaluateAgent"
+    search_space_agent: "ProxylessNAS"
     criterion_agent: "LabelSmoothingCrossEntropy"
-    supernet_agent: "ProxylessNASSupernet"
 
 train:
     resume: False

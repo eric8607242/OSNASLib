@@ -91,16 +91,3 @@ class MetaAgent:
                 model, list(range(self.config["train"]["ngpu"])))
         else:
             return model
-
-    def _construct_supernet(self):
-        """
-        Return:
-            supernet (nn.Module): The supernet constructed based on search space.
-        """
-        supernet_class = get_supernet_class(self.config["agent"]["supernet_agent"])
-        supernet = supernet_class(
-            self.config["dataset"]["classes"],
-            self.config["dataset"]["dataset"],
-            bn_momentum=self.config["train"]["bn_momentum"],
-            bn_track_running_stats=self.config["train"]["bn_track_running_stats"])
-        return supernet

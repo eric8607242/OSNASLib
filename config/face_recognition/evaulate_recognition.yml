@@ -1,7 +1,7 @@
 agent:
     main_agent: "FREvaluateAgent"
     criterion_agent: "OnlineTripletLoss"
-    supernet_agent: "MobileFaceNetSupernet"
+    search_space_agent: "MobileFaceNet"
 
 train:
     resume: False

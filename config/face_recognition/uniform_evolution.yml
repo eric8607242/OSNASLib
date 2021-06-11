@@ -2,7 +2,7 @@ agent:
     main_agent: "FRSearchAgent"
     training_strategy_agent: "UniformSampler"
     search_strategy_agent: "EvolutionSearcher"
-    supernet_agent: "MobileFaceNetSupernet"
+    search_space_agent: "MobileFaceNet"
 
     criterion_agent: "OnlineTripletLoss"
 
