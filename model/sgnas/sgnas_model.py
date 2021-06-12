@@ -6,7 +6,7 @@ from ..base_model import BaseModel
 from ..block_builder import get_block
 
 class SGNASModel(BaseModel):
-    def _construct_stage_layers(self, architecture):
+    def _construct_stage_layers(self, architecture, bn_momentum, bn_track_running_stats):
         """ Construct searched layers in entire search stage.
 
         Return:
@@ -32,13 +32,13 @@ class SGNASModel(BaseModel):
                               stride=stride,
                               activation="relu",
                               se=False,
-                              bn_momentum=self.bn_momentum,
-                              bn_track_running_stats=self.bn_track_running_stats,
+                              bn_momentum=bn_momentum,
+                              bn_track_running_stats=bn_track_running_stats,
                               **{"kernel_size_list": kernel_size_list,
                                  "expansion_rate": len(kernel_size_list)})
             stages.append(layer)
 
-        stages = nn.Sequential(stages)
+        stages = nn.Sequential(*stages)
         return stages
 
 

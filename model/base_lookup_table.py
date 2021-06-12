@@ -244,7 +244,7 @@ def calculate_flops(model, in_channels, input_size):
 
 def calculate_model_efficient(model, in_channels, input_size, logger):
     flops = calculate_flops(model, in_channels, input_size)
-    param_nums = calculate_param(model)
+    param_nums = calculate_param(model, in_channels, input_size)
     latency = calculate_latency(model, in_channels, input_size)
 
     logger.info("Model efficient calculating =====================")

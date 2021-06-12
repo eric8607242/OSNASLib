@@ -1,5 +1,7 @@
 import math
 
+from abc import abstractmethod
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -7,29 +9,21 @@ import torch.nn.functional as F
 from .block_builder import get_block
 
 
-class Model(nn.Module):
+class BaseModel(nn.Module):
     def __init__(
             self,
             macro_cfg,
             micro_cfg,
             architecture,
-            classes,
-            dataset,
             bn_momentum=0.1,
             bn_track_running_stats=True):
-        super(Model, self).__init__()
+        super(BaseModel, self).__init__()
         self.micro_cfg = micro_cfg
         self.macro_cfg = macro_cfg
 
-        self.classes = classes
-        self.dataset = dataset
-
-        bn_momentum = bn_momentum
-        bn_track_running_stats = bn_track_running_stats
-
         # First Stage
         self.first_stages = nn.ModuleList()
-        for l_cfg in macro_cfg["first"]:
+        for l_cfg in self.macro_cfg["first"]:
             block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
 
             layer = get_block(block_type=block_type,
@@ -45,28 +39,11 @@ class Model(nn.Module):
             self.first_stages.append(layer)
 
         # Search Stage
-        self.stages = nn.ModuleList()
-        for l_cfg, block_idx in zip(macro_cfg["search"], architecture):
-            in_channels, out_channels, stride = l_cfg
-
-            block_type, kernel_size, se, activation, kwargs = micro_cfg[block_idx]
-            layer = get_block(block_type=block_type,
-                              in_channels=in_channels,
-                              out_channels=out_channels,
-                              kernel_size=kernel_size,
-                              stride=stride,
-                              activation=activation,
-                              se=se,
-                              bn_momentum=bn_momentum,
-                              bn_track_running_stats=bn_track_running_stats,
-                              **kwargs
-                              )
-
-            self.stages.append(layer)
+        self.stages = self._construct_stage_layers(architecture, bn_momentum, bn_track_running_stats)
 
         # Last Stage
         self.last_stages = nn.ModuleList()
-        for l_cfg in macro_cfg["last"]:
+        for l_cfg in self.macro_cfg["last"]:
             block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
 
             layer = get_block(block_type=block_type,
@@ -83,17 +60,27 @@ class Model(nn.Module):
 
         self._initialize_weights()
 
-    def forward(self, x):
-        for i, l in enumerate(self.first_stages):
-            x = l(x)
+    @abstractmethod
+    def _construct_stage_layers(self, architecture):
+        """ Construct searched layers in entire search stage.
 
-        for i, l in enumerate(self.stages):
-            x = l(x)
+        Return:
+            stages (nn.Sequential)
+        """
+        return stages
+
+
+    def forward(self, x):
+        y = x
+        for i, l in enumerate(self.first_stages):
+            y = l(y)
+
+        y = self.stages(y)
 
         for i, l in enumerate(self.last_stages):
-            x = l(x)
+            y = l(y)
 
-        return x
+        return y
 
     def _initialize_weights(self):
         for m in self.modules():

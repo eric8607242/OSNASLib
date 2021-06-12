@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ..base import BaseSuperlayer
+from ..base_supernet import BaseSuperlayer
 from ..block_builder import get_block
 
 

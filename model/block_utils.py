@@ -427,7 +427,7 @@ class MixConv(nn.Module):
                                   kernel_size,
                                   stride=stride,
                                   padding=(kernel_size // 2),
-                                  groups=block_out_channels,
+                                  groups=self.block_out_channels,
                                   bias=False)
             self.mixconv.append(operation)
 

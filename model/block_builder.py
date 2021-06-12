@@ -36,6 +36,7 @@ def _get_mixconv_block(in_channels, out_channels, kernel_size,
     """
     kernel_size_list = kwargs["kernel_size_list"]
     expansion_rate = kwargs["expansion_rate"]
+    point_group = kwargs["point_group"] if "point_group" in kwargs else 1
 
     block = MixConv(in_channels=in_channels,
                     out_channels=out_channels,

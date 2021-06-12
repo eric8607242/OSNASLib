@@ -3,7 +3,6 @@ import numpy as np
 
 from .base_lookup_table import calculate_model_efficient
 from .block_builder import get_block
-from .model import Model
 
 
 def load_architecture(path_to_architecture):

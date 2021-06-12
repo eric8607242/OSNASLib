@@ -103,6 +103,7 @@ In OSNASLib, we provide serveral type of candidate block as follows:
 1. MobileNet Block (Inverted residual bottleneck)
 2. ShuffleNet Block
 3. ShuffleNetX Block
+4. MixConv Block
 4. Linear (Classifier)
 5. Global Average Pooling
 6. Conv BN Activation Block
@@ -183,7 +184,7 @@ from ..block_builder import get_block
 
 
 class {{customize_class}}Model(BaseModel):
-    def _construct_stage_layers(self, architecture):
+    def _construct_stage_layers(self, architecture, bn_momentum, bn_track_running_stats):
         """ Construct searched layers in entire search stage.
 
         Return:
