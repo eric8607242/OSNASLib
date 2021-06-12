@@ -19,12 +19,19 @@ class LookUpTable:
         self,
         macro_cfg,
         micro_cfg,
+        macro_len,
+        micro_len,
         table_path,
         input_size,
         info_metric="flops"):
 
         self.macro_cfg = macro_cfg
         self.micro_cfg = micro_cfg
+        
+        self.macro_len = macro_len
+        self.micro_len = micro_len
+        
+        self.input_size = input_size
 
         if os.path.isfile(table_path):
             with open(table_path) as f:
@@ -32,10 +39,10 @@ class LookUpTable:
         else:
             base_info_table = self.construct_base_info_table()
             self.info_table = self.construct_info_table()
+            self.info_table.update(base_info_table)
             with open(table_path, "w") as f:
                 json.dump(self.info_table, f)
 
-        self.input_size = input_size
         self.info_metric = info_metric
 
     def get_model_info(self, architecture_parameter):
@@ -137,10 +144,11 @@ class LookUpTable:
         Return:
             input_size (int): The input size of search stage
         """
+        global_stride = 1
         for l, l_cfg in enumerate(self.macro_cfg["first"]):
             block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs = l_cfg
             global_stride *= stride
-        input_size = input_size if global_stride == 1 else input_size // global_stride
+        input_size = self.input_size if global_stride == 1 else self.input_size // global_stride
 
         return input_size
         
@@ -189,7 +197,7 @@ class LookUpTable:
         """
         block_info = {}
         for metric in info_metric_list:
-            calculate_info = getattr(sys.modules[__name__], metric)
+            calculate_info = getattr(sys.modules[__name__], f"calculate_{metric}")
             block_info[metric] = calculate_info(block, in_channels, input_size)
 
         return block_info
@@ -203,8 +211,7 @@ class LookUpTable:
         Return:
             architecture_parameter (torch.tensor): The matrix of one-hot encoding.
         """
-        architecture_parameter = torch.zeros(
-            len(self.macro_cfg["search"]), len(self.micro_cfg))
+        architecture_parameter = torch.zeros(self.macro_len, self.micro_len)
         for l, a in enumerate(architecture):
             architecture_parameter[l, a] = 1
 
@@ -220,7 +227,7 @@ def calculate_latency(model, in_channels, input_size):
     return latency
 
 
-def calculate_param_nums(model, in_channels, input_size):
+def calculate_param(model, in_channels, input_size):
     total_params = sum(p.numel()
                        for p in model.parameters() if p.requires_grad)
     return total_params
@@ -237,7 +244,7 @@ def calculate_flops(model, in_channels, input_size):
 
 def calculate_model_efficient(model, in_channels, input_size, logger):
     flops = calculate_flops(model, in_channels, input_size)
-    param_nums = calculate_param_nums(model)
+    param_nums = calculate_param(model)
     latency = calculate_latency(model, in_channels, input_size)
 
     logger.info("Model efficient calculating =====================")

@@ -182,7 +182,7 @@ class ShuffleBlockX(nn.Module):
                     group=in_channels),
                 ConvBNAct(
                     in_channels=in_channels,
-                    out_channels=in_channels,
+                    out_channels=branch_out_channels,
                     kernel_size=1,
                     stride=1,
                     activation=activation,
@@ -193,12 +193,14 @@ class ShuffleBlockX(nn.Module):
             self.branch_1 = nn.Sequential()
 
         branch_2 = []
-        branch_2_out_channels = [[in_channels, branch_out_channels], [
-            branch_out_channels, branch_out_channels], [branch_out_channels, branch_out_channels]]
         branch_2_in_channels = in_channels if stride == 2 else branch_out_channels
+        branch_2_out_channels = [[branch_2_in_channels, branch_out_channels], 
+                                 [branch_out_channels, branch_out_channels], 
+                                 [branch_out_channels, branch_out_channels]]
+        
         for i, (oc1, oc2) in enumerate(branch_2_out_channels):
             branch_2.append(
-                ConvBNAct(in_channels=branch_2_in_channels,
+                ConvBNAct(in_channels=oc1,
                           out_channels=oc1,
                           kernel_size=3,
                           stride=stride if i == 0 else 1,
@@ -206,7 +208,7 @@ class ShuffleBlockX(nn.Module):
                           bn_momentum=bn_momentum,
                           bn_track_running_stats=bn_track_running_stats,
                           pad=(3 // 2),
-                          group=branch_2_in_channels))
+                          group=oc1))
             branch_2.append(
                 ConvBNAct(in_channels=oc1,
                           out_channels=oc2,
@@ -217,7 +219,6 @@ class ShuffleBlockX(nn.Module):
                           bn_track_running_stats=bn_track_running_stats,
                           pad=0)
             )
-            branch_2_in_channels = oc2
         self.branch_2 = nn.Sequential(*branch_2)
 
     def forward(self, x):

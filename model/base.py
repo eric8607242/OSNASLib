@@ -212,7 +212,7 @@ class BaseSupernet(nn.Module):
         Args:
             architecture (torch.tensor): The block index for each layer.
         """
-        architecture = architecture.reshape(len(self.search_stages))
+        architecture = architecture.reshape(len(self.search_stages), -1)
         for a, l in zip(architecture, self.search_stages):
             l.set_activate_architecture(a)
 

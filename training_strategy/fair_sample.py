@@ -4,8 +4,8 @@ import torch.nn as nn
 from .base import BaseSampler
 
 class FairnessSampler(BaseSampler):
-    def __init__(self, micro_len, macro_len, model):
-        super(FairnessSampler, self).__init__(micro_len, macro_len, model)
+    def __init__(self, model):
+        super(FairnessSampler, self).__init__(model)
         
         self.architecture_order = [
             [i for i in range(self.micro_len)] for j in range(self.macro_len)]

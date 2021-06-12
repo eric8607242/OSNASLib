@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 from ..base import BaseSuperlayer
-from ..block_utils import ConvBNAct
+from ..block_builder import get_block
 
 
 class ZeroConv(nn.Module):

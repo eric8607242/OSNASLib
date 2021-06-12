@@ -47,7 +47,7 @@ class SPOSSupernet(BaseSupernet):
                           ["shuffleX", 0, False, "relu", {}]]
         macro_cfg = {
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
-            "first": [["Conv", 3, 16, 2, 3, "relu", False, {}]],  # stride 1 for CIFAR
+            "first": [["conv", 3, 16, 2, 3, "relu", False, {}]],  # stride 1 for CIFAR
             # in_channels, out_channels, stride
             "search": [[16, 64, 2],  # stride 1 for CIFAR
                        [64, 64, 1],
@@ -82,4 +82,4 @@ class SPOSSupernet(BaseSupernet):
         Return 
             model_cfg_shape (Tuple)
         """
-        return (len(macro_cfg["search"]), len(micro_cfg))
+        return (len(self.macro_cfg["search"]), len(self.micro_cfg))

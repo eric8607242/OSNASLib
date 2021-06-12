@@ -1,5 +1,7 @@
 import time
 
+import torch.nn as nn
+
 from .base_agent import MetaAgent
 
 from model import get_search_space_class, save_architecture
@@ -27,11 +29,15 @@ class MetaSearchAgent(MetaAgent):
 
         # Construct search utility ========================================================
         training_strategy_class = get_training_strategy(self.config["agent"]["training_strategy_agent"])
-        self.training_strategy = training_strategy_class(len(self.micro_cfg), len(self.macro_cfg["search"]), self.supernet)
+        self.training_strategy = training_strategy_class(self.supernet)
 
+        macro_len, micro_len = self.supernet.module.get_model_cfg_shape() \
+                                    if isinstance(self.supernet, nn.DataParallel) else self.model.get_model_cfg_shape()
         self.lookup_table = lookup_table_class(
             self.macro_cfg,
             self.micro_cfg,
+            macro_len,
+            micro_len,
             self.config["experiment_path"]["lookup_table_path"],
             self.config["dataset"]["input_size"],
             info_metric=self.config["search_utility"]["info_metric"])

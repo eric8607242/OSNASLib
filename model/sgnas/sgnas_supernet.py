@@ -17,8 +17,9 @@ class SGNASSuperlayer(BaseSuperlayer):
         for b_cfg in self.micro_cfg:
             self.kernel_size_list.append(b_cfg[1])
 
-        self.max_expansion_rate = self.micro_cfg[0][-1]["max_expansion_rate"]
-        self.min_expansion_rate = self.micro_cfg[0][-1]["min_expansion_rate"]
+        _, _, _, _, kwargs = self.micro_cfg[0]        
+        self.max_expansion_rate = kwargs["max_expansion_rate"]
+        self.min_expansion_rate = kwargs["min_expansion_rate"]
 
         hidden_channel = int(in_channels * self.max_expansion_rate)
 
@@ -27,8 +28,8 @@ class SGNASSuperlayer(BaseSuperlayer):
                               out_channels=hidden_channel,
                               kernel_size=1,
                               stride=1,
-                              activation=activation,
-                              se=se,
+                              activation="relu",
+                              se=False,
                               bn_momentum=bn_momentum,
                               bn_track_running_stats=bn_track_running_stats,
                               **kwargs
@@ -57,14 +58,14 @@ class SGNASSuperlayer(BaseSuperlayer):
                               kernel_size=1,
                               stride=1,
                               activation=None,
-                              se=se,
+                              se=False,
                               bn_momentum=bn_momentum,
                               bn_track_running_stats=bn_track_running_stats,
                               **{"bn": False}
                               )
 
         self.sbn = nn.ModuleList()
-        for i in range(self.max_expansion_rate-self.min_expansion_rate+1):
+        for i in range(self.max_expansion_rate+1):
             self.sbn.append(nn.BatchNorm2d(out_channels))
 
     def forward(self, x):
@@ -81,7 +82,15 @@ class SGNASSuperlayer(BaseSuperlayer):
         y = y + x if self.use_res_connect else y
 
         return y
+    
+    def set_forward_state(self, state):
+        """ Set supernet forward state. ["gumbel_softmax", "softmax", "single", "sum"]
 
+        Args:
+            state (str): The state in model forward.
+        """
+        for block in self.unified_block:
+            block.set_forward_state(state)
 
     # Single-path NAS
     def set_activate_architecture(self, architecture):
@@ -91,13 +100,12 @@ class SGNASSuperlayer(BaseSuperlayer):
             architecture (torch.tensor): The block index for each layer.
         """
         self.sbn_index = 0
-        split_architecture = torch.split(architecture, len(self.kernel_size_list)) 
 
-        for block, a in zip(self.unified_block, split_architecture):
-            # Force sampling
-            a = a.sort()[0]
-            if "skip" in self.kernel_size_list:
-                self.sbn_index += a[self.kernel_size_list.index("skip")]
+        # Force sampling
+        architecture = architecture.sort()[0]
+        self.sbn_index = sum(architecture == self.kernel_size_list.index(0))
+
+        for block, a in zip(self.unified_block, architecture):
             block.set_activate_architecture(a)
 
     # Differentaible NAS
@@ -138,7 +146,7 @@ class SGNASSuperlayer(BaseSuperlayer):
         for block in self.unified_block:
             arch_param = block.get_arch_param()
             if 0 in self.kernel_size_list:
-                self.sbn_index += arch_param[self.kernel_size_list.index(0]
+                self.sbn_index += arch_param[self.kernel_size_list.index(0)]
                 
             arch_param_list.append(arch_param)
         self.sbn_index = round(self.sbn_index)
@@ -218,4 +226,4 @@ class SGNASSupernet(BaseSupernet):
         Return 
             model_cfg_shape (Tuple)
         """
-        return (len(macro_cfg["search"])*len(self.micro_cfg), len(self.micro_cfg))
+        return (len(self.macro_cfg["search"])*6, len(self.micro_cfg))

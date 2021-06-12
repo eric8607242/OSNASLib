@@ -1,5 +1,5 @@
 from ..base_lookup_table import LookUpTable
-from .block_builder import get_block
+from ..block_builder import get_block
 
 class {{customize_class}}LookUpTable(LookUpTable):
     def construct_info_table(self, info_metric_list=["flops", "param", "latency"]):

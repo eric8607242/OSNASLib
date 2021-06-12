@@ -87,4 +87,4 @@ class ProxylessNASSupernet(BaseSupernet):
         Return 
             model_cfg_shape (Tuple)
         """
-        return (len(macro_cfg["search"]), len(micro_cfg))
+        return (len(self.macro_cfg["search"]), len(self.micro_cfg))

@@ -1,5 +1,6 @@
 from ..base_lookup_table import LookUpTable
-from .block_builder import get_block
+from ..block_builder import get_block
+ 
 
 class FBNetLookUpTable(LookUpTable):
     def construct_info_table(self, info_metric_list=["flops", "param", "latency"]):
@@ -48,3 +49,5 @@ class FBNetLookUpTable(LookUpTable):
         return info_table
 
 
+class FBNetSLookUpTable(FBNetLookUpTable): pass
+class FBNetLLookUpTable(FBNetLookUpTable): pass

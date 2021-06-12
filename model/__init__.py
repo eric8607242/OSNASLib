@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 
-from .lookup_table_builder import LookUpTable, calculate_model_efficient
+from .base_lookup_table import calculate_model_efficient
 from .block_builder import get_block
 from .model import Model
 
@@ -22,7 +22,7 @@ def get_search_space_class(name):
     return supernet_class, lookup_table_class
 
 
-from .fbnet import FBNetSSupernet, FBNetLSupernet, FBNetLookUpTable
+from .fbnet import FBNetSSupernet, FBNetLSupernet, FBNetSLookUpTable, FBNetLLookUpTable
 from .spos import SPOSSupernet, SPOSLookUpTable
 from .proxylessnas import ProxylessNASSupernet, ProxylessNASLookUpTable
 from .mobilefacenet import MobileFaceNetSupernet, MobileFaceNetLookUpTable

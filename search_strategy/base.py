@@ -48,6 +48,7 @@ class BaseSearcher:
 
         architectures_acc = []
         for i, architecture in enumerate(architectures_list):
+            architecture = torch.tensor(architecture)
             self.supernet.module.set_activate_architecture(architecture) if isinstance(
                 self.supernet, nn.DataParallel) else self.supernet.set_activate_architecture(architecture)
 

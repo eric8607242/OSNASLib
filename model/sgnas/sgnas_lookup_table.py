@@ -1,5 +1,5 @@
 from ..base_lookup_table import LookUpTable
-from .block_builder import get_block
+from ..block_builder import get_block
 
 class SGNASLookUpTable(LookUpTable):
     def construct_info_table(self, info_metric_list=["flops", "param", "latency"]):
@@ -22,9 +22,8 @@ class SGNASLookUpTable(LookUpTable):
 
         for l, l_cfg in enumerate(self.macro_cfg["search"]):
             in_channels, out_channels, stride = l_cfg
-            layer_info = {metric: [] for metric in info_metric_list}
 
-            hidden_channel = int(in_channels * self.max_expansion_rate)
+            hidden_channel = int(in_channels * max_expansion_rate)
 
             # Calculate pointwise info
             block = get_block(block_type="conv",
@@ -32,11 +31,10 @@ class SGNASLookUpTable(LookUpTable):
                               out_channels=hidden_channel,
                               kernel_size=1,
                               stride=1,
-                              activation=activation,
-                              se=se,
-                              bn_momentum=bn_momentum,
-                              bn_track_running_stats=bn_track_running_stats,
-                              **kwargs)
+                              activation="relu",
+                              se=False,
+                              bn_momentum=0.1,
+                              bn_track_running_stats=True)
             pointwise_info = self._get_block_info(block, in_channels, input_size, info_metric_list)
 
             # Calculate pointwise_1 info
@@ -46,16 +44,17 @@ class SGNASLookUpTable(LookUpTable):
                               kernel_size=1,
                               stride=1,
                               activation=None,
-                              se=se,
-                              bn_momentum=bn_momentum,
-                              bn_track_running_stats=bn_track_running_stats,
-                              **{"bn": False})
-            pointwise_1_info = self._get_block_info(block, in_channels, input_size, info_metric_list)
+                              se=False,
+                              bn_momentum=0.1,
+                              bn_track_running_stats=True)
+            
+            pointwise_1_info = self._get_block_info(block, hidden_channel, input_size if stride == 1 else input_size // 2, info_metric_list)
             block_in_channels = hidden_channel // max_expansion_rate
             block_out_channels = hidden_channel // max_expansion_rate
 
             for e in range(max_expansion_rate):
                 # Calculate unified sub block info
+                layer_info = {metric: [] for metric in info_metric_list}
                 for b, b_cfg in enumerate(self.micro_cfg):
                     block_type, kernel_size, se, activation, kwargs = b_cfg
                     if kernel_size == 0:
@@ -64,8 +63,8 @@ class SGNASLookUpTable(LookUpTable):
                             block_info[metric] = 0                    
                     else:
                         block = get_block(block_type=block_type,
-                                          in_channels=in_channels,
-                                          out_channels=out_channels,
+                                          in_channels=block_in_channels,
+                                          out_channels=block_out_channels,
                                           kernel_size=kernel_size,
                                           stride=stride,
                                           activation=activation,
@@ -79,14 +78,15 @@ class SGNASLookUpTable(LookUpTable):
 
                         # Count pointwise info
                         for metric in info_metric_list:
-                            block_info[metric] += (pointwise_info + pointwise_1_info) // max_expansion_rate
+                            block_info[metric] += (pointwise_info[metric] + pointwise_1_info[metric]) // max_expansion_rate
 
                     layer_info = self._merge_info_table(
                         layer_info, block_info, info_metric_list)
+                info_table = self._merge_info_table(
+                    info_table, layer_info, info_metric_list)
 
             input_size = input_size if stride == 1 else input_size // 2
-            info_table = self._merge_info_table(
-                info_table, layer_info, info_metric_list)
+
 
         return info_table
 

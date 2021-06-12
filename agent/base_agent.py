@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 
 from utils import get_logger, get_writer, set_random_seed, get_optimizer, get_lr_scheduler, resume_checkpoint
-from model import Model, get_supernet_class, LookUpTable, calculate_model_efficient
+from model import Model, calculate_model_efficient
 from criterion import get_criterion
 from dataflow import get_dataloader
 
