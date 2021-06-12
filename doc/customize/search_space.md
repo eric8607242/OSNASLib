@@ -1,5 +1,17 @@
 # How To Customize Search Space
-In OSNASLib, we cover serveral basic search space (e.g., FBNet, ProxylessNAS, and SPOS). We split the config of the search space into micro config and macro config. By designing different micro config and macro config, user can design the different search space easily. In this document, we will briefly introduce how to customize the search space in `./model/` easily.
+For customizing the search space flexibly, we provide the interface of supernet and hardware constraints lookup table. By inheriting the interface, the customizing seach space can be incorporated with other components (e.g., search strategy, training_strategy, and criterion) easily. In this document, we will briefly introduce how to customize the supernet and lookup table for your search space quickly.
+
+## Customizing Components
+There are three components you have to implement for your search space : `Superlayer`, `Supernet`, and `LookUpTable`.
+
+* `Supernet`: In `Supernet`, user should define the `macro_cfg` and the `micro_cfg` of your search space.
+    * `macro_cfg`: The macro configuration of the search space (e.g., layer number, input channels of each layer, and output channel of each layer).
+    * `micro_cfg`: The configurations of the candidate blocks in each layer (e.g., kernel size, expansion rate, and activation).
+* `Superlayer`: In `Superlayer`, user should define the structure of the supernet in each layer. For example, we can construct the blocks for each candidate configuration directly, or only construct one block to represent the all candidate configurations. Besides, to incorporate for various search strategy, there are lots of methods implement in the abstract class `Superlayer`. For different structure design of the search space, user can override the method to incorporate the search strategy easily.
+* `LookUpTable`: To make the search process can search for the specific hardware constraints (e.g., FLOPs, latency, and parameter number), `LookUpTable` is the key component for the search space. 
+
+We illustrate the three components as follow figure:
+![search_space](../../resource/search_space.png)
 
 ## Generate Template
 ```
@@ -104,6 +116,8 @@ def _get_[CUSTOMIZE NAME]_block(in_channels, out_channels, kernel_size,
 
 ## LookUpTable Interface
 For the different structure of the lookup table, we allow users to redesign the lookuptable flexibly. To customizing the lookup table, the interface class `[CUSTOMIZE CLASS]LookUpTable` should inherit the class `LookUpTable`. In `[CUSTOMIZE CLASS]LookUpTable`, user should re-implement the method `construct_info_table` to construct the info lookup table of search stage in `macro_cfg`. We provide the basic lookup table building method as default and implement lots of useful method to build the lookup table more easily. Please refer to `model/base_lookup_table.py` for more details about useful methods.
+
+> The shape of the `info_table` should same as the shape of the `model_cfg_shape` returned by `Supernet` to calculate the approximating hardware constraints.
 
 ```python3
 from ..base_lookup_table import LookUpTable

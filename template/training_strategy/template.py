@@ -3,8 +3,8 @@ from .base import BaseSampler
 class {{customize_class}}Sampler(BaseSampler):
     """ Sampler is the strategy to decide how to train each candidate block of the supernet.
     """
-    def __init__(self, micro_len, macro_len, model):
-        super({{customize_class}}, self).__init__(micro_len, macro_len, model)
+    def __init__(self, model):
+        super({{customize_class}}, self).__init__(model)
 
     def step(self):
         """ The sampler step before each iteration

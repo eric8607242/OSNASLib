@@ -53,6 +53,9 @@ In OSNASLib, we provide the example for serveral tasks. Please reference for fol
 * [Classification](./doc/example/classification.md)
 * [Face Recognition](./doc/example/face_recognition.md)
 
-## TODO
-* [ ] Documents
+## Related Resources
+* [AutoDL-Projects](https://github.com/D-X-Y/AutoDL-Projects)
+* [Awesome-AutoDL](https://github.com/D-X-Y/Awesome-AutoDL)
+* [AutoML.org](https://www.automl.org/)
+
 
