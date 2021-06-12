@@ -379,3 +379,96 @@ class IRBlock(nn.Module):
 
         return y
 
+class MixConv(nn.Module):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size_list,
+                 stride,
+                 activation,
+                 se,
+                 expansion_rate,
+                 bn_momentum,
+                 bn_track_running_stats,
+                 point_group=1):
+        """ Construct mix convolution.
+
+        As IRBlock, we first expand the feature map with the expansion rate.
+        And the expansion hidden channel size will be split into block_in_channels
+        based on the length of kernel size, which allow more fine-grained mixing convolution.
+        """
+        super(MixConv, self).__init__()
+
+        self.stride = stride
+        self.use_res_connect = self.stride == 1 and in_channels == out_channels
+
+        hidden_channel = int(in_channels * expansion_rate)
+
+        if expansion_rate == 1:
+            self.point_wise = nn.Sequential()
+        else:
+            self.point_wise = ConvBNAct(
+                in_channels=in_channels,
+                out_channels=hidden_channel,
+                kernel_size=1,
+                stride=1,
+                activation=activation,
+                bn_momentum=bn_momentum,
+                bn_track_running_stats=bn_track_running_stats,
+                group=point_group,
+                pad=0)
+
+        self.block_in_channels = hidden_channel // len(kernel_size_list)
+        self.block_out_channels = hidden_channel // len(kernel_size_list)
+        self.mixconv = nn.ModuleList()
+        for kernel_size in kernel_size_list:
+            operation = nn.Conv2d(self.block_in_channels,
+                                  self.block_out_channels,
+                                  kernel_size,
+                                  stride=stride,
+                                  padding=(kernel_size // 2),
+                                  groups=block_out_channels,
+                                  bias=False)
+            self.mixconv.append(operation)
+
+        self.bn_act = nn.Sequential()
+        self.bn_act.add_module("bn",
+                nn.BatchNorm2d(hidden_channel, 
+                    momentum=bn_momentum, 
+                    track_running_stats=bn_track_running_stats))
+
+        if activation == "relu":
+            self.bn_act.add_module("relu", nn.ReLU6(inplace=True))
+        elif activation == "hswish":
+            self.bn_act.add_module("hswish", HSwish())
+        elif activation == "prelu":
+            self.bn_act.add_module("prelu", nn.PReLU(out_channels))
+        
+        self.point_wise_1 = ConvBNAct(
+            in_channels=hidden_channel,
+            out_channels=out_channels,
+            kernel_size=1,
+            stride=1,
+            activation=None,
+            bn_momentum=bn_momentum,
+            bn_track_running_stats=bn_track_running_stats,
+            group=point_group,
+            pad=0)
+
+        self.se = SEModule(hidden_channel) if se else nn.Sequential()
+
+    def forward(self, x):
+        y = self.point_wise(x)
+
+        # Mix conv block ====================
+        split_y = torch.split(y, self.block_in_channels, dim=1)
+        y = torch.cat([block_i(y_i) for y_i, block_i in zip(split_y, self.mixconv)], dim=1)
+        y = self.bn_act(y)
+        # ==================================
+
+        y = self.se(y)
+        y = self.point_wise_1(y)
+
+        y = y + x if self.use_res_connect else y
+        return y
+

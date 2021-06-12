@@ -1,2 +1,3 @@
 from .proxylessnas_supernet import ProxylessNASSupernet
 from .proxylessnas_lookup_table import ProxylessNASLookUpTable
+from .proxylessnas_model import ProxylessNASModel

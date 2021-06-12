@@ -1,4 +1,4 @@
-from ..base import BaseSupernet, BaseSuperlayer
+from ..base_supernet import BaseSupernet, BaseSuperlayer
 
 class {{customize_class}}Superlayer(BaseSuperlayer):
     def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):

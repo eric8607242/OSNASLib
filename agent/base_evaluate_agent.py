@@ -2,7 +2,7 @@ import time
 
 from .base_agent import MetaAgent
 
-from model import Model, load_architecture, calculate_model_efficient
+from model import get_model_class, load_architecture, calculate_model_efficient
 
 
 class MetaEvaluateAgent(MetaAgent):
@@ -15,7 +15,8 @@ class MetaEvaluateAgent(MetaAgent):
         supernet_class, _ = get_search_space_class(self.config["agent"]["supernet_agent"])
         self.macro_cfg, self.micro_cfg = supernet_class.get_model_cfg(self.config["dataset"]["classes"])
 
-        model = Model(
+        model_class = get_model_class(self.config["agent"]["search_space"])
+        model = model_class(
             self.macro_cfg,
             self.micro_cfg,
             architecture,

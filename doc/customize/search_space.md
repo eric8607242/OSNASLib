@@ -1,13 +1,14 @@
 # How To Customize Search Space
-For customizing the search space flexibly, we provide the interface of supernet and hardware constraints lookup table. By inheriting the interface, the customizing seach space can be incorporated with other components (e.g., search strategy, training_strategy, and criterion) easily. In this document, we will briefly introduce how to customize the supernet and lookup table for your search space quickly.
+For customizing the search space flexibly, we provide the interface of supernet, hardware constraints lookup table and model. By inheriting the interface, the customizing seach space can be incorporated with other components (e.g., search strategy, training_strategy, and criterion) easily. In this document, we will briefly introduce how to customize the supernet, the model and the lookup table for your search space quickly.
 
 ## Customizing Components
-There are three components you have to implement for your search space : `Superlayer`, `Supernet`, and `LookUpTable`.
+There are four components you have to implement for your search space : `Superlayer`, `Supernet`, `Model`, and `LookUpTable`.
 
 * `Supernet`: In `Supernet`, user should define the `macro_cfg` and the `micro_cfg` of your search space.
     * `macro_cfg`: The macro configuration of the search space (e.g., layer number, input channels of each layer, and output channel of each layer).
     * `micro_cfg`: The configurations of the candidate blocks in each layer (e.g., kernel size, expansion rate, and activation).
 * `Superlayer`: In `Superlayer`, user should define the structure of the supernet in each layer. For example, we can construct the blocks for each candidate configuration directly, or only construct one block to represent the all candidate configurations. Besides, to incorporate for various search strategy, there are lots of methods implement in the abstract class `Superlayer`. For different structure design of the search space, user can override the method to incorporate the search strategy easily.
+* `Model`: After searching process, `Model` construct the searched architecture based on the saved best architecture indexs. Therefore, user shoud decode the architecture indexs to build the model within the interface `Model`.
 * `LookUpTable`: To make the search process can search for the specific hardware constraints (e.g., FLOPs, latency, and parameter number), `LookUpTable` is the key component for the search space. 
 
 We illustrate the three components as follow figure:
@@ -26,6 +27,7 @@ After generating the model template, the directory `[CUSTOMIZE NAME]/` will be c
     |- [CUSTOMIZE NAME]/
     |         |- __init__.py
     |         |- [CUSTOMIZE NAME]_supernet.py
+    |         |- [CUSTOMIZE NAME]_model.py
     |         -- [CUSTOMIZE NAME]_lookup_table.py
             ...
 ```
@@ -168,6 +170,26 @@ class [CUSTOMIZE CLASS]LookUpTable(LookUpTable):
 
 
         return info_table
+```
+
+## Model Interface
+After searching process, OSNASLib save the best architecture as a ndarray vector, which is the index of candidate block in each layer. Therefore, with different structure of the search space, user should implement different decode method to construct the model based on the architecture indexs. In the interface `Model`, user only need to implement the method `_construct_stage_layers()` to construct the search stages, and return a `nn.Sequential` object. With the implementation, the model will construct other stages automatically.
+
+```python3
+import torch.nn as nn
+
+from ..base_model import BaseModel
+from ..block_builder import get_block
+
+
+class {{customize_class}}Model(BaseModel):
+    def _construct_stage_layers(self, architecture):
+        """ Construct searched layers in entire search stage.
+
+        Return:
+            stages (nn.Sequential)
+        """
+        return stages
 ```
 
 

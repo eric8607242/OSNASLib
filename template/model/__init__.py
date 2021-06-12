@@ -18,6 +18,10 @@ def build_template(customize_name, customize_class=None):
     meta_template = env.get_template("supernet_template.py")
     render_file(meta_template.render(customize_class=customize_class), os.path.join(root_path, f"{customize_name}_supernet.py"))
 
+    # Create model template
+    model_template = env.get_template("model_template.py")
+    render_file(model_template.render(customize_class=customize_class), os.path.join(root_path, f"{customize_name}_model.py"))
+
     # Create lookup table template
     lookup_table_template = env.get_template("lookup_table_template.py")
     render_file(lookup_table_template.render(customize_class=customize_class), os.path.join(root_path, f"{customize_name}_lookup_table.py"))
@@ -28,4 +32,4 @@ def build_template(customize_name, customize_class=None):
     render_file(init_template.render(customize_name=customize_name, customize_class=customize_class), os.path.join(root_path, "__init__.py"))
 
     # Add import in model __init__
-    render_import(f"from .{customize_name} import {customize_class}Supernet, {customize_class}LookUpTable", os.path.join("model", "__init__.py"))
+    render_import(f"from .{customize_name} import {customize_class}Supernet, {customize_class}LookUpTable, {customize_class}Model", os.path.join("model", "__init__.py"))

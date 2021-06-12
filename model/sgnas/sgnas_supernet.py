@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-from ..base import BaseSupernet, BaseSuperlayer
+from ..base_supernet import BaseSupernet, BaseSuperlayer
 from ..block_builder import get_block
 from .sgnas_utils import UnifiedSubBlock
 

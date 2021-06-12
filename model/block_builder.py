@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .block_utils import IRBlock, ShuffleBlock, ShuffleBlockX, GlobalAveragePooling, ConvBNAct
+from .block_utils import IRBlock, ShuffleBlock, ShuffleBlockX, GlobalAveragePooling, ConvBNAct, MixConv
 
 def get_block(block_type, in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
@@ -27,6 +27,26 @@ def get_block(block_type, in_channels, out_channels, kernel_size,
     block_method = getattr(sys.modules[__name__], f"_get_{block_type}_block")
     block = block_method(in_channels, out_channels, kernel_size, 
                 stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs)
+
+    return block
+
+def _get_mixconv_block(in_channels, out_channels, kernel_size,
+        stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
+    """ Construct the mixconv block of MixNet
+    """
+    kernel_size_list = kwargs["kernel_size_list"]
+    expansion_rate = kwargs["expansion_rate"]
+
+    block = MixConv(in_channels=in_channels,
+                    out_channels=out_channels,
+                    kernel_size_list=kernel_size_list,
+                    stride=stride,
+                    activation=activation,
+                    se=se,
+                    expansion_rate=expansion_rate,
+                    bn_momentum=bn_momentum,
+                    bn_track_running_stats=bn_track_running_stats,
+                    point_group=point_group)
 
     return block
 
