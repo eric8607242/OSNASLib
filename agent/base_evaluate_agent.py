@@ -20,7 +20,6 @@ class MetaEvaluateAgent(MetaAgent):
             self.macro_cfg,
             self.micro_cfg,
             architecture)
-        print(model)
 
         calculate_model_efficient(model, 3, self.config["dataset"]["input_size"], self.logger)
 

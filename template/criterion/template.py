@@ -1,3 +1,5 @@
+import torch.nn as nn
+
 class {{customize_class}}(nn.Module):
     def __init__(self, criterion_config):
         """

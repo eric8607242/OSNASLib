@@ -16,10 +16,12 @@ After generating the criterion template, the file `CUSTOMIZE NAME` will be creat
 ```
 
 ## Criterion Interface
-For customizing criterion, the interface should iherited the class `nn.Module`. Besides, to provide more flexibility, you can pass any kind of hyperparameter by `criterion_config`, which is set in the config file.
+For customizing criterion, the interface should iherited the class `nn.Module`. Besides, to provide more flexibility, you can pass any kind of hyperparameter by the argument `criterion_config`, which is set in the config file.
 
 ```python3
 # ./criterion/[CUSTOMIZE NAME].py
+import torch.nn as nn
+
 class {{customize_class}}(nn.Module):
     def __init__(self, criterion_config):
         """

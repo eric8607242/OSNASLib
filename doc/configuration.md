@@ -6,3 +6,4 @@ In OSNASLib, we provide several example config file. For different search strate
     * `uniform_evolution.yml`
     * `uniform_random.yml`
     * `differentiable_differentiable.yml`
+

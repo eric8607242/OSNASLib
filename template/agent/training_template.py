@@ -70,7 +70,10 @@ class {{customize_class}}TrainingAgent:
             agent (Object): The search agent.
             epoch (int)
         """
-        pass
+        model.train()
+        for step, (X, y) in enumerate(train_loader):
+            agent._iteration_preprocess()
+            raise NotImplemented
 
     def _search_validate_step(self, model, val_loader, agent, epoch):
         """ The validate step for searching process.
@@ -84,6 +87,12 @@ class {{customize_class}}TrainingAgent:
         Return:
             evaluate_metric (float): The performance of the supernet
         """
+        model.eval()
+        with torch.no_grad():
+            for step, (X, y) in enumerate(val_loader):
+                agent._iteration_preprocess()
+
+                raise NotImplemented
         return evaluate_metric
 
     def _evaluate_training_step(self, model, train_loader, agent, epoch):
@@ -95,7 +104,9 @@ class {{customize_class}}TrainingAgent:
             agent (Object): The evaluate agent
             epoch (int)
         """
-        pass
+        model.train()
+        for step, (X, y) in enumerate(train_loader):
+            raise NotImplemented
 
     def _evaluate_validate_step(self, model, val_loader, agent, epoch):
         """ The training step for evaluating process (training from scratch).
@@ -109,6 +120,10 @@ class {{customize_class}}TrainingAgent:
         Return:
             evaluate_metric (float): The performance of the searched model.
         """
+        model.eval()
+        with torch.no_grad():
+            for step, (X, y) in enumerate(val_loader):
+                raise NotImplemented
         return evaluate_metric
 
     @staticmethod
@@ -125,6 +140,10 @@ class {{customize_class}}TrainingAgent:
         Return:
             evaluate_metric (float): The performance of the supernet.
         """
+        model.eval()
+        with torch.no_grad():
+            for step, (X, y) in enumerate(val_loader):
+                raise NotImplemented
         return evaluate_metric
 
 

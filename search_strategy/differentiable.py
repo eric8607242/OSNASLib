@@ -46,8 +46,8 @@ class DifferentiableSearcher(BaseSearcher):
 
         self.step_num += 1
         
-        self.supernet.module.set_forward_state("sum") if isinstance(
-            self.supernet, nn.DataParallel) else self.supernet.set_forward_state("sum")
+        self.supernet.module.set_forward_state("softmax") if isinstance(
+            self.supernet, nn.DataParallel) else self.supernet.set_forward_state("softmax")
 
         # Update architecture parameter
         self.a_optimizer.zero_grad()

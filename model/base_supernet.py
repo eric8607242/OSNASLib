@@ -80,16 +80,18 @@ class BaseSuperlayer(nn.Module):
 
         return best_architecture
 
-    def set_forward_state(self, state):
+    def set_forward_state(self, state, **kwargs):
         """ Set supernet forward state. ["gumbel_softmax", "softmax", "single", "sum"]
 
         Args:
             state (str): The state in model forward.
         """
         self.state_forward = getattr(self, f"_{state}_forward")
+        if "tau" in kwargs:
+            self.tau = kwargs["tau"]
 
     def _gumbel_softmax_forward(self, x):
-        weight = F.gumbel_softmax(self.arch_param[0], dim=0) 
+        weight = F.gumbel_softmax(self.arch_param[0], dim=0, tau=self.tau) 
         y = sum(p * b(x) for p, b in zip(weight, self.supernet_layer))
         return y
 

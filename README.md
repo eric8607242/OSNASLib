@@ -3,6 +3,10 @@
 ## Introduction
 OSNASLib is a library for one-shot neural architecture search (NAS). Recently, searching the neural architecture for various deep learning tasks (e.g., semantic segmentation, object detection, and NLP) becomes a common pipeline to improve the performance. Therefore, OSNASLib provides extremely flexible interfaces to allow researchers can incorporate different one-shot NAS algorithms into various specific tasks efficient.
 
+We illustrate OSNASLib as the following figure:
+![osnaslib](./research/osnaslib.png)
+> The regions of blue lines are the components that user can customize easily with our interface.
+
 In OSNASLib, we cover various components of one-shot NAS (e.g., search space, search strategy, and training strategy). You can incorporate any components to specify for different dataset, differnt criterion and different specific tasks easily. 
 
 * [What is neural architecture search (NAS)](./doc/nas.md)
@@ -14,6 +18,15 @@ In OSNASLib, we cover various components of one-shot NAS (e.g., search space, se
 * Researchers whose research focus is on NAS and want to validate the proposed NAS methods to various tasks (e.g., image classification and face recognition).
 
 **We are glad at all contributions to improve this repo. Please feel free to pull request.**
+
+## Requirements
+* `python3 >= 3.6`
+* `pytorch`
+Please clone the repo and install the corresponding dependency.
+```
+git clone https://github.com/eric8607242/OSNASLib
+pip install -r requirements.txt
+```
 
 ## Getting Started
 ```
