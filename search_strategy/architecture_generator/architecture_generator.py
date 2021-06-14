@@ -32,7 +32,8 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
 
         self.hc_criterion = get_hc_criterion(self.config["agent"]["hc_criterion_agent"], self.config["criterion"])
 
-        self.arch_param_nums = self.supernet.get_model_cfg_shape()
+        self.arch_param_nums = supernet.module.get_model_cfg_shape() if isinstance(supernet, nn.DataParallel) \
+                    else supernet.get_model_cfg_shape()
         self.prior_pool = PriorPool(self.lookup_table, self.arch_param_nums, self.config, self.logger)
 
         self.hardware_constraint_pool = [i for i in range(self.config["search_utility"]["lowest_hardware_constraint"], self.config["search_utility"]["highest_hardware_constraint"], 5)]
@@ -62,16 +63,20 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
         
         best_hc_loss = float("inf")
         best_ce_loss = float("inf")
+        
+        best_architecture = None
+        best_architecture_hc = None
+        
         for epoch in range(self.search_epochs):
             self.logger.info(f"Start to train the architecture generator for epoch {epoch}")
             self.logger.info(f"Tau : {tau}")
 
             self._generator_training_step(tau, epoch=epoch)
             target_val_hardware_constraint = (self.config["search_utility"]["lowest_hardware_constraint"] + self.config["search_utility"]["highest_hardware_constraint"]) / 2
-            ce_loss = self._generator_validate(target_hardware_constraint=target_val_hardware_constraint, epoch=epoch)
+            ce_loss, arch_param, arch_param_hardware_constraint = self._generator_validate(target_hardware_constraint=target_val_hardware_constraint, epoch=epoch)
 
             evaluate_metric, total_hc_loss, kendall_tau = self._evaluate_generator()
-            self.logger.info(f"The evaluating total loss : {total_loss}")
+            self.logger.info(f"The evaluating total loss : {total_hc_loss}")
             self.logger.info(f"The Kendall Tau : {kendall_tau}")
 
             if total_hc_loss < best_hc_loss:
@@ -83,8 +88,14 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
                 self.logger.info(f"The newest best ce loss achieve {ce_loss}! Save model.")
                 save(self.generator, self.config["experiment_path"]["best_acc_generator_checkpoint_path"], self.g_optimizer, None, epoch+1)
                 best_ce_loss = ce_loss
+                
+                best_architecture = arch_param.argmax(dim=-1).cpu().numpy()
+                best_architecture_hc = arch_param_hardware_constraint.item()
+                
 
             tau *= self.config["generator"]["tau_decay"]
+            
+            return best_architecture, best_architecture_hc, best_ce_loss
 
 
     def _generator_training_step(self, tau, epoch, print_freq=100):
@@ -102,7 +113,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
             arch_param_hardware_constraint = self.lookup_table.get_model_info(arch_param)
             self.logger.info(f"Generating architecture parameter hardware constraint: {arch_param_hardware_constraint.item()}")
 
-            hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint)* self.config["criterion"]["hc_weight"]
+            hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint)* self.config["arch_optim"]["a_hc_weight"]
 
             X, y = X.to(self.device, non_blocking=True), y.to(self.device, non_blocking=True)
             N = X.shape[0]
@@ -125,7 +136,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
                                  f"Loss {losses.get_avg():.3f} CE Loss {ce_losses.get_avg():.3f} HC Loss {hc_losses.get_avg():.3f}")
 
 
-    def _generator_validate(self, target_hardware_constraint, epoch):
+    def _generator_validate(self, target_hardware_constraint, epoch, print_freq=100):
         ce_losses = AverageMeter()
 
         with torch.no_grad():
@@ -136,7 +147,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
             arch_param_hardware_constraint = self.lookup_table.get_model_info(arch_param)
             self.logger.info(f"Generating architecture parameter hardware constraint: {arch_param_hardware_constraint.item()}")
 
-            hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint)* self.config["arch_optim"]["hc_weight"]
+            hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint)* self.config["arch_optim"]["a_hc_weight"]
             self.logger.info(f"Hardware loss : {hc_loss.item()}")
 
             for step, (X, y) in enumerate(self.val_loader):
@@ -153,7 +164,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
                                      f"CE Loss {ce_losses.get_avg():.3f}")
 
         ce_loss = ce_losses.get_avg()
-        return ce_loss
+        return ce_loss, arch_param, arch_param_hardware_constraint
 
 
     def _get_target_hardware_constraint(self, target_hardware_constraint=None):
@@ -211,7 +222,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
             arch_param_hardware_constraint = self.lookup_table.get_model_info(arch_param)
             self.logger.info(f"Generating architecture parameter hardware constraint: {arch_param_hardware_constraint}")
 
-            hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint) * self.config["arch_optim"]["hc_weight"]
+            hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint) * self.config["arch_optim"]["a_hc_weight"]
 
             evaluate_metric["gen_hardware_constraint"].append(arch_param_hardware_constraint.item())
             evaluate_metric["target_hardware_constraint"].append(hc)

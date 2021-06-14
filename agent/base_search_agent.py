@@ -68,10 +68,10 @@ class MetaSearchAgent(MetaAgent):
                 self.val_loader,
                 self)
 
-        best_architecture, best_architecture_hc, best_architecture_top1 = self.search_strategy.search()
+        best_architecture, best_architecture_hc, best_architecture_performance = self.search_strategy.search()
 
         self.logger.info(f"Best architectrue : {best_architecture}")
-        self.logger.info(f"Best architectrue top1 : {best_architecture_top1*100:.3f}")
+        self.logger.info(f"Best architectrue performance : {best_architecture_performance:.3f}")
         self.logger.info(f"Best architectrue hc : {best_architecture_hc}")
 
         save_architecture(self.config["experiment_path"]["searched_model_path"], best_architecture)

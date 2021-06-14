@@ -203,7 +203,7 @@ class BaseSupernet(nn.Module):
         Args:
             arch_param (torch.tensor)
         """
-        arch_param = arch_param.reshape(len(self.search_stages), -1)
+        arch_param = arch_param.reshape(len(self.search_stages), 1, -1)
         for ap, l in zip(arch_param, self.search_stages):
             l.set_arch_param(ap)
         

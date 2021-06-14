@@ -58,7 +58,7 @@ class DifferentiableSearcher(BaseSearcher):
             architecture_parameter)
 
         target_hc_tensor = torch.tensor(self.target_hc, dtype=torch.float).to(self.device)
-        hc_loss = self.hc_criterion(architecture_info, target_hc_tensor)*self.config["criterion"]["hc_weight"]
+        hc_loss = self.hc_criterion(architecture_info, target_hc_tensor)*self.config["arch_optim"]["a_hc_weight"]
 
         X, y = next(iter(self.val_loader))
         X, y = X.to(
