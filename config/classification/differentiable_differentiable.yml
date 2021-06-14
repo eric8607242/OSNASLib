@@ -7,11 +7,10 @@ agent:
     criterion_agent: "LabelSmoothingCrossEntropy"
     hc_criterion_agent: "MSELoss"
 
-target_hc: 100
-
 search_utility:
     directly_search: False
     info_metric: "flops"
+    target_hc: 100
     prior_pool_size: 1
 
 

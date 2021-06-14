@@ -6,14 +6,13 @@ agent:
 
     criterion_agent: "OnlineTripletLoss"
 
-target_hc: 350
-
 search_utility:
     directly_search: False
     generation_num: 10
     population_num: 20
     parent_num: 10
     info_metric: "flops"
+    target_hc: 350
 
 
 train:

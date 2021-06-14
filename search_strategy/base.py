@@ -25,7 +25,7 @@ class BaseSearcher:
         self.device = device
         self.logger = logger
 
-        self.target_hc = self.config["target_hc"]
+        self.target_hc = self.config["search_utility"]["target_hc"]
 
     @abc.abstractmethod
     def step(self):

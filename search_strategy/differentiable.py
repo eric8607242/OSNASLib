@@ -99,4 +99,4 @@ class DifferentiableSearcher(BaseSearcher):
                 best_architecture)
 
 
-        return best_architecture, 0, best_architecture_info
+        return best_architecture, best_architecture_info, 0

@@ -6,14 +6,13 @@ agent:
 
     criterion_agent: "LabelSmoothingCrossEntropy"
 
-target_hc: 100
-
 search_utility:
     directly_search: False
     generation_num: 2
     population_num: 10
     parent_num: 5
     info_metric: "flops"
+    target_hc: 100
 
 
 train:

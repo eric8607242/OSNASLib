@@ -3,3 +3,4 @@ torchvision==0.8.2
 tensorboardX==2.1
 tabulate==0.8.9
 Jinja2==3.0.0
+PyYAML==5.4.1

@@ -13,7 +13,7 @@ We illustrate OSNASLib as the following figure:
 * [What is neural architecture search (NAS)](./doc/nas.md)
 * [What is one-shot NAS](./doc/one_shot_nas.md)
 
-### Who Requires OSNASLib?
+### Who Needs OSNASLib?
 * NAS beginners who want to build the codebase of baseline one-shot NAS methods quickly.
 * Researchers who want to incorporate NAS into various research fields to improve performance.
 * Researchers whose research focus is on NAS and want to validate the proposed NAS methods to various tasks (e.g., image classification and face recognition).
@@ -21,8 +21,9 @@ We illustrate OSNASLib as the following figure:
 **We are glad at all contributions to improve this repo. Please feel free to pull request.**
 
 ## Requirements
-* `python3 >= 3.6`
-* `pytorch`
+* Python >= 3.6
+* torch >= 1.5.0
+
 Please clone the repo and install the corresponding dependency.
 ```
 git clone https://github.com/eric8607242/OSNASLib
@@ -37,12 +38,19 @@ optional arguments:
     --title                 The title of the experiment. All corrsponding files will be saved in the directory named with experiment title.
     -c, --config            The path to the config file. Refer to ./config/ for serveral example config file.
 ```
+### Classification
+``` python3 
+python3 main.py -c ./config/classification/uniform_evolution.py --title uniform_sampling_evolution_search
+```
+
+### Face Recognition
+``` python3 
+python3 main.py -c ./config/face_recognition/uniform_evolution.py --title uniform_sampling_evolution_search
+```
 
 More information about configuration please refer to [configuration](./doc/configuration.md).
 
 ## Customize NAS For Your Tasks
-To make customize more easily, we 
-
 ### Generate Templare
 OSNASLib provides extremely flexible interfaces to make researchers can incorporate different components of one-shot NAS for various tasks easily.
 For customizing for different components, you will need to generate some code that establishes the component template - a collection of interface for incorporating with other components.
