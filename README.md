@@ -44,7 +44,15 @@ python3 main.py -c ./config/classification/uniform_evolution.py --title uniform_
 ```
 
 ### Face Recognition
+After searching architecture for face recognition, please download the dataset first.
+```
+# Download data
+bash ./script/facedata_download.sh
+```
+> Thanks to JohnnyLord for the support of face recognition training pipeline.
 ``` python3 
+# Download data
+bash ./script/facedata_download.sh
 python3 main.py -c ./config/face_recognition/uniform_evolution.py --title uniform_sampling_evolution_search
 ```
 
