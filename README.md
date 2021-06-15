@@ -7,7 +7,7 @@ OSNASLib is a library for one-shot neural architecture search (NAS). Recently, s
 In OSNASLib, we cover various components of one-shot NAS (e.g., search space, search strategy, criterion, dataflow, train agent, and training strategy). You can customize each of them to specific for different tasks and different dataset easily.
 
 We illustrate OSNASLib as the following figure:
-![osnaslib](./resource/osnaslib.png)
+![osnaslib](./resource/osnaslib_abstract.png)
 > The regions of blue lines are the components that user can customize easily with our interface.
 
 * [What is neural architecture search (NAS)](./doc/nas.md)

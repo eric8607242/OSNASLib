@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .block_utils import IRBlock, ShuffleBlock, ShuffleBlockX, GlobalAveragePooling, ConvBNAct, MixConv
+from .block_utils import IRBlock, ShuffleBlock, ShuffleBlockX, GlobalAveragePooling, ConvBNAct, MixConv, ASPPModule
 
 def get_block(block_type, in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
@@ -174,3 +174,31 @@ def _get_skip_block(in_channels, out_channels, kernel_size,
         else:
             block = nn.Sequential()
     return block
+
+def _get_asppmodule_block(in_channels, out_channels, kernel_size,
+        stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
+    padding_list = kwargs["padding_list"]
+    dilation_list = kwargs["dilation_list"]
+
+    block = ASPPModule(in_channels_list=in_channels,
+                       out_channels=out_channels,
+                       kernel_size=kernel_size,
+                       padding_list=padding_list,
+                       dilation_list=dilation_list,
+                       bn_momentum=bn_momentum,
+                       bn_track_running_stats=bn_track_running_stats)
+    return block
+
+if __name__ == "__main__":
+    from block_utils import IRBlock, ShuffleBlock, ShuffleBlockX, GlobalAveragePooling, ConvBNAct, MixConv, ASPPModule
+    block = get_block(block_type="asppmodule",
+                      in_channels=[128, 128],
+                      out_channels=40,
+                      kernel_size=3,
+                      stride=[],
+                      activation=None,
+                      se=False,
+                      bn_momentum=0.1,
+                      bn_track_running_stats=True,
+                      **{"padding_list":[1, 2],
+                         "dilation_list":[2, 2]})

@@ -79,6 +79,7 @@ class ConvBNAct(nn.Sequential):
                  pad,
                  bn=True,
                  group=1,
+                 dilation=1,
                  *args,
                  **kwargs):
 
@@ -96,6 +97,7 @@ class ConvBNAct(nn.Sequential):
                 stride,
                 pad,
                 groups=group,
+                dilation=dilation,
                 bias=False))
         
         if bn:
@@ -471,4 +473,90 @@ class MixConv(nn.Module):
 
         y = y + x if self.use_res_connect else y
         return y
+
+class ASPPModule(nn.Module):
+    def __init__(self,
+                 in_channels_list,
+                 out_channels,
+                 kernel_size,
+                 padding_list,
+                 dilation_list,
+                 bn_momentum,
+                 bn_track_running_stats):
+        super(ASPPModule, self).__init__()
+
+        self.aspps = nn.ModuleList()
+        for i, in_channels in enumerate(in_channels_list):
+            self.aspps.append(ASPP(in_channels=in_channels,
+                                   out_channels=out_channels,
+                                   kernel_size=kernel_size,
+                                   padding=padding_list[i],
+                                   dilation=dilation_list[i],
+                                   bn_momentum=bn_momentum,
+                                   bn_track_running_stats=bn_track_running_stats))
+
+    def forward(self, xs):
+        first_y = self.aspps(xs[0])
+        first_y = F.upsample(first_y, size=(320, 320), mode="bilinear", align_corners=True)
+
+        y_list = [first_y]
+        for i in range(1, len(self.aspps)):
+            y = self.aspps[i](xs[i])
+            y = F.upsample(y, size=(320, 320), mode="bilinear", align_corners=True)
+            
+            y_list.append(y)
+
+        return sum(y_list)
+
+
+class ASPP(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, padding, dilation, bn_momentum, bn_track_running_stats):
+        super(ASPP, self).__init__()
+        self.conv_1 = ConvBNAct(in_channels=in_channels,
+                                out_channels=in_channels,
+                                kernel_size=1,
+                                stride=1,
+                                activation=None,
+                                bn_momentum=bn_momentum,
+                                bn_track_running_stats=bn_track_running_stats,
+                                pad=0)
+        self.conv_2 = ConvBNAct(in_channels=in_channels,
+                                out_channels=out_channels,
+                                kernel_size=kernel_size,
+                                stride=1,
+                                activation=None,
+                                bn_momentum=bn_momentum,
+                                bn_track_running_stats=bn_track_running_stats,
+                                pad=padding,
+                                dilation=dilation)
+        self.conv_3 = ConvBNAct(in_channels=in_channels,
+                                out_channels=in_channels,
+                                kernel_size=1,
+                                stride=1,
+                                activation=None,
+                                bn_momentum=bn_momentum,
+                                bn_track_running_stats=bn_track_running_stats,
+                                pad=0)
+
+        self.concate_conv = nn.Conv2d(in_channels*3,
+                                      out_channels,
+                                      1,
+                                      1,
+                                      0)
+
+    def forward(self, x):
+        y_1 = self.conv_1(x)
+        y_2 = self.conv_2(y_1)
+
+        y_3 = F.avg_pool2d(x, kernel_size=x.size()[2:])
+        y_3 = F.upsample(y_3, size=x.size()[2:], align_corners=True, mode="bilinear")
+        y_3 = self.conv_3(y_3)
+
+        y = torch.cat([y_1, y_2, y_3], dim=1)
+        y = self.concate_conv(y)
+
+        return y
+
+
+                
 
