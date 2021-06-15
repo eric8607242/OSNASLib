@@ -44,10 +44,10 @@ To allow each search strategy can search on each seach space. We implement vario
 from ..base import BaseSupernet, BaseSuperlayer
 
 class [CUSTOMIZE CLASS]Superlayer(BaseSuperlayer):
-    def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
+    def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats, *args, **kwargs):
         supernet_layer = nn.ModuleList()
         for b_cfg in micro_cfg:
-            block_type, kernel_size, se, activation, kwargs = b_cfg
+            block_type, kernel_size, se, activation, cfg_kwargs = b_cfg
             block = get_block(block_type=block_type,
                               in_channels=in_channels,
                               out_channels=out_channels,
@@ -57,7 +57,7 @@ class [CUSTOMIZE CLASS]Superlayer(BaseSuperlayer):
                               se=se,
                               bn_momentum=bn_momentum,
                               bn_track_running_stats=bn_track_running_stats,
-                              **kwargs
+                              **cfg_kwargs
                               )
             supernet_layer.append(block)
         return supernet_layer
@@ -184,7 +184,7 @@ from ..block_builder import get_block
 
 
 class {{customize_class}}Model(BaseModel):
-    def _construct_stage_layers(self, architecture, bn_momentum, bn_track_running_stats):
+    def _construct_stage_layers(self, architecture, bn_momentum, bn_track_running_stats, *args, **kwargs):
         """ Construct searched layers in entire search stage.
 
         Return:

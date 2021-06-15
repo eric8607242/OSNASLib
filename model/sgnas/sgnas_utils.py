@@ -16,11 +16,11 @@ class ZeroConv(nn.Module):
 
 
 class UnifiedSubBlock(BaseSuperlayer):
-    def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
+    def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats, *args, **kwargs):
         self.supernet_layer = nn.ModuleList()
         # Micro confg is  kernel size list
         for i, b_cfg in enumerate(self.micro_cfg):
-            block_type, kernel_size, se, activation, kwargs = b_cfg
+            block_type, kernel_size, se, activation, cfg_kwargs = b_cfg
             if kernel_size == 0:
                 operation = ZeroConv(in_channels=in_channels,
                                      out_channels=out_channels,
@@ -36,5 +36,5 @@ class UnifiedSubBlock(BaseSuperlayer):
                                   se=se,
                                   bn_momentum=bn_momentum,
                                   bn_track_running_stats=bn_track_running_stats,
-                                  **kwargs)
+                                  **cfg_kwargs)
             self.supernet_layer.append(operation)

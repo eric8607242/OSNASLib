@@ -5,7 +5,7 @@ from ..block_builder import get_block
 
 
 class MobileFaceNetModel(BaseModel):
-    def _construct_stage_layers(self, architecture, bn_momentum, bn_track_running_stats):
+    def _construct_stage_layers(self, architecture, bn_momentum, bn_track_running_stats, *args, **kwargs):
         """ Construct searched layers in entire search stage.
 
         Return:
@@ -15,7 +15,7 @@ class MobileFaceNetModel(BaseModel):
         for l_cfg, block_idx in zip(self.macro_cfg["search"], architecture):
             in_channels, out_channels, stride = l_cfg
 
-            block_type, kernel_size, se, activation, kwargs = self.micro_cfg[block_idx]
+            block_type, kernel_size, se, activation, cfg_kwargs = self.micro_cfg[block_idx]
             layer = get_block(block_type=block_type,
                               in_channels=in_channels,
                               out_channels=out_channels,
@@ -25,7 +25,7 @@ class MobileFaceNetModel(BaseModel):
                               se=se,
                               bn_momentum=bn_momentum,
                               bn_track_running_stats=bn_track_running_stats,
-                              **kwargs)
+                              **cfg_kwargs)
             stages.append(layer)
 
         stages = nn.Sequential(*stages)
