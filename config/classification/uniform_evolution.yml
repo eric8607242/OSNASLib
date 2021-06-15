@@ -8,19 +8,19 @@ agent:
 
 search_utility:
     directly_search: False
-    generation_num: 2
-    population_num: 10
-    parent_num: 5
+    generation_num: 20
+    population_num: 50
+    parent_num: 10
     info_metric: "flops"
-    target_hc: 100
+    target_hc: 90
 
 
 train:
     resume: False
     random_seed: 42
     device: "cuda"
-    ngpu: 1
-    epochs: 5
+    ngpu: 2
+    epochs: 100
 
     bn_track_running_stats: True
     bn_momentum: 0.1
@@ -65,7 +65,7 @@ logs_path:
 
 
 experiment_path:
-    resume_path: "./best_checkpoint.pth"
+    resume_path: "./checkpoints/search_99.pth"
     checkpoint_root_path: "./checkpoints/"
     best_checkpoint_path: "./best_checkpoint.pth"
 

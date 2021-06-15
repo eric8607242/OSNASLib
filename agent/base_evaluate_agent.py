@@ -22,16 +22,14 @@ class MetaEvaluateAgent(MetaAgent):
             architecture)
 
         calculate_model_efficient(model, 3, self.config["dataset"]["input_size"], self.logger)
-
+        
         self.model = model.to(self.device)
         self.model = self._parallel_process(self.model)
 
         self._optimizer_init(self.model)
         # =================================================================================
-
         # Resume checkpoint ===============================================================
         self._resume(self.model)
-
 
     def fit(self):
         """ Fit evalating process.

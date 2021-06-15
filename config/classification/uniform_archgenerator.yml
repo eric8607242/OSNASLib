@@ -11,30 +11,28 @@ search_utility:
     directly_search: True
     random_iteration: 10
     info_metric: "flops"
-    target_hc: 100
-    lowest_hardware_constraint: 80
-    highest_hardware_constraint: 120
+    target_hc: 27
+    lowest_hardware_constraint: 20
+    highest_hardware_constraint: 35
     prior_pool_size: 1
 
 
 generator:
     hc_dim: 10
     tau_decay: 0.95
-    epochs: 50
+    epochs: 20
 
 train:
-    resume: False
+    resume: True
     random_seed: 42
     device: "cuda"
     ngpu: 1
-    epochs: 5
+    epochs: 1
 
     bn_track_running_stats: True
     bn_momentum: 0.1
 
-criterion:
-    hc_weight: 0.0003
- 
+criterion: 
 
 dataset:
     dataset: "cifar100"
@@ -59,6 +57,7 @@ optim:
     decay_ratio: 0.1
 
 arch_optim:
+    a_hc_weight: 0.001
     a_optimizer: "adam"
     a_lr: 0.001
     a_weight_decay: 0
@@ -72,7 +71,7 @@ logs_path:
 
 
 experiment_path:
-    resume_path: "./best_checkpoint.pth"
+    resume_path: "./checkpoints/search_99.pth"
     checkpoint_root_path: "./checkpoints/"
     best_checkpoint_path: "./best_checkpoint.pth"
 

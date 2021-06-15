@@ -72,7 +72,8 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
             self.logger.info(f"Tau : {tau}")
 
             self._generator_training_step(tau, epoch=epoch)
-            target_val_hardware_constraint = (self.config["search_utility"]["lowest_hardware_constraint"] + self.config["search_utility"]["highest_hardware_constraint"]) / 2
+#             target_val_hardware_constraint = (self.config["search_utility"]["lowest_hardware_constraint"] + self.config["search_utility"]["highest_hardware_constraint"]) / 2
+            target_val_hardware_constraint = self.config["search_utility"]["target_hc"]
             ce_loss, arch_param, arch_param_hardware_constraint = self._generator_validate(target_hardware_constraint=target_val_hardware_constraint, epoch=epoch)
 
             evaluate_metric, total_hc_loss, kendall_tau = self._evaluate_generator()
@@ -84,7 +85,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
                 save(self.generator, self.config["experiment_path"]["best_loss_generator_checkpoint_path"], self.g_optimizer, None, epoch+1)
                 best_hc_loss = total_hc_loss
 
-            if ce_loss < best_ce_loss:
+            if ce_loss < best_ce_loss and total_hc_loss < 0.05:
                 self.logger.info(f"The newest best ce loss achieve {ce_loss}! Save model.")
                 save(self.generator, self.config["experiment_path"]["best_acc_generator_checkpoint_path"], self.g_optimizer, None, epoch+1)
                 best_ce_loss = ce_loss
@@ -95,7 +96,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
 
             tau *= self.config["generator"]["tau_decay"]
             
-            return best_architecture, best_architecture_hc, best_ce_loss
+        return best_architecture, best_architecture_hc, best_ce_loss
 
 
     def _generator_training_step(self, tau, epoch, print_freq=100):
@@ -111,7 +112,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
             arch_param = self._set_arch_param(arch_param, tau)
 
             arch_param_hardware_constraint = self.lookup_table.get_model_info(arch_param)
-            self.logger.info(f"Generating architecture parameter hardware constraint: {arch_param_hardware_constraint.item()}")
+            self.logger.info(f"[Train] Generating architecture parameter hardware constraint: {arch_param_hardware_constraint.item()}")
 
             hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint)* self.config["arch_optim"]["a_hc_weight"]
 
@@ -122,7 +123,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
 
             ce_loss = self.criterion(outs, y)
             total_loss = ce_loss + hc_loss
-            self.logger.info(f"Hardware loss : {hc_loss.item()}")
+            self.logger.info(f"[Train] Hardware loss : {hc_loss.item()}")
 
             total_loss.backward()
             self.g_optimizer.step()
@@ -145,10 +146,10 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
             arch_param = self._set_arch_param(arch_param)
 
             arch_param_hardware_constraint = self.lookup_table.get_model_info(arch_param)
-            self.logger.info(f"Generating architecture parameter hardware constraint: {arch_param_hardware_constraint.item()}")
+            self.logger.info(f"[Val] Generating architecture parameter hardware constraint: {arch_param_hardware_constraint.item()}")
 
             hc_loss = self.hc_criterion(arch_param_hardware_constraint, target_hardware_constraint)* self.config["arch_optim"]["a_hc_weight"]
-            self.logger.info(f"Hardware loss : {hc_loss.item()}")
+            self.logger.info(f"[Val] Hardware loss : {hc_loss.item()}")
 
             for step, (X, y) in enumerate(self.val_loader):
                 X, y = X.to(self.device, non_blocking=True), y.to(self.device, non_blocking=True)
@@ -211,7 +212,7 @@ class ArchitectureGeneratorSearcher(BaseSearcher):
 
         hc_count = 0
         total_loss = 0
-        for hc in range(self.config["search_utility"]["lowest_hardware_constraint"], self.config["search_utility"]["highest_hardware_constraint"], 10):
+        for hc in range(self.config["search_utility"]["lowest_hardware_constraint"], self.config["search_utility"]["highest_hardware_constraint"], 3):
             hc_count += 1
             target_hardware_constraint = self._get_target_hardware_constraint(hc)
 

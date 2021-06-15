@@ -79,8 +79,8 @@ class MetaAgent:
             self.start_epochs = resume_checkpoint(
                     model,
                     self.config["experiment_path"]["resume_path"],
-                    self.optimizer,
-                    self.lr_scheduler)
+                    None,
+                    None)
             self.logger.info(
                 "Resume training from {} at epoch {}".format(
                     self.config["experiment_path"]["resume_path"], self.start_epochs))

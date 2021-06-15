@@ -15,14 +15,16 @@ class MetaSearchAgent(MetaAgent):
         """
         supernet_class, lookup_table_class = get_search_space_class(self.config["agent"]["search_space_agent"])
         # Construct model and correspond optimizer ======================================
-        supernet = supernet_class(
+        self.supernet = supernet_class(
             self.config["dataset"]["classes"],
             self.config["dataset"]["dataset"],
             bn_momentum=self.config["train"]["bn_momentum"],
             bn_track_running_stats=self.config["train"]["bn_track_running_stats"])
-        self.macro_cfg, self.micro_cfg = supernet.get_model_cfg(self.config["dataset"]["classes"])
+        self.macro_cfg, self.micro_cfg = self.supernet.get_model_cfg(self.config["dataset"]["classes"])
         
-        self.supernet = supernet.to(self.device)
+        self._resume(self.supernet)
+        
+        self.supernet.to(self.device)
         self.supernet = self._parallel_process(self.supernet)
 
         self._optimizer_init(self.supernet)
@@ -52,8 +54,7 @@ class MetaSearchAgent(MetaAgent):
                 self.device, self.criterion, self.logger)
 
         # Resume checkpoint ===============================================================
-        self._resume(self.supernet)
-
+        
     def fit(self):
         """ Fit searching process.
         Training the supernet and searching the architecture by the search strategy.

@@ -25,7 +25,8 @@ class BaseSuperlayer(nn.Module):
         raise NotImplemented
     
     def forward(self, x):
-        y = self.state_forward(x)
+        state_forward = getattr(self, f"_{self.forward_state}_forward")
+        y = state_forward(x)
 
         return y
 
@@ -86,7 +87,7 @@ class BaseSuperlayer(nn.Module):
         Args:
             state (str): The state in model forward.
         """
-        self.state_forward = getattr(self, f"_{state}_forward")
+        self.forward_state = state
         if "tau" in kwargs:
             self.tau = kwargs["tau"]
 

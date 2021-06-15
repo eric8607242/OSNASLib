@@ -27,6 +27,9 @@ class RandomSearcher(BaseSearcher):
             best_architecture_hc (float)
             best_architecture_top1 (float)
         """
+        self.supernet.module.set_forward_state("single") if isinstance(
+            self.supernet, nn.DataParallel) else self.supernet.set_forward_state("single")
+        
         random_architectures = []
         for i in range(self.random_iteration):
             self.logger.info("Architecture index : {}".format(i))

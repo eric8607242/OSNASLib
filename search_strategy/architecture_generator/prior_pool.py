@@ -28,7 +28,7 @@ class PriorPool:
 
         pool_interval = (high_info_metric - low_info_metric) // (prior_pool_size + 1)
 
-        for metric in range(low_info_metric+pool_interval, high_info_metric, pool_interval):
+        for i, metric in enumerate(range(low_info_metric+pool_interval, high_info_metric, pool_interval)):
             generate_metric, arch_param = self._generate_arch_param()
 
             while generate_metric > metric + bias or \
@@ -37,6 +37,8 @@ class PriorPool:
 
             prior_pool[str(metric)] = arch_param.tolist()
             self.logger.info(f"Target metric : {metric}, Prior generate : {generate_metric}")
+            if i == prior_pool_size - 1:
+                break
         return prior_pool
 
 

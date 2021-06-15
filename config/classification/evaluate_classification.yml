@@ -7,8 +7,8 @@ train:
     resume: False
     random_seed: 42
     device: "cuda"
-    ngpu: 1
-    epochs: 10
+    ngpu: 2
+    epochs: 150
 
     bn_track_running_stats: True
     bn_momentum: 0.1
@@ -28,7 +28,7 @@ dataset:
 optim:
     optimizer: "sgd"
     lr: 0.045
-    weight_decay: 0.00004
+    weight_decay: 0.0004
     momentum: 0.9
     alpha: 0.9
     beta: 0.99

@@ -53,7 +53,7 @@ class ProxylessNASSupernet(BaseSupernet):
             "first": [["conv", 3, 32, 2, 3, "relu", False, {}],  # stride 1 for CIFAR
                       ["mobile", 32, 16, 1, 3, "relu", False, {"expansion_rate": 1}]],
             # in_channels, out_channels, stride
-            "search": [[16, 24, 2],  # stride 1 for CIFAR
+            "search": [[16, 24, 1],  # stride 1 for CIFAR
                        [24, 24, 1],
                        [24, 24, 1],
                        [24, 24, 1],

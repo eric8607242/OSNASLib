@@ -52,6 +52,7 @@ optim:
 
 arch_optim:
     a_optimizer: "adam"
+    a_hc_weight: 0.0003
     a_lr: 0.001
     a_weight_decay: 0
     a_momentum: 0
