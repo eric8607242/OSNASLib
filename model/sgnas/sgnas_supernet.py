@@ -185,7 +185,7 @@ class SGNASSupernet(BaseSupernet):
         micro_cfg = [["conv", 3, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
                     ["conv", 5, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
                     ["conv", 7, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
-                    ["skip", 0, False, None, {"max_expansion_rate": 6, "min_expansion_rate": 2}]]
+                    ["zero", 0, False, None, {"max_expansion_rate": 6, "min_expansion_rate": 2}]]
 
         macro_cfg = {
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
