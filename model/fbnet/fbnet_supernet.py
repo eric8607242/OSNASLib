@@ -62,7 +62,7 @@ class FBNetSSupernet(BaseSupernet):
             "first": [["conv", 3, 16, 2, 3, "relu", False, {}]],  # stride 1 for CIFAR
             # in_channels, out_channels, stride
             "search": [[16, 16, 1],
-                       [16, 24, 2],  # stride 1 for CIFAR
+                       [16, 24, 1],  # stride 1 for CIFAR
                        [24, 24, 1],
                        [24, 24, 1],
                        [24, 24, 1],
@@ -125,7 +125,7 @@ class FBNetLSupernet(BaseSupernet):
             "first": [["conv", 3, 16, 2, 3, "relu", False, {}]],  # stride 1 for CIFAR
             # in_channels, out_channels, stride
             "search": [[16, 16, 1],
-                       [16, 24, 2],  # stride 1 for CIFAR
+                       [16, 24, 1],  # stride 1 for CIFAR
                        [24, 24, 1],
                        [24, 24, 1],
                        [24, 24, 1],

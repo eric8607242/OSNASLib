@@ -59,7 +59,7 @@ class LookUpTable:
             architecture_parameter = self._architecture_to_one_hot(
                 architecture_parameter)
         else:
-            architecture_parameter = architecture_parameter.reshape(len(self.macro_cfg["search"]), len(self.micro_cfg))
+            architecture_parameter = architecture_parameter.reshape(self.macro_len, self.micro_len)
         model_info = []
         for i, l_ap in enumerate(architecture_parameter):
             model_info.extend(

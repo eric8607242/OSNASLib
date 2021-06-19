@@ -179,6 +179,16 @@ def _get_sepconv_block(in_channels, out_channels, kernel_size,
                       dilation=dilation)
     return block
 
+def _get_depthwise_conv_block(in_channels, out_channels, kernel_size,
+        stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
+    """
+    Construct the convolution block
+    """
+    kwargs["group"] = out_channels
+    return _get_conv_block(in_channels, out_channels, kernel_size,
+                                stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs)
+
+
 
 def _get_skip_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):

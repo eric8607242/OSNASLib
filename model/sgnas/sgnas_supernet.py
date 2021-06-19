@@ -182,9 +182,9 @@ class SGNASSupernet(BaseSupernet):
             micro_cfg (list): The all configurations in each layer of supernet.
         """
         # block_type, kernel_size, se, activation, kwargs
-        micro_cfg = [["conv", 3, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
-                    ["conv", 5, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
-                    ["conv", 7, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
+        micro_cfg = [["depthwise_conv", 3, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
+                    ["depthwise_conv", 5, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
+                    ["depthwise_conv", 7, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
                     ["zero", 0, False, None, {"max_expansion_rate": 6, "min_expansion_rate": 2}]]
 
         macro_cfg = {
@@ -192,7 +192,7 @@ class SGNASSupernet(BaseSupernet):
             "first": [["conv", 3, 32, 2, 3, "relu", False, {}],  # stride 1 for CIFAR
                       ["mobile", 32, 16, 1, 3, "relu", False, {"expansion_rate": 1}]],
             # in_channels, out_channels, stride
-            "search": [[16, 24, 2],  # stride 1 for CIFAR
+            "search": [[16, 24, 1],  # stride 1 for CIFAR
                        [24, 24, 1],
                        [24, 24, 1],
                        [24, 24, 1],
