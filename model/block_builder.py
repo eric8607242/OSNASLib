@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .block_utils import IRBlock, ShuffleBlock, ShuffleBlockX, GlobalAveragePooling, ConvBNAct, MixConv
+from .block_utils import IRBlock, ShuffleBlock, ShuffleBlockX, GlobalAveragePooling, ConvBNAct, MixConv, ASPPModule, SepConvBNAct, Zero
 
 def get_block(block_type, in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
@@ -140,6 +140,9 @@ def _get_conv_block(in_channels, out_channels, kernel_size,
     """
     group = kwargs["group"] if "group" in kwargs else 1
     bn = kwargs["bn"] if "bn" in kwargs else True
+    dilation = kwargs["dilation"] if "dilation" in kwargs else 1
+    padding = kwargs["padding"] if "padding" in kwargs else (kernel_size // 2)
+
     block = ConvBNAct(in_channels=in_channels,
                       out_channels=out_channels,
                       kernel_size=kernel_size,
@@ -149,7 +152,31 @@ def _get_conv_block(in_channels, out_channels, kernel_size,
                       bn_track_running_stats=bn_track_running_stats,
                       bn=bn,
                       group=group,
-                      pad=(kernel_size // 2))
+                      pad=padding,
+                      dilation=dilation)
+    return block
+
+def _get_sepconv_block(in_channels, out_channels, kernel_size,
+        stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
+    """
+    Construct the convolution block
+    """
+    group = kwargs["group"] if "group" in kwargs else 1
+    bn = kwargs["bn"] if "bn" in kwargs else True
+    dilation = kwargs["dilation"] if "dilation" in kwargs else 1
+    padding = kwargs["padding"] if "padding" in kwargs else (kernel_size // 2)
+
+    block = SepConvBNAct(in_channels=in_channels,
+                      out_channels=out_channels,
+                      kernel_size=kernel_size,
+                      stride=stride,
+                      activation=activation,
+                      bn_momentum=bn_momentum,
+                      bn_track_running_stats=bn_track_running_stats,
+                      bn=bn,
+                      group=group,
+                      pad=padding,
+                      dilation=dilation)
     return block
 
 def _get_depthwise_conv_block(in_channels, out_channels, kernel_size,
@@ -184,3 +211,53 @@ def _get_skip_block(in_channels, out_channels, kernel_size,
         else:
             block = nn.Sequential()
     return block
+
+def _get_asppmodule_block(in_channels, out_channels, kernel_size,
+        stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
+    padding_list = kwargs["padding_list"]
+    dilation_list = kwargs["dilation_list"]
+
+    block = ASPPModule(in_channels_list=in_channels,
+                       out_channels=out_channels,
+                       kernel_size=kernel_size,
+                       padding_list=padding_list,
+                       dilation_list=dilation_list,
+                       bn_momentum=bn_momentum,
+                       bn_track_running_stats=bn_track_running_stats)
+    return block
+
+def _get_avgpool_block(in_channels, out_channels, kernel_size,
+        stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
+    padding = kwargs["padding"] if "padding" in kwargs else (kernel_size // 2)
+
+    block = nn.AvgPool2d(kernel_size, stride=stride, padding, count_include_pad=False)
+    return block
+
+def _get_maxpool_block(in_channels, out_channels, kernel_size,
+        stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
+    padding = kwargs["padding"] if "padding" in kwargs else (kernel_size // 2)
+
+    block = nn.MaxPool2d(kernel_size, stride=stride, padding)
+    return block
+
+def _get_zero_block(in_channels, out_channels, kernel_size,
+        stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
+    block = Zero(in_channels=in_channels,
+                 out_channels=out_channels,
+                 stride=stride)
+    return block
+
+
+if __name__ == "__main__":
+    from block_utils import IRBlock, ShuffleBlock, ShuffleBlockX, GlobalAveragePooling, ConvBNAct, MixConv, ASPPModule
+    block = get_block(block_type="asppmodule",
+                      in_channels=[128, 128],
+                      out_channels=40,
+                      kernel_size=3,
+                      stride=[],
+                      activation=None,
+                      se=False,
+                      bn_momentum=0.1,
+                      bn_track_running_stats=True,
+                      **{"padding_list":[1, 2],
+                         "dilation_list":[2, 2]})

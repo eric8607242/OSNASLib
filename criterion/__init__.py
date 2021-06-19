@@ -22,3 +22,4 @@ def get_hc_criterion(name, criterion_config):
 # Import customizing module (Do not delete this line)
 from .lscrossentropy import LabelSmoothingCrossEntropy
 from .tripletloss import OnlineTripletLoss
+from .focalloss import FocalLoss

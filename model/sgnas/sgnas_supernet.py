@@ -8,7 +8,7 @@ from .sgnas_utils import UnifiedSubBlock
 class SGNASSuperlayer(BaseSuperlayer):
     """ The unified block in SGNAS
     """
-    def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
+    def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats, *args, **kwargs):
         """ Construct the supernet layer module.
         """
         self.use_res_connect = stride == 1 and in_channels == out_channels
@@ -17,9 +17,9 @@ class SGNASSuperlayer(BaseSuperlayer):
         for b_cfg in self.micro_cfg:
             self.kernel_size_list.append(b_cfg[1])
 
-        _, _, _, _, kwargs = self.micro_cfg[0]        
-        self.max_expansion_rate = kwargs["max_expansion_rate"]
-        self.min_expansion_rate = kwargs["min_expansion_rate"]
+        _, _, _, _, cfg_kwargs = self.micro_cfg[0]        
+        self.max_expansion_rate = cfg_kwargs["max_expansion_rate"]
+        self.min_expansion_rate = cfg_kwargs["min_expansion_rate"]
 
         hidden_channel = int(in_channels * self.max_expansion_rate)
 
@@ -32,7 +32,7 @@ class SGNASSuperlayer(BaseSuperlayer):
                               se=False,
                               bn_momentum=bn_momentum,
                               bn_track_running_stats=bn_track_running_stats,
-                              **kwargs
+                              **cfg_kwargs
                               )
 
 
@@ -185,7 +185,7 @@ class SGNASSupernet(BaseSupernet):
         micro_cfg = [["depthwise_conv", 3, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
                     ["depthwise_conv", 5, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
                     ["depthwise_conv", 7, False, "relu", {"max_expansion_rate": 6, "min_expansion_rate": 2}],
-                    ["skip", 0, False, None, {"max_expansion_rate": 6, "min_expansion_rate": 2}]]
+                    ["zero", 0, False, None, {"max_expansion_rate": 6, "min_expansion_rate": 2}]]
 
         macro_cfg = {
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs

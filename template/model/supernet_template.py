@@ -1,12 +1,12 @@
 from ..base_supernet import BaseSupernet, BaseSuperlayer
 
 class {{customize_class}}Superlayer(BaseSuperlayer):
-    def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
+    def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats, *args, **kwargs):
         """ Construct the supernet layer module.
         """
         self.supernet_layer = nn.ModuleList()
         for b_cfg in self.micro_cfg:
-            block_type, kernel_size, se, activation, kwargs = b_cfg
+            block_type, kernel_size, se, activation, cfg_kwargs = b_cfg
             block = get_block(block_type=block_type,
                               in_channels=in_channels,
                               out_channels=out_channels,
@@ -16,7 +16,7 @@ class {{customize_class}}Superlayer(BaseSuperlayer):
                               se=se,
                               bn_momentum=bn_momentum,
                               bn_track_running_stats=bn_track_running_stats,
-                              **kwargs
+                              **cfg_kwargs
                               )
             self.supernet_layer.append(block)
 

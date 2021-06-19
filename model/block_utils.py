@@ -6,46 +6,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-def make_divisible(x, divisible_by=8):
-    return int(np.ceil(x * 1. / divisible_by) * divisible_by)
-
-
-def conv_1x1_bn(in_channels,
-                out_channels,
-                activation,
-                bn_momentum,
-                bn_track_running_stats):
-    if activation == "relu":
-        return nn.Sequential(
-            nn.Conv2d(
-                in_channels,
-                out_channels,
-                1,
-                1,
-                0,
-                bias=False),
-            nn.BatchNorm2d(
-                out_channels,
-                momentum=bn_momentum,
-                track_running_stats=bn_track_running_stats),
-            nn.ReLU6(
-                inplace=True))
-    elif activation == "hswish":
-        return nn.Sequential(
-            nn.Conv2d(
-                in_channels,
-                out_channels,
-                1,
-                1,
-                0,
-                bias=False),
-            nn.BatchNorm2d(
-                out_channels,
-                momentum=bn_momentum,
-                track_running_stats=bn_track_running_stats),
-            HSwish())
-
-
 class GlobalAveragePooling(nn.Module):
     def forward(self, x):
         return x.mean(3).mean(2)
@@ -76,9 +36,10 @@ class ConvBNAct(nn.Sequential):
                  activation,
                  bn_momentum,
                  bn_track_running_stats,
-                 pad,
+                 padding,
                  bn=True,
                  group=1,
+                 dilation=1,
                  *args,
                  **kwargs):
 
@@ -94,8 +55,9 @@ class ConvBNAct(nn.Sequential):
                 out_channels,
                 kernel_size,
                 stride,
-                pad,
+                padding,
                 groups=group,
+                dilation=dilation,
                 bias=False))
         
         if bn:
@@ -113,6 +75,64 @@ class ConvBNAct(nn.Sequential):
         elif activation == "prelu":
             self.add_module("prelu", nn.PReLU(out_channels))
 
+class SepConvBNAct(nn.Sequential):
+    def __init__(self,
+                 in_channels,
+                 out_channels,
+                 kernel_size,
+                 stride,
+                 activation,
+                 bn_momentum,
+                 bn_track_running_stats,
+                 padding,
+                 bn=True,
+                 group=1,
+                 dilation=1,
+                 *args,
+                 **kwargs):
+
+        super(ConvBNAct, self).__init__()
+
+        assert activation in ["hswish", "relu", "prelu", None]
+        assert stride in [1, 2, 4]
+        self.add_module(
+            "conv_1",
+            nn.Conv2d(
+                in_channels,
+                in_channels,
+                kernel_size,
+                stride,
+                padding,
+                groups=group,
+                dilation=dilation,
+                bias=False))
+
+        self.add_module(
+            "conv_2",
+            nn.Conv2d(
+                in_channels,
+                out_channels,
+                1,
+                stride,
+                padding,
+                groups=group,
+                dilation=dilation,
+                bias=False))
+        
+        if bn:
+            self.add_module(
+                "bn",
+                nn.BatchNorm2d(
+                    out_channels,
+                    momentum=bn_momentum,
+                    track_running_stats=bn_track_running_stats))
+
+        if activation == "relu":
+            self.add_module("relu", nn.ReLU6(inplace=True))
+        elif activation == "hswish":
+            self.add_module("hswish", HSwish())
+        elif activation == "prelu":
+            self.add_module("prelu", nn.PReLU(out_channels))
 
 class SEModule(nn.Module):
     def __init__(self,
@@ -177,7 +197,7 @@ class ShuffleBlockX(nn.Module):
                     activation=None,
                     bn_momentum=bn_momentum,
                     bn_track_running_stats=bn_track_running_stats,
-                    pad=(
+                    padding=(
                         3 // 2),
                     group=in_channels),
                 ConvBNAct(
@@ -188,7 +208,7 @@ class ShuffleBlockX(nn.Module):
                     activation=activation,
                     bn_momentum=bn_momentum,
                     bn_track_running_stats=bn_track_running_stats,
-                    pad=0))
+                    padding=0))
         else:
             self.branch_1 = nn.Sequential()
 
@@ -207,7 +227,7 @@ class ShuffleBlockX(nn.Module):
                           activation=None,
                           bn_momentum=bn_momentum,
                           bn_track_running_stats=bn_track_running_stats,
-                          pad=(3 // 2),
+                          padding=(3 // 2),
                           group=oc1))
             branch_2.append(
                 ConvBNAct(in_channels=oc1,
@@ -217,7 +237,7 @@ class ShuffleBlockX(nn.Module):
                           activation=activation,
                           bn_momentum=bn_momentum,
                           bn_track_running_stats=bn_track_running_stats,
-                          pad=0)
+                          padding=0)
             )
         self.branch_2 = nn.Sequential(*branch_2)
 
@@ -256,7 +276,7 @@ class ShuffleBlock(nn.Module):
                     activation=None,
                     bn_momentum=bn_momentum,
                     bn_track_running_stats=bn_track_running_stats,
-                    pad=(
+                    padding=(
                         kernel_size // 2),
                     group=in_channels),
                 ConvBNAct(
@@ -267,7 +287,7 @@ class ShuffleBlock(nn.Module):
                     activation=activation,
                     bn_momentum=bn_momentum,
                     bn_track_running_stats=bn_track_running_stats,
-                    pad=0))
+                    padding=0))
         else:
             self.branch_1 = nn.Sequential()
 
@@ -280,7 +300,7 @@ class ShuffleBlock(nn.Module):
                 activation=activation,
                 bn_momentum=bn_momentum,
                 bn_track_running_stats=bn_track_running_stats,
-                pad=0),
+                padding=0),
             ConvBNAct(
                 in_channels=branch_out_channels,
                 out_channels=branch_out_channels,
@@ -289,7 +309,7 @@ class ShuffleBlock(nn.Module):
                 activation=None,
                 bn_momentum=bn_momentum,
                 bn_track_running_stats=bn_track_running_stats,
-                pad=(
+                padding=(
                     kernel_size // 2),
                 group=branch_out_channels),
             ConvBNAct(
@@ -300,7 +320,7 @@ class ShuffleBlock(nn.Module):
                 activation=activation,
                 bn_momentum=bn_momentum,
                 bn_track_running_stats=bn_track_running_stats,
-                pad=0))
+                padding=0))
 
     def forward(self, x):
         if self.stride == 1:
@@ -343,7 +363,7 @@ class IRBlock(nn.Module):
                 bn_momentum=bn_momentum,
                 bn_track_running_stats=bn_track_running_stats,
                 group=point_group,
-                pad=0)
+                padding=0)
         self.depthwise = ConvBNAct(
             in_channels=hidden_channel,
             out_channels=hidden_channel,
@@ -352,7 +372,7 @@ class IRBlock(nn.Module):
             activation=activation,
             bn_momentum=bn_momentum,
             bn_track_running_stats=bn_track_running_stats,
-            pad=(
+            padding=(
                 kernel_size // 2),
             group=hidden_channel)
 
@@ -365,7 +385,7 @@ class IRBlock(nn.Module):
             bn_momentum=bn_momentum,
             bn_track_running_stats=bn_track_running_stats,
             group=point_group,
-            pad=0)
+            padding=0)
 
         self.se = SEModule(hidden_channel) if se else nn.Sequential()
 
@@ -416,7 +436,7 @@ class MixConv(nn.Module):
                 bn_momentum=bn_momentum,
                 bn_track_running_stats=bn_track_running_stats,
                 group=point_group,
-                pad=0)
+                padding=0)
 
         self.block_in_channels = hidden_channel // len(kernel_size_list)
         self.block_out_channels = hidden_channel // len(kernel_size_list)
@@ -453,7 +473,7 @@ class MixConv(nn.Module):
             bn_momentum=bn_momentum,
             bn_track_running_stats=bn_track_running_stats,
             group=point_group,
-            pad=0)
+            padding=0)
 
         self.se = SEModule(hidden_channel) if se else nn.Sequential()
 
@@ -471,4 +491,108 @@ class MixConv(nn.Module):
 
         y = y + x if self.use_res_connect else y
         return y
+
+class ASPPModule(nn.Module):
+    def __init__(self,
+                 in_channels_list,
+                 out_channels,
+                 kernel_size,
+                 padding_list,
+                 dilation_list,
+                 bn_momentum,
+                 bn_track_running_stats):
+        super(ASPPModule, self).__init__()
+
+        self.aspps = nn.ModuleList()
+        for i, in_channels in enumerate(in_channels_list):
+            self.aspps.append(ASPP(in_channels=in_channels,
+                                   out_channels=out_channels,
+                                   kernel_size=kernel_size,
+                                   padding=padding_list[i],
+                                   dilation=dilation_list[i],
+                                   bn_momentum=bn_momentum,
+                                   bn_track_running_stats=bn_track_running_stats))
+
+    def forward(self, xs):
+        first_y = self.aspps(xs[0])
+        first_y = F.upsample(first_y, size=(320, 320), mode="bilinear", align_corners=True)
+
+        y_list = [first_y]
+        for i in range(1, len(self.aspps)):
+            y = self.aspps[i](xs[i])
+            y = F.upsample(y, size=(320, 320), mode="bilinear", align_corners=True)
+            
+            y_list.append(y)
+
+        return sum(y_list)
+
+
+class ASPP(nn.Module):
+    def __init__(self, in_channels, out_channels, kernel_size, padding, dilation, bn_momentum, bn_track_running_stats):
+        super(ASPP, self).__init__()
+        self.conv_1 = ConvBNAct(in_channels=in_channels,
+                                out_channels=in_channels,
+                                kernel_size=1,
+                                stride=1,
+                                activation=None,
+                                bn_momentum=bn_momentum,
+                                bn_track_running_stats=bn_track_running_stats,
+                                padding=0)
+        self.conv_2 = ConvBNAct(in_channels=in_channels,
+                                out_channels=out_channels,
+                                kernel_size=kernel_size,
+                                stride=1,
+                                activation=None,
+                                bn_momentum=bn_momentum,
+                                bn_track_running_stats=bn_track_running_stats,
+                                padding=padding,
+                                dilation=dilation)
+        self.conv_3 = ConvBNAct(in_channels=in_channels,
+                                out_channels=in_channels,
+                                kernel_size=1,
+                                stride=1,
+                                activation=None,
+                                bn_momentum=bn_momentum,
+                                bn_track_running_stats=bn_track_running_stats,
+                                padding=0)
+
+        self.concate_conv = nn.Conv2d(in_channels*3,
+                                      out_channels,
+                                      1,
+                                      1,
+                                      0)
+
+    def forward(self, x):
+        y_1 = self.conv_1(x)
+        y_2 = self.conv_2(y_1)
+
+        y_3 = F.avg_pool2d(x, kernel_size=x.size()[2:])
+        y_3 = F.upsample(y_3, size=x.size()[2:], align_corners=True, mode="bilinear")
+        y_3 = self.conv_3(y_3)
+
+        y = torch.cat([y_1, y_2, y_3], dim=1)
+        y = self.concate_conv(y)
+
+        return y
+
+
+
+class Zero(nn.Module):
+    def __init__(self, in_channels, out_channels, stride):
+        super(Zero, self).__init__()
+        self.stride = stride
+
+        self.conv_flag = False
+        if in_channels != out_channels:
+            self.conv_flag = True
+            self.zero_conv = nn.Conv2d(in_channels, out_channels, 1, stride=stride, bias=False)
+
+    def forward(self, x):
+        if self.conv_flag:
+            return self.zero_conv(x)
+        return x[:,:,::self.stride,::self.stride].mul(0.)
+           
+
+
+                
 

@@ -7,7 +7,7 @@ OSNASLib is a library for one-shot neural architecture search (NAS). Recently, s
 In OSNASLib, we cover various components of one-shot NAS (e.g., search space, search strategy, criterion, dataflow, train agent, and training strategy). You can customize each of them to specific for different tasks and different dataset easily.
 
 We illustrate OSNASLib as the following figure:
-![osnaslib](./resource/osnaslib.png)
+![osnaslib](./resource/osnaslib_abstract.png)
 > The regions of blue lines are the components that user can customize easily with our interface.
 
 * [What is neural architecture search (NAS)](./doc/nas.md)
@@ -44,7 +44,12 @@ python3 main.py -c ./config/classification/uniform_evolution.py --title uniform_
 ```
 
 ### Face Recognition
-``` python3 
+After searching architecture for face recognition, please download the dataset first.
+```bash
+bash ./script/facedata_download.sh
+```
+> Thanks to Johnnylord for the support of face recognition training pipeline.
+```bash
 python3 main.py -c ./config/face_recognition/uniform_evolution.py --title uniform_sampling_evolution_search
 ```
 

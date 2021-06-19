@@ -12,14 +12,14 @@ from .block_builder import get_block
 
 class BaseSuperlayer(nn.Module):
     """ The abstract class of the layer of the supernet """
-    def __init__(self, micro_cfg, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
+    def __init__(self, micro_cfg, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats, *args, **kwargs):
         super(BaseSuperlayer, self).__init__()
         self.micro_cfg = micro_cfg
 
         self._construct_supernet_layer(in_channels, out_channels, stride, bn_momentum, bn_track_running_stats)
 
     @abstractmethod
-    def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats):
+    def _construct_supernet_layer(self, in_channels, out_channels, stride, bn_momentum, bn_track_running_stats, *args, **kwargs):
         """ Construct the supernet layer module.
         """
         raise NotImplemented
