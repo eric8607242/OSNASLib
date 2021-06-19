@@ -116,11 +116,10 @@ class SGNASSuperlayer(BaseSuperlayer):
             arch_param (torch.tensor)
         """
         self.sbn_index = 0
-        split_arch_param = torch.split(arch_param, len(self.kernel_size_list))
-
+        split_arch_param = torch.split(arch_param, len(self.kernel_size_list), dim=-1)
         for block, ap in zip(self.unified_block, split_arch_param):
             if 0 in self.kernel_size_list:
-                self.sbn_index += ap[self.kernel_size_list.index(0)]
+                self.sbn_index += ap[0, self.kernel_size_list.index(0)].item()
 
             block.set_arch_param(ap)
         self.sbn_index = round(self.sbn_index)
