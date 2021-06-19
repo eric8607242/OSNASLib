@@ -61,7 +61,7 @@ class BaseModel(nn.Module):
         self._initialize_weights()
 
     @abstractmethod
-    def _construct_stage_layers(self, architecture, bn_momentum, bn_track_running_statsm *args, **kwargs):
+    def _construct_stage_layers(self, architecture, bn_momentum, bn_track_running_statsm, *args, **kwargs):
         """ Construct searched layers in entire search stage.
 
         Return:

@@ -152,7 +152,7 @@ def _get_conv_block(in_channels, out_channels, kernel_size,
                       bn_track_running_stats=bn_track_running_stats,
                       bn=bn,
                       group=group,
-                      pad=padding,
+                      padding=padding,
                       dilation=dilation)
     return block
 
@@ -175,7 +175,7 @@ def _get_sepconv_block(in_channels, out_channels, kernel_size,
                       bn_track_running_stats=bn_track_running_stats,
                       bn=bn,
                       group=group,
-                      pad=padding,
+                      padding=padding,
                       dilation=dilation)
     return block
 
@@ -194,7 +194,7 @@ def _get_skip_block(in_channels, out_channels, kernel_size,
                           bn_momentum=bn_momentum,
                           bn_track_running_stats=bn_track_running_stats,
                           group=1,
-                          pad=0)
+                          padding=0)
     else:
         if stride != 1:
             block = nn.AvgPool2d(stride, stride=stride)
@@ -220,14 +220,14 @@ def _get_avgpool_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
     padding = kwargs["padding"] if "padding" in kwargs else (kernel_size // 2)
 
-    block = nn.AvgPool2d(kernel_size, stride=stride, padding, count_include_pad=False)
+    block = nn.AvgPool2d(kernel_size, stride=stride, padding=padding, count_include_pad=False)
     return block
 
 def _get_maxpool_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
     padding = kwargs["padding"] if "padding" in kwargs else (kernel_size // 2)
 
-    block = nn.MaxPool2d(kernel_size, stride=stride, padding)
+    block = nn.MaxPool2d(kernel_size, stride=stride, padding=padding)
     return block
 
 def _get_zero_block(in_channels, out_channels, kernel_size,
