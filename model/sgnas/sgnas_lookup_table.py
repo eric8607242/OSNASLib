@@ -19,7 +19,6 @@ class SGNASLookUpTable(LookUpTable):
 
         input_size = self.get_search_input_size()
         info_table = {metric: [] for metric in info_metric_list}
-
         for l, l_cfg in enumerate(self.macro_cfg["search"]):
             in_channels, out_channels, stride = l_cfg
 
@@ -72,13 +71,13 @@ class SGNASLookUpTable(LookUpTable):
                                           bn_momentum=0.1,
                                           bn_track_running_stats=True,
                                           **kwargs)
-
+                        
                         block_info = self._get_block_info(
-                            block, in_channels, input_size, info_metric_list)
+                            block, block_in_channels, input_size, info_metric_list)
 
                         # Count pointwise info
                         for metric in info_metric_list:
-                            block_info[metric] += (pointwise_info[metric] + pointwise_1_info[metric]) // max_expansion_rate
+                            block_info[metric] += (pointwise_info[metric] + pointwise_1_info[metric]) / max_expansion_rate
 
                     layer_info = self._merge_info_table(
                         layer_info, block_info, info_metric_list)
