@@ -187,7 +187,8 @@ class ShuffleBlockX(nn.Module):
         branch_out_channels = out_channels // 2
 
         self.stride = stride
-        if self.stride == 2:
+        self.use_branch = self.stride == 2 or in_channels != out_channels
+        if self.use_branch:
             self.branch_1 = nn.Sequential(
                 ConvBNAct(
                     in_channels=in_channels,
@@ -213,7 +214,7 @@ class ShuffleBlockX(nn.Module):
             self.branch_1 = nn.Sequential()
 
         branch_2 = []
-        branch_2_in_channels = in_channels if stride == 2 else branch_out_channels
+        branch_2_in_channels = in_channels if self.use_branch else branch_out_channels
         branch_2_out_channels = [[branch_2_in_channels, branch_out_channels], 
                                  [branch_out_channels, branch_out_channels], 
                                  [branch_out_channels, branch_out_channels]]
@@ -242,7 +243,7 @@ class ShuffleBlockX(nn.Module):
         self.branch_2 = nn.Sequential(*branch_2)
 
     def forward(self, x):
-        if self.stride == 1:
+        if not self.use_branch:
             c = x.size(1) // 2
             x1, x2 = x[:, :c], x[:, c:]
             out = torch.cat((x1, self.branch_2(x2)), 1)
@@ -262,11 +263,11 @@ class ShuffleBlock(nn.Module):
                  bn_momentum,
                  bn_track_running_stats):
         super(ShuffleBlock, self).__init__()
-
         branch_out_channels = out_channels // 2
 
         self.stride = stride
-        if self.stride == 2:
+        self.use_branch = self.stride == 2 or in_channels != out_channels
+        if self.use_branch:
             self.branch_1 = nn.Sequential(
                 ConvBNAct(
                     in_channels=in_channels,
@@ -293,7 +294,7 @@ class ShuffleBlock(nn.Module):
 
         self.branch_2 = nn.Sequential(
             ConvBNAct(
-                in_channels=in_channels if stride > 1 else branch_out_channels,
+                in_channels=in_channels if self.use_branch else branch_out_channels,
                 out_channels=branch_out_channels,
                 kernel_size=1,
                 stride=1,
@@ -323,7 +324,7 @@ class ShuffleBlock(nn.Module):
                 padding=0))
 
     def forward(self, x):
-        if self.stride == 1:
+        if not self.use_branch:
             c = x.size(1) // 2
             x1, x2 = x[:, :c], x[:, c:]
         else:

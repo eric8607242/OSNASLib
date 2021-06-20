@@ -49,7 +49,7 @@ class SPOSSupernet(BaseSupernet):
             # block_type, in_channels, out_channels, stride, kernel_size, activation, se, kwargs
             "first": [["conv", 3, 16, 2, 3, "relu", False, {}]],  # stride 1 for CIFAR
             # in_channels, out_channels, stride
-            "search": [[16, 64, 2],  # stride 1 for CIFAR
+            "search": [[16, 64, 1],  # stride 1 for CIFAR
                        [64, 64, 1],
                        [64, 64, 1],
                        [64, 64, 1],
