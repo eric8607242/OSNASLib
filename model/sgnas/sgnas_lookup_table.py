@@ -1,3 +1,5 @@
+import math
+
 from ..base_lookup_table import LookUpTable
 from ..block_builder import get_block
 
@@ -84,7 +86,7 @@ class SGNASLookUpTable(LookUpTable):
                 info_table = self._merge_info_table(
                     info_table, layer_info, info_metric_list)
 
-            input_size = input_size if stride == 1 else input_size // 2
+            input_size = input_size if stride == 1 else math.ceil(input_size/2)
 
 
         return info_table
