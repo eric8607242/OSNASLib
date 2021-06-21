@@ -1,14 +1,14 @@
 # How To Customize Dataflow
 In OSNASLib, we cover serveral basic dataloader (e.g., CIFAR10, CIFAR100, and ImageNet). Besides, we also provide flexible API interface to customize for any your specific tasks or the novel dataloder. In this document, we will briefly introduce how to customize the dataloader in `./dataflow/` easily.
 
-## Generate Template
+## Generate Interface
 ```
-python3 build_template.py -t dataflow --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
+python3 build_interface.py -t dataflow --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
 ```
 
-After generating the criterion template, the file `CUSTOMIZE NAME` will be created in `criterion/`, and the corresponding import will be create automatically.
+After generating the criterion interface, the file `CUSTOMIZE NAME` will be created in `criterion/`, and the corresponding import will be create automatically.
 
-### Template Struture
+### Interface Struture
 ```
 - dataflow/
     |- [CUSTOMIZE NAME].py

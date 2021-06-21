@@ -4,7 +4,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from template import render_file, render_import
 
-def build_template(customize_name, customize_class=None):
+def build_interface(customize_name, customize_class=None):
     assert customize_class is not None
 
     template_path = os.path.dirname(os.path.realpath(__file__))
@@ -14,15 +14,15 @@ def build_template(customize_name, customize_class=None):
         os.mkdir(root_path)
 
     env = Environment(loader=FileSystemLoader(template_path))
-    # Create supernet template
+    # Create supernet interface
     meta_template = env.get_template("supernet_template.py")
     render_file(meta_template.render(customize_class=customize_class), os.path.join(root_path, f"{customize_name}_supernet.py"))
 
-    # Create model template
+    # Create model interface
     model_template = env.get_template("model_template.py")
     render_file(model_template.render(customize_class=customize_class), os.path.join(root_path, f"{customize_name}_model.py"))
 
-    # Create lookup table template
+    # Create lookup table interface
     lookup_table_template = env.get_template("lookup_table_template.py")
     render_file(lookup_table_template.render(customize_class=customize_class), os.path.join(root_path, f"{customize_name}_lookup_table.py"))
     

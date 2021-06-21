@@ -1,12 +1,12 @@
 # How to customize the agent
 To supprot searching architectures for various tasks (e.g., classification, face recognition, and object detection), OSNASLib allow users to customize the training agent for different training pipeline. With the the customizing training agent, user do not need to implement the detail of searching process and evaluating process. By incorporate the training agent into the pre-implemented search agent and evaluate agent, user can search the architectures and evaluate the searched architecture by scratch easily. In this document, will briefly introduce how to customize the agent for your task in `agnet/` easily.
 
-## Generate Template
+## Generate Interface
 ```
-python3 build_template.py -t agent --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
+python3 build_interface.py -t agent --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
 ```
 
-After generating the agent template, the directory `[CUSTOMIZE NAME]/` will be created in `agent/`, and the corresponding files (`__init__.py`, `training_agent.py`, and `agents.py`) are created in the directory `[CUSTOMIZE NAME]/`.
+After generating the agent interface, the directory `[CUSTOMIZE NAME]/` will be created in `agent/`, and the corresponding files (`__init__.py`, `training_agent.py`, and `agents.py`) are created in the directory `[CUSTOMIZE NAME]/`.
 
 ### Template Struture
 ```
@@ -24,7 +24,7 @@ For customizing agent for various tasks, you should implement the training inter
 
 ### Training Agent Interface
 `[CUSTOMIZE CLASS]TrainingAgent` is the training agent implemented the training pipeline specific for customizing task. In `[CUSTOMIZE CLASS]TrainingAgent`, you shoud implement the `_search_training_step()`, `_search_validate_step()`, `_evaluate_training_step()`, `_evaluate_validate_step()`, and `searching_evaluate()` for your task.
-> Note that we provide the example training pipeline in the template. You shoud modify the training pipeline to specific for your task.
+> Note that we provide the example training pipeline in the interface. You shoud modify the training pipeline to specific for your task.
 
 ```python3
 import os

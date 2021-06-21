@@ -2,14 +2,14 @@
 In OSNASLib, we cover serveral basic search strategy (e.g., differentiable search strategy, random search, evolution algorithm and architecture generator). Besides, we also provide flexible API interface to customize for any your specific tasks or the novel search strategy. In this document, we will briefly introduce how to customize the search strategy in `./search_strategy/` easily.
 
 
-## Generate Template
+## Generate Interface
 ```
-python3 build_template.py -t search_strategy --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
+python3 build_interface.py -t search_strategy --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
 ```
 
-After generating the search strategy template, the file `[CUSTOMIZE NAME].py` will be created in `searchstrategy/` and the corresponding import will be create automatically.
+After generating the search strategy interface, the file `[CUSTOMIZE NAME].py` will be created in `searchstrategy/` and the corresponding import will be create automatically.
 
-### Template Struture
+### Interface Struture
 ```
 - search_strategy/
         |- [CUSTOMIZE NAME].py

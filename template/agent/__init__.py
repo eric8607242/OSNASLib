@@ -4,7 +4,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from template import render_file, render_import
 
-def build_template(customize_name, customize_class=None):
+def build_interface(customize_name, customize_class=None):
     assert customize_class is not None
 
     template_path = os.path.dirname(os.path.realpath(__file__))
@@ -14,17 +14,17 @@ def build_template(customize_name, customize_class=None):
         os.mkdir(root_path)
 
     env = Environment(loader=FileSystemLoader(template_path))
-    # Create training template
+    # Create training interface
     training_template = env.get_template("training_template.py")
     render_file(training_template.render(customize_class=customize_class), \
                 os.path.join(root_path, "training_agent.py"))
 
-    # Create agents template
+    # Create agents interface
     agents_template = env.get_template("agents_template.py")
     render_file(agents_template.render(customize_class=customize_class), \
                 os.path.join(root_path, "agents.py"))
 
-    # Create init template
+    # Create init interface
     init_template = env.get_template("init_template.py")
     render_file(init_template.render(customize_class=customize_class), \
                 os.path.join(root_path, "__init__.py"))

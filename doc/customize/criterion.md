@@ -1,14 +1,14 @@
 # How To Customize Criterion
 In OSNASLib, user can easily specific for different tasks by incorporate different components. For supporting various tasks, OSNASLib is able to modify or incorporate customizing loss function easily. In this document, we will briefly introduce how to customize the criterion for various tasks in `./criterion/` easily.
 
-## Generate Template
+## Generate Interface
 ```
-python3 build_template.py -t criterion --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
+python3 build_interface.py -t criterion --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
 ```
 
-After generating the criterion template, the file `CUSTOMIZE NAME` will be created in `criterion/`, and the corresponding import will be create automatically.
+After generating the criterion interface, the file `CUSTOMIZE NAME` will be created in `criterion/`, and the corresponding import will be create automatically.
 
-### Template Struture
+### Interface Struture
 ```
 - criterion/
     |- [CUSTOMIZE NAME].py

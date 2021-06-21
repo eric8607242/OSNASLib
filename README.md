@@ -58,14 +58,14 @@ More information about configuration please refer to [configuration](./doc/confi
 ## Customize NAS For Your Tasks
 ### Generate Templare
 OSNASLib provides extremely flexible interfaces to make researchers can incorporate different components of one-shot NAS for various tasks easily.
-For customizing for different components, you will need to generate some code that establishes the component template - a collection of interface for incorporating with other components.
+For customizing for different components, you will need to generate some code that establishes the component interface - a collection of interface for incorporating with other components.
 ```
-python3 build_template.py -tt [TEMPLATE TYPE] --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
+python3 build_interface.py -it [INTERFACE TYPE] --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
 
 optional arguments:
-    -tt, --template-type    The type of the generated template (e.g., agent, criterion, and dataflow).
-    --customize-name        The filename of the customizing template.
-    --customize-class       The classname of the interface class in customizing template.
+    -it, --interface-type   The type of the generated interface (e.g., agent, criterion, and dataflow).
+    --customize-name        The filename of the customizing interface.
+    --customize-class       The classname of the interface class in customizing interface.
 ```
 
 Please refer to the documents for more detail of customizing.

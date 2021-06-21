@@ -14,14 +14,14 @@ There are four components you have to implement for your search space : `Superla
 We illustrate the three components as follow figure:
 ![search_space](../../resource/search_space.png)
 
-## Generate Template
+## Generate Interface
 ```
-python3 build_template.py -t model --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
+python3 build_interface.py -t model --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
 ```
 
-After generating the model template, the directory `[CUSTOMIZE NAME]/` will be created in `model/`, and the corresponding files (`__init__.py` and `[CUSTOMIZE NAME]_supernet.py`) are created in the directory `[CUSTOMIZE NAME]/`.
+After generating the model interface, the directory `[CUSTOMIZE NAME]/` will be created in `model/`, and the corresponding files (`__init__.py` and `[CUSTOMIZE NAME]_supernet.py`) are created in the directory `[CUSTOMIZE NAME]/`.
 
-### Template Struture
+### Interface Struture
 ```
 - model/
     |- [CUSTOMIZE NAME]/
