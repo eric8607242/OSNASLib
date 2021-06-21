@@ -27,7 +27,7 @@ class MetaSearchAgent(MetaAgent):
         self.supernet.to(self.device)
         self.supernet = self._parallel_process(self.supernet)
 
-        self._optimizer_init(self.supernet)
+        self._optimizer_init(self.supernet, self.criterion)
 
         # Construct search utility ========================================================
         training_strategy_class = get_training_strategy(self.config["agent"]["training_strategy_agent"])

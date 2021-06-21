@@ -1,13 +1,13 @@
 agent:
     main_agent: "FREvaluateAgent"
     criterion_agent: "OnlineTripletLoss"
-    search_space_agent: "MobileFaceNet"
+    search_space_agent: "ProxylessNAS"
 
 train:
     resume: False
-    random_seed: 42
+    random_seed: 1234
     device: "cuda"
-    ngpu: 4
+    ngpu: 1
     epochs: 10
 
     bn_track_running_stats: True
@@ -22,8 +22,8 @@ dataset:
     classes: 128 # Embedding channels
     input_size: 112
 
-    batch_size: 256
-    num_workers: 8
+    batch_size: 128
+    num_workers: 4
     train_portion: 1
 
 optim:

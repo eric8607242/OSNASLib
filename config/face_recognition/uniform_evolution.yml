@@ -2,9 +2,10 @@ agent:
     main_agent: "FRSearchAgent"
     training_strategy_agent: "UniformSampler"
     search_strategy_agent: "EvolutionSearcher"
-    search_space_agent: "MobileFaceNet"
+    search_space_agent: "ProxylessNAS"
 
-    criterion_agent: "OnlineTripletLoss"
+    #criterion_agent: "OnlineTripletLoss"
+    criterion_agent: "FaceCELoss"
 
 search_utility:
     directly_search: False
@@ -12,37 +13,39 @@ search_utility:
     population_num: 20
     parent_num: 10
     info_metric: "flops"
-    target_hc: 350
+    target_hc: 80
 
 
 train:
     resume: False
-    random_seed: 42
+    random_seed: 1234
     device: "cuda"
-    ngpu: 4
-    epochs: 5
+    ngpu: 1
+    epochs: 10
 
     bn_track_running_stats: True
     bn_momentum: 0.1
 
 criterion:
+    embedding_channels: 256
+    training_classes: 10575
     margin: 0.3 # Margin of triplet loss
 
 dataset:
     dataset: "face"
     dataset_path: "./data/"
     
-    classes: 128 # Embedding channels
+    classes: 256 # Embedding channels
     input_size: 112
 
-    batch_size: 128
-    num_workers: 8
+    batch_size: 64
+    num_workers: 4
     train_portion: 0.8
 
 optim:
-    optimizer: "adam"
-    lr: 0.001
-    weight_decay: 0.0001
+    optimizer: "sgd"
+    lr: 0.01
+    weight_decay: 0.00000
     momentum: 0.9
     alpha: 0.9
     beta: 0.99

@@ -37,6 +37,7 @@ class MetaAgent:
                                                                 train_portion=self.config["dataset"]["train_portion"])
 
         self.criterion = get_criterion(config["agent"]["criterion_agent"], config["criterion"])
+        self.criterion = self._parallel_process(self.criterion)
 
         self.epochs = config["train"]["epochs"]
         self.start_epochs = 0
@@ -51,9 +52,10 @@ class MetaAgent:
         """
         raise NotImplementedError
 
-    def _optimizer_init(self, model):
+    def _optimizer_init(self, model, criterion):
         self.optimizer = get_optimizer(
-            model.parameters(),
+            [{"params": model.parameters()},
+             {"params": criterion.parameters()}],
             self.config["optim"]["optimizer"],
             learning_rate=self.config["optim"]["lr"],
             weight_decay=self.config["optim"]["weight_decay"],

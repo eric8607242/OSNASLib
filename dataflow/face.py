@@ -11,8 +11,8 @@ import torchvision.transforms as transforms
 from torch.utils.data.sampler import Sampler
 from torch.utils.data import DataLoader
 
-FACE_MEAN = [0.485, 0.456, 0.406]
-FACE_STD = [0.229, 0.224, 0.225]
+FACE_MEAN = [0.5, 0.5, 0.5]
+FACE_STD = [0.5, 0.5, 0.5]
 
 def get_face_dataloader(dataset_path, input_size, batch_size, num_workers, train_portion=1):
     """ Prepare dataset for training and evaluating pipeline

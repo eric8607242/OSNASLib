@@ -26,7 +26,7 @@ class MetaEvaluateAgent(MetaAgent):
         self.model = model.to(self.device)
         self.model = self._parallel_process(self.model)
 
-        self._optimizer_init(self.model)
+        self._optimizer_init(self.model, self.criterion)
         # =================================================================================
         # Resume checkpoint ===============================================================
         self._resume(self.model)
