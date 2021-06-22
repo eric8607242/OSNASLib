@@ -8,7 +8,7 @@ from PIL import Image
 import torch
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
-from torch.utils.data.sampler import Sampler
+from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data import DataLoader
 
 FACE_MEAN = [0.5, 0.5, 0.5]
