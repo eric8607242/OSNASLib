@@ -36,7 +36,8 @@ class MetaAgent:
                                                                 self.config["dataset"]["num_workers"], 
                                                                 train_portion=self.config["dataset"]["train_portion"])
 
-        self.criterion = get_criterion(config["agent"]["criterion_agent"], config["criterion"])
+        criterion = get_criterion(config["agent"]["criterion_agent"], config["criterion"])
+        self.criterion = criterion.to(self.device)
         self.criterion = self._parallel_process(self.criterion)
 
         self.epochs = config["train"]["epochs"]
@@ -74,13 +75,14 @@ class MetaAgent:
             decay_ratio=self.config["optim"]["decay_ratio"],
             total_epochs=self.config["train"]["epochs"])
 
-    def _resume(self, model):
+    def _resume(self, model, criterion):
         """ Load the checkpoint of model, optimizer, and lr scheduler.
         """
         if self.config["train"]["resume"]:
             self.start_epochs = resume_checkpoint(
                     model,
                     self.config["experiment_path"]["resume_path"],
+                    criterion,
                     None,
                     None)
             self.logger.info(

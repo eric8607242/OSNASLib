@@ -22,7 +22,7 @@ class MetaSearchAgent(MetaAgent):
             bn_track_running_stats=self.config["train"]["bn_track_running_stats"])
         self.macro_cfg, self.micro_cfg = self.supernet.get_model_cfg(self.config["dataset"]["classes"])
         
-        self._resume(self.supernet)
+        self._resume(self.supernet, self.criterion)
         
         self.supernet.to(self.device)
         self.supernet = self._parallel_process(self.supernet)
@@ -53,7 +53,6 @@ class MetaSearchAgent(MetaAgent):
                 self.training_strategy, 
                 self.device, self.criterion, self.logger)
 
-        # Resume checkpoint ===============================================================
         
     def fit(self):
         """ Fit searching process.

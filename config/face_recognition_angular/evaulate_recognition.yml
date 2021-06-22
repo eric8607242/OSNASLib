@@ -1,0 +1,56 @@
+agent:
+    main_agent: "FREvaluateAgent"
+    criterion_agent: "FaceCELoss"
+    search_space_agent: "ProxylessNAS"
+
+train:
+    resume: False
+    random_seed: 1234
+    device: "cuda"
+    ngpu: 1
+    epochs: 10
+
+    bn_track_running_stats: True
+    bn_momentum: 0.1
+
+criterion:
+    embedding_channels: 256
+    training_classes: 10575
+    margin: 0.3 # Margin of triplet loss
+
+dataset:
+    dataset: "face_angular"
+    dataset_path: "./data/"
+    classes: 256 # Embedding channels
+    input_size: 112
+
+    batch_size: 128
+    num_workers: 4
+    train_portion: 1
+
+optim:
+    optimizer: "sgd"
+    lr: 0.1
+    weight_decay: 0.00000
+    momentum: 0.9
+    alpha: 0.9
+    beta: 0.99
+
+    scheduler: "cosine"
+    decay_step: 10
+    decay_ratio: 0.1
+
+logs_path:
+    logger_path: "./logs/"
+    writer_path: "./logs/tb/"
+
+experiment_path:
+    resume_path: "./best_checkpoint.pth"
+    checkpoint_root_path: "./checkpoints/"
+    best_checkpoint_path: "./best_checkpoint.pth"
+
+    lookup_table_path: "./lookup_table.json"
+    searched_model_path: "./searched_model_architecture.npy"
+
+
+

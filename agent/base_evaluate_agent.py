@@ -29,7 +29,7 @@ class MetaEvaluateAgent(MetaAgent):
         self._optimizer_init(self.model, self.criterion)
         # =================================================================================
         # Resume checkpoint ===============================================================
-        self._resume(self.model)
+        self._resume(self.model, self.criterion)
 
     def fit(self):
         """ Fit evalating process.

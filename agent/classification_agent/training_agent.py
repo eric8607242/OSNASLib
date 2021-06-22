@@ -46,6 +46,7 @@ class CFTrainingAgent:
                 save(
                     model,
                     agent.config["experiment_path"]["best_checkpoint_path"],
+                    agent.criterion,
                     agent.optimizer,
                     agent.lr_scheduler,
                     epoch + 1)
@@ -55,6 +56,7 @@ class CFTrainingAgent:
                 os.path.join(
                     agent.config["experiment_path"]["checkpoint_root_path"],
                     f"{agent.agent_state}_{epoch}.pth"),
+                agent.criterion,
                 agent.optimizer,
                 agent.lr_scheduler,
                 epoch + 1)

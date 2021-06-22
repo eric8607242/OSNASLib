@@ -9,4 +9,5 @@ def get_dataloader(dataset_name, dataset_path, input_size, batch_size, num_worke
 # Import customizing module (Do not delete this line)
 from .cifar import get_cifar100_dataloader, get_cifar10_dataloader
 from .imagenet import get_imagenet_dataloader
-from .face import get_face_dataloader
+from .face_triplet import get_face_triplet_dataloader
+from .face_angular import get_face_angular_dataloader

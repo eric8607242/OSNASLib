@@ -110,6 +110,7 @@ def accuracy(output, target, topk=(1,)):
 def resume_checkpoint(
         model,
         checkpoint_path,
+        criterion=None,
         optimizer=None,
         lr_scheduler=None):
     resume_epoch = None
@@ -118,6 +119,9 @@ def resume_checkpoint(
 
         if isinstance(checkpoint, dict) and "model" in checkpoint:
             model.load_state_dict(checkpoint["model"])
+            if criterion is not None and "criterion" in checkpoint:
+                criterion.load_state_dict(checkpoint["criterion"])
+
             if optimizer is not None and "optimizer" in checkpoint:
                 optimizer.load_state_dict(checkpoint["optimizer"])
 
@@ -138,6 +142,7 @@ def resume_checkpoint(
 def save(
         model,
         checkpoint_path,
+        criterion=None,
         optimizer=None,
         lr_scheduler=None,
         resume_epoch=None):
@@ -147,6 +152,9 @@ def save(
     else:
         checkpoint = {"model": model.module.state_dict() if isinstance(
             model, nn.DataParallel) else model.state_dict()}
+        if criterion is not None:
+            checkpoint["criterion"] = criterion.state_dict()
+
         if optimizer is not None:
             checkpoint["optimizer"] = optimizer.state_dict()
 

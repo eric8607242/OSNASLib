@@ -4,7 +4,6 @@ agent:
     search_strategy_agent: "EvolutionSearcher"
     search_space_agent: "ProxylessNAS"
 
-    #criterion_agent: "OnlineTripletLoss"
     criterion_agent: "FaceCELoss"
 
 search_utility:
@@ -13,7 +12,7 @@ search_utility:
     population_num: 20
     parent_num: 10
     info_metric: "flops"
-    target_hc: 80
+    target_hc: 320
 
 
 train:
@@ -32,7 +31,7 @@ criterion:
     margin: 0.3 # Margin of triplet loss
 
 dataset:
-    dataset: "face"
+    dataset: "face_angular"
     dataset_path: "./data/"
     
     classes: 256 # Embedding channels
@@ -60,7 +59,7 @@ logs_path:
 
 
 experiment_path:
-    resume_path: "./best_checkpoint.pth"
+    resume_path: "./checkpoints/search_1.pth"
     checkpoint_root_path: "./checkpoints/"
     best_checkpoint_path: "./best_checkpoint.pth"
 

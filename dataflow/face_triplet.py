@@ -14,7 +14,7 @@ from torch.utils.data import DataLoader
 FACE_MEAN = [0.5, 0.5, 0.5]
 FACE_STD = [0.5, 0.5, 0.5]
 
-def get_face_dataloader(dataset_path, input_size, batch_size, num_workers, train_portion=1):
+def get_face_triplet_dataloader(dataset_path, input_size, batch_size, num_workers, train_portion=1):
     """ Prepare dataset for training and evaluating pipeline
 
     Args:
@@ -37,7 +37,6 @@ def get_face_dataloader(dataset_path, input_size, batch_size, num_workers, train
                         ])
     test_transform = transforms.Compose([
                         transforms.ToTensor(),
-                        transforms.Normalize(FACE_MEAN, FACE_STD)
                         ])
 
     train_dataset = datasets.ImageFolder(root=osp.join(dataset_path, "face", "train", "CASIA-WebFace"),
@@ -82,6 +81,7 @@ def get_face_dataloader(dataset_path, input_size, batch_size, num_workers, train
             num_workers=num_workers,
             batch_sampler=train_sampler)
         val_loader = None
+
     test_loader = DataLoader(
             dataset=test_dataset, 
             shuffle=False, 

@@ -4,6 +4,7 @@ import time
 import numpy as np
 
 import torch
+import torch.nn.functional as F
 
 from utils import AverageMeter, save
 
@@ -49,6 +50,7 @@ class FRTrainingAgent:
                 save(
                     model,
                     agent.config["experiment_path"]["best_checkpoint_path"],
+                    agent.criterion,
                     agent.optimizer,
                     agent.lr_scheduler,
                     epoch + 1)
@@ -58,6 +60,7 @@ class FRTrainingAgent:
                 os.path.join(
                     agent.config["experiment_path"]["checkpoint_root_path"],
                     f"{agent.agent_state}_{epoch}.pth"),
+                agent.criterion,
                 agent.optimizer,
                 agent.lr_scheduler,
                 epoch + 1)
@@ -141,6 +144,12 @@ class FRTrainingAgent:
                 # Extract embeddings
                 embeds1 = model(imgs1)
                 embeds2 = model(imgs2)
+
+                # For angular based ==============
+                embeds1 = F.normalize(embeds1, p=2)
+                embeds2 = F.normalize(embeds2, p=2)
+                # ================================
+
                 # Accumulates
                 all_labels.append(labels.detach().cpu().numpy())
                 all_embeds1.append(embeds1.detach().cpu().numpy())
