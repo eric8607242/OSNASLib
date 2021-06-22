@@ -56,11 +56,13 @@ def get_face_angular_dataloader(dataset_path, input_size, batch_size, num_worker
         train_loader = DataLoader(
             train_dataset,
             num_workers=num_workers,
+            batch_size=batch_size,
             sampler=train_sampler,
             pin_memory=True)
         val_loader = DataLoader(
             train_dataset,
             num_workers=num_workers,
+            batch_size=batch_size,
             sampler=val_sampler,
             pin_memory=True)
     else:
