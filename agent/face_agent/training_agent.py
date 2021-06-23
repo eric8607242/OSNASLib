@@ -145,10 +145,11 @@ class FRTrainingAgent:
                 embeds1 = model(imgs1)
                 embeds2 = model(imgs2)
 
-                # For angular based ==============
-                embeds1 = F.normalize(embeds1, p=2)
-                embeds2 = F.normalize(embeds2, p=2)
-                # ================================
+                if self.config["criterion"]["normalize"]:
+                    # For angular based ==============
+                    embeds1 = F.normalize(embeds1, p=2)
+                    embeds2 = F.normalize(embeds2, p=2)
+                    # ================================
 
                 # Accumulates
                 all_labels.append(labels.detach().cpu().numpy())
@@ -169,7 +170,7 @@ class FRTrainingAgent:
 
         agent.logger.info(
             f"Valid : [{epoch+1:3d}/{agent.epochs}] " 
-            f"Final Acc : {acc_avg:.2f} Final Thresh : {thresh_avg:.2f} "
+            f"Final Acc : {acc_avg:.5f} Final Thresh : {thresh_avg:.5f} "
             f"Time {time.time() - start_time:.2f}")
 
         return acc_avg

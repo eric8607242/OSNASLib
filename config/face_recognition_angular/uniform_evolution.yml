@@ -2,7 +2,7 @@ agent:
     main_agent: "FRSearchAgent"
     training_strategy_agent: "UniformSampler"
     search_strategy_agent: "EvolutionSearcher"
-    search_space_agent: "ProxylessNAS"
+    search_space_agent: "FBNetL"
 
     criterion_agent: "FaceCELoss"
 
@@ -12,7 +12,7 @@ search_utility:
     population_num: 20
     parent_num: 10
     info_metric: "flops"
-    target_hc: 320
+    target_hc: 300
 
 
 train:
@@ -26,6 +26,7 @@ train:
     bn_momentum: 0.1
 
 criterion:
+    normalize: True
     embedding_channels: 256
     training_classes: 10575
     margin: 0.3 # Margin of triplet loss
@@ -43,8 +44,8 @@ dataset:
 
 optim:
     optimizer: "sgd"
-    lr: 0.01
-    weight_decay: 0.00000
+    lr: 0.05
+    weight_decay: 0.00004
     momentum: 0.9
     alpha: 0.9
     beta: 0.99

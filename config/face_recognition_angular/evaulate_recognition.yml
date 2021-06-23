@@ -1,7 +1,7 @@
 agent:
     main_agent: "FREvaluateAgent"
     criterion_agent: "FaceCELoss"
-    search_space_agent: "ProxylessNAS"
+    search_space_agent: "FBNetL"
 
 train:
     resume: False
@@ -14,6 +14,7 @@ train:
     bn_momentum: 0.1
 
 criterion:
+    normalize: True
     embedding_channels: 256
     training_classes: 10575
     margin: 0.3 # Margin of triplet loss
@@ -31,7 +32,7 @@ dataset:
 optim:
     optimizer: "sgd"
     lr: 0.1
-    weight_decay: 0.00000
+    weight_decay: 0.00004
     momentum: 0.9
     alpha: 0.9
     beta: 0.99

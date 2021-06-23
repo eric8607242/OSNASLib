@@ -1,19 +1,7 @@
 agent:
-    main_agent: "FRSearchAgent"
-    training_strategy_agent: "UniformSampler"
-    search_strategy_agent: "EvolutionSearcher"
-    search_space_agent: "ProxylessNAS"
-
+    main_agent: "FREvaluateAgent"
     criterion_agent: "FaceCELoss"
-
-search_utility:
-    directly_search: False
-    generation_num: 10
-    population_num: 20
-    parent_num: 10
-    info_metric: "flops"
-    target_hc: 320
-
+    search_space_agent: "ProxylessNAS"
 
 train:
     resume: False
@@ -26,6 +14,7 @@ train:
     bn_momentum: 0.1
 
 criterion:
+    normalize: False
     embedding_channels: 256
     training_classes: 10575
     margin: 0.3 # Margin of triplet loss
@@ -33,17 +22,16 @@ criterion:
 dataset:
     dataset: "face_angular"
     dataset_path: "./data/"
-    
     classes: 256 # Embedding channels
     input_size: 112
 
-    batch_size: 64
+    batch_size: 128
     num_workers: 4
-    train_portion: 0.8
+    train_portion: 1
 
 optim:
     optimizer: "sgd"
-    lr: 0.01
+    lr: 0.1
     weight_decay: 0.00000
     momentum: 0.9
     alpha: 0.9
@@ -57,9 +45,8 @@ logs_path:
     logger_path: "./logs/"
     writer_path: "./logs/tb/"
 
-
 experiment_path:
-    resume_path: "./checkpoints/search_1.pth"
+    resume_path: "./best_checkpoint.pth"
     checkpoint_root_path: "./checkpoints/"
     best_checkpoint_path: "./best_checkpoint.pth"
 
