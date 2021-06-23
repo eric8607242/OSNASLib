@@ -15,7 +15,8 @@ For different tasks and different datasets, data pre-process or specific data lo
 Search space is a very important component in NAS. A small search space may possibly exclude the global optimal architecture. In OSNASLib, we allow users to customize the search space for different application scenarios where different hardware resources may be available.
 
 We illustrates structure of the search space component in OSNASLib as following:
-![search_space_components](../resources/search_space_components.png)
+
+![search_space_components](../resource/search_space_components.png)
 > Structure of the search space. With the provided interface (blue regions), users can define various search spaces by setting different supernet structures and different search space configurations.
 
 To define the search space, users should configure a supernet and a hardware constraints lookup table. In the supernet, configurations of the search space like candidate blocks of each layer, and input and output channel sizes of each layer, should be set. Based on the configurations, the main agent constructs the supernet for architecture search. With the provided interface, it is flexible to implement different supernet structures. 
