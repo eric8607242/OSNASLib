@@ -40,7 +40,7 @@ class EvolutionSearcher(BaseSearcher):
             architecture = self.training_strategy.generate_training_architecture()
             architecture_info = self.lookup_table.get_model_info(architecture)
 
-            while architecture_info > self.target_hc:
+            while architecture_info > self.target_hc or architecture_info < self.target_hc - 20:
                 architecture = self.training_strategy.generate_training_architecture()
                 architecture_info = self.lookup_table.get_model_info(architecture)
 

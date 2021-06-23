@@ -145,7 +145,7 @@ class FRTrainingAgent:
                 embeds1 = model(imgs1)
                 embeds2 = model(imgs2)
 
-                if self.config["criterion"]["normalize"]:
+                if agent.config["criterion"]["normalize"]:
                     # For angular based ==============
                     embeds1 = F.normalize(embeds1, p=2)
                     embeds2 = F.normalize(embeds2, p=2)
