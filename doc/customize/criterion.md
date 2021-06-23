@@ -1,4 +1,4 @@
-# How To Customize Criterion
+# How to customize criterion
 In OSNASLib, user can easily specific for different tasks by incorporate different components. For supporting various tasks, OSNASLib is able to modify or incorporate customizing loss function easily. In this document, we will briefly introduce how to customize the criterion for various tasks in `./criterion/` easily.
 
 ## Generate Interface

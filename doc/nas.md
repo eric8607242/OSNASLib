@@ -1,7 +1,7 @@
-# What Is Neural Architecture Search (NAS)
+# What is neural architecture search (NAS)
 
-* [What Is Neural Architecture Search (NAS)](./nas.md)
-* [What Is One-shot NAS](./one_shot_nas.md)
+* [What is neural architecture search (NAS)](./nas.md)
+* [What is one-shot NAS](./one_shot_nas.md)
 
 By now, deep learning networks has brought surprising advances in various research field (e.g., image classification, semantic segmentation, and object detection). However, it is very difficult to design a good neural architecture for a specific hardware constraint (or devices with limited hardware resource), which requires much domain knowledge and lots of time. To reduce the effort of designing neural architecutre and get the better neural architecture, neural architecture search (NAS) has recevied much attention in recent years.
 

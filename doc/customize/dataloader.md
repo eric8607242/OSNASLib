@@ -1,4 +1,4 @@
-# How To Customize Dataflow
+# How to customize dataflow
 In OSNASLib, we cover serveral basic dataloader (e.g., CIFAR10, CIFAR100, and ImageNet). Besides, we also provide flexible API interface to customize for any your specific tasks or the novel dataloder. In this document, we will briefly introduce how to customize the dataloader in `./dataflow/` easily.
 
 ## Generate Interface

@@ -1,4 +1,4 @@
-# How To Customize Search Space
+# How to customize search space
 For customizing the search space flexibly, we provide the interface of supernet, hardware constraints lookup table and model. By inheriting the interface, the customizing seach space can be incorporated with other components (e.g., search strategy, training_strategy, and criterion) easily. In this document, we will briefly introduce how to customize the supernet, the model and the lookup table for your search space quickly.
 
 ## Customizing Components

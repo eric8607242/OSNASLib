@@ -1,22 +1,21 @@
 # OSNASLib
 
 ## Introduction
-OSNASLib is a library for one-shot neural architecture search (NAS). Recently, searching the neural architecture for various deep learning tasks (e.g., semantic segmentation, object detection, and NLP) becomes a common pipeline to improve the performance. Therefore, OSNASLib provides extremely flexible interfaces to allow researchers can incorporate different one-shot NAS algorithms into various specific tasks efficient.
-
-
-In OSNASLib, we cover various components of one-shot NAS (e.g., search space, search strategy, criterion, dataflow, train agent, and training strategy). You can customize each of them to specific for different tasks and different dataset easily.
-
-We illustrate OSNASLib as the following figure:
+OSNASLib is a general one-shot NAS framework empowering uses to incorporate one-shot NAS methods into various tasks (e.g. face recongition) easily. OSNASLib consists of six major components: criterion, dataflow, training agent, search space, search strategy, and training strategy.
+The framework of OSNASLib is illustrated as following:
 ![osnaslib](./resource/osnaslib_abstract.png)
 > The regions of blue lines are the components that user can customize easily with our interface.
 
+For each component, OSNASLib provides serveral baselines and allows users to customize them for various tasks flexibly. To build a deep neural network with one-shot NAS, users only need to set the training agent, dataflow, and criterion without implementing functional details of one-shot NAS. Furthermore, users can develop new one-shot NAS methods with OSNASLib by customizing search space, search strategy, and training strategy. With the provided baselines, OSNASLib allows users to benchmark their proposed NAS methods fairly (e.g., same codebases and same evaluation configurations).
+
 * [What is neural architecture search (NAS)](./doc/nas.md)
 * [What is one-shot NAS](./doc/one_shot_nas.md)
+* [The major components in OSNASLib](./doc/osnaslib.md)
 
 ### Who Needs OSNASLib?
-* NAS beginners who want to build the codebase of baseline one-shot NAS methods quickly.
-* Researchers who want to incorporate NAS into various research fields to improve performance.
-* Researchers whose research focus is on NAS and want to validate the proposed NAS methods to various tasks (e.g., image classification and face recognition).
+* NAS beginners who want to build the codebases of basic one-shot NAS methods quickly.
+* Researchers who want to integrate NAS methods into a targeted task to improve performance.
+* Researchers who focus on desinging NAS methods for various tasks (e.g., image classification and face recognition) and compare with other baseline methods fairly.
 
 **We are glad at all contributions to improve this repo. Please feel free to pull request.**
 
@@ -57,8 +56,7 @@ More information about configuration please refer to [configuration](./doc/confi
 
 ## Customize NAS For Your Tasks
 ### Generate Templare
-OSNASLib provides extremely flexible interfaces to make researchers can incorporate different components of one-shot NAS for various tasks easily.
-For customizing for different components, you will need to generate some code that establishes the component interface - a collection of interface for incorporating with other components.
+OSNASLib empowers users to customize specific components for various tasks. However, importing and cooperating multiple components into the main agent are still tedious. To reduce this burden, OSNASLib provides the interface generator to generate interfaces for each component and automatically import to the main agent. To generate interfaces, only one command is needed. 
 ```
 python3 build_interface.py -it [INTERFACE TYPE] --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
 

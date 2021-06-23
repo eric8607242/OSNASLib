@@ -78,7 +78,7 @@ class EvolutionSearcher(BaseSearcher):
 
                 offspring_hc = self.lookup_table.get_model_info(offspring[0])
 
-                if offspring_hc <= self.target_hc:
+                if offspring_hc <= self.target_hc and offspring_hc > self.target_hc - 20:
                     offspring_evolution.extend(offspring)
                     evoluation_id += 1
 
