@@ -2,7 +2,7 @@ import time
 
 from .base_agent import MetaAgent
 
-from model import get_model_class, get_search_space_class, load_architecture, calculate_model_efficient
+from search_space import get_model_class, get_search_space_class, load_architecture, calculate_model_efficient
 
 
 class MetaEvaluateAgent(MetaAgent):

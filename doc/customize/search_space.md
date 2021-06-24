@@ -16,14 +16,14 @@ We illustrate the three components as follow figure:
 
 ## Generate Interface
 ```
-python3 build_interface.py -t model --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
+python3 build_interface.py -t search_space --customize-name [CUSTOMIZE NAME] --customize-class [CUSTOMIZE CLASS]
 ```
 
-After generating the model interface, the directory `[CUSTOMIZE NAME]/` will be created in `model/`, and the corresponding files (`__init__.py` and `[CUSTOMIZE NAME]_supernet.py`) are created in the directory `[CUSTOMIZE NAME]/`.
+After generating the search space interface, the directory `[CUSTOMIZE NAME]/` will be created in `search_space/`, and the corresponding files (`__init__.py` and `[CUSTOMIZE NAME]_supernet.py`) are created in the directory `[CUSTOMIZE NAME]/`.
 
 ### Interface Struture
 ```
-- model/
+- search_space/
     |- [CUSTOMIZE NAME]/
     |         |- __init__.py
     |         |- [CUSTOMIZE NAME]_supernet.py
@@ -34,13 +34,13 @@ After generating the model interface, the directory `[CUSTOMIZE NAME]/` will be 
 
 
 ## Supernet Interface
-For customizing model, the interface class `[CUSTOMIZE CLASS]Supernet` and `[CUSTOMIZE CLASS]Superlayer` in `[CUSTOMIZE NAME]_supernet.py` should inherit the class `BaseSupernet` and `BaseSuperlayer`, respectively. The staticmethod `get_model_cfg` return `macro_cfg` and `micro_cfg`.
+For customizing search space, the interface class `[CUSTOMIZE CLASS]Supernet` and `[CUSTOMIZE CLASS]Superlayer` in `[CUSTOMIZE NAME]_supernet.py` should inherit the class `BaseSupernet` and `BaseSuperlayer`, respectively. The staticmethod `get_model_cfg` return `macro_cfg` and `micro_cfg`.
 
-To allow each search strategy can search on each seach space. We implement various method in `BaseSuperlayer`. For example, the method `set_activate_architecture()` is utilized by single-path NAS and the method `initialize_arch_param()` is utilized by differentiable NAS. Refer to `./model/base.py` about more detail about the interface for search space design.
+To allow each search strategy can search on each seach space. We implement various method in `BaseSuperlayer`. For example, the method `set_activate_architecture()` is utilized by single-path NAS and the method `initialize_arch_param()` is utilized by differentiable NAS. Refer to `./search_space/base.py` about more detail about the interface for search space design.
 
 
 ```python3
-# ./model/[CUSTOMIZE NAME]/[CUSTOMIZE NAME]_supernet.py
+# ./search_space/[CUSTOMIZE NAME]/[CUSTOMIZE NAME]_supernet.py
 from ..base import BaseSupernet, BaseSuperlayer
 
 class [CUSTOMIZE CLASS]Superlayer(BaseSuperlayer):
@@ -109,7 +109,7 @@ In OSNASLib, we provide serveral type of candidate block as follows:
 6. Conv BN Activation Block
 7. Skip Connection Block
 
-You can crate new candidate block in `./model/block_builder.py` by following candidate block interface:
+You can crate new candidate block in `./search_space/block_builder.py` by following candidate block interface:
 ```
 def _get_[CUSTOMIZE NAME]_block(in_channels, out_channels, kernel_size,
         stride, activation, se, bn_momentum, bn_track_running_stats, *args, **kwargs):
@@ -118,7 +118,7 @@ def _get_[CUSTOMIZE NAME]_block(in_channels, out_channels, kernel_size,
 ```
 
 ## LookUpTable Interface
-For the different structure of the lookup table, we allow users to redesign the lookuptable flexibly. To customizing the lookup table, the interface class `[CUSTOMIZE CLASS]LookUpTable` should inherit the class `LookUpTable`. In `[CUSTOMIZE CLASS]LookUpTable`, user should re-implement the method `construct_info_table` to construct the info lookup table of search stage in `macro_cfg`. We provide the basic lookup table building method as default and implement lots of useful method to build the lookup table more easily. Please refer to `model/base_lookup_table.py` for more details about useful methods.
+For the different structure of the lookup table, we allow users to redesign the lookuptable flexibly. To customizing the lookup table, the interface class `[CUSTOMIZE CLASS]LookUpTable` should inherit the class `LookUpTable`. In `[CUSTOMIZE CLASS]LookUpTable`, user should re-implement the method `construct_info_table` to construct the info lookup table of search stage in `macro_cfg`. We provide the basic lookup table building method as default and implement lots of useful method to build the lookup table more easily. Please refer to `search_space/base_lookup_table.py` for more details about useful methods.
 
 > The shape of the `info_table` should same as the shape of the `model_cfg_shape` returned by `Supernet` to calculate the approximating hardware constraints.
 
@@ -131,7 +131,7 @@ class [CUSTOMIZE CLASS]LookUpTable(LookUpTable):
         """ Construct the info lookup table of search stage in macro config.
 
         We provide serveral useful method to calculate the info metric and process info
-        metric table. Please refer to `/model/base_lookup_table.py` for more details.
+        metric table. Please refer to `/search_space/base_lookup_table.py` for more details.
 
         Args:
             info_metric_list (list):

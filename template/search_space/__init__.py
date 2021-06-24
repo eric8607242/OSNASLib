@@ -8,7 +8,7 @@ def build_interface(customize_name, customize_class=None):
     assert customize_class is not None
 
     template_path = os.path.dirname(os.path.realpath(__file__))
-    root_path = os.path.join(os.getcwd(), "model", customize_name)
+    root_path = os.path.join(os.getcwd(), "search_space", customize_name)
 
     if not os.path.isdir(root_path):
         os.mkdir(root_path)

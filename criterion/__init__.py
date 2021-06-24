@@ -19,7 +19,7 @@ def get_hc_criterion(name, criterion_config):
         return criterion_class()
 
 
-# Import customizing module (Do not delete this line)
+# Import customizing module
 from .lscrossentropy import LabelSmoothingCrossEntropy
 from .tripletloss import OnlineTripletLoss
 from .focalloss import FocalLoss

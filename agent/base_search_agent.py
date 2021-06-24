@@ -4,7 +4,7 @@ import torch.nn as nn
 
 from .base_agent import MetaAgent
 
-from model import get_search_space_class, save_architecture
+from search_space import get_search_space_class, save_architecture
 
 from search_strategy import get_search_strategy
 from training_strategy import get_training_strategy
