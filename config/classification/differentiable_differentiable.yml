@@ -10,7 +10,7 @@ agent:
 search_utility:
     directly_search: False
     info_metric: "flops"
-    target_hc: 100
+    target_hc: 27
     prior_pool_size: 1
 
 

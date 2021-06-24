@@ -2,7 +2,7 @@ agent:
     main_agent: "CFSearchAgent"
     training_strategy_agent: "UniformSampler"
     search_strategy_agent: "RandomSearcher"
-    search_space_agent: "ProxylessNAS"
+    search_space_agent: "FBNetS"
 
     criterion_agent: "LabelSmoothingCrossEntropy"
 
@@ -15,9 +15,9 @@ search_utility:
 
 train:
     resume: True
-    random_seed: 42
+    random_seed: 999
     device: "cuda"
-    ngpu: 2
+    ngpu: 1
     epochs: 5
 
     bn_track_running_stats: True

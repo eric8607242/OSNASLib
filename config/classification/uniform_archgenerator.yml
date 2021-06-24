@@ -2,7 +2,7 @@ agent:
     main_agent: "CFSearchAgent"
     training_strategy_agent: "UniformSampler"
     search_strategy_agent: "ArchitectureGeneratorSearcher"
-    search_space_agent: "ProxylessNAS"
+    search_space_agent: "SPOS"
 
     criterion_agent: "LabelSmoothingCrossEntropy"
     hc_criterion_agent: "MSELoss"
@@ -24,10 +24,10 @@ generator:
 
 train:
     resume: True
-    random_seed: 42
+    random_seed: 1234
     device: "cuda"
     ngpu: 1
-    epochs: 1
+    epochs: 0
 
     bn_track_running_stats: True
     bn_momentum: 0.1
@@ -57,9 +57,9 @@ optim:
     decay_ratio: 0.1
 
 arch_optim:
-    a_hc_weight: 0.001
+    a_hc_weight: 0.0006
     a_optimizer: "adam"
-    a_lr: 0.001
+    a_lr: 0.0001
     a_weight_decay: 0
     a_momentum: 0
     a_alpha: ""

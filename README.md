@@ -43,7 +43,7 @@ python3 main.py -c ./config/classification/uniform_evolution.py --title uniform_
 ```
 
 ### Face Recognition
-After searching architecture for face recognition, please download the dataset first.
+Before searching architecture for face recognition, please download the dataset first.
 ```bash
 bash ./script/facedata_download.sh
 ```
@@ -52,7 +52,7 @@ bash ./script/facedata_download.sh
 python3 main.py -c ./config/face_recognition/uniform_evolution.py --title uniform_sampling_evolution_search
 ```
 
-More information about configuration please refer to [configuration](./doc/configuration.md).
+OSNASLib provides several example configurations for utilizing different baseline components. Please refer to `./config/` for more information about configuration.
 
 ## Customize NAS For Your Tasks
 ### Generate Templare

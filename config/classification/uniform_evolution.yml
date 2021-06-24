@@ -2,24 +2,24 @@ agent:
     main_agent: "CFSearchAgent"
     training_strategy_agent: "UniformSampler"
     search_strategy_agent: "EvolutionSearcher"
-    search_space_agent: "ProxylessNAS"
+    search_space_agent: "SPOS"
 
     criterion_agent: "LabelSmoothingCrossEntropy"
 
 search_utility:
     directly_search: False
-    generation_num: 20
+    generation_num: 0
     population_num: 50
     parent_num: 10
     info_metric: "flops"
-    target_hc: 90
+    target_hc: 27
 
 
 train:
     resume: False
-    random_seed: 42
+    random_seed: 1234
     device: "cuda"
-    ngpu: 2
+    ngpu: 1
     epochs: 100
 
     bn_track_running_stats: True

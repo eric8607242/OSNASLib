@@ -1,7 +1,7 @@
 agent:
     main_agent: "FREvaluateAgent"
     criterion_agent: "FaceCELoss"
-    search_space_agent: "FBNetL"
+    search_space_agent: "SGNAS"
 
 train:
     resume: False

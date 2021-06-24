@@ -15,8 +15,6 @@ train:
 
 criterion:
     normalize: False
-    embedding_channels: 256
-    training_classes: 10575
     margin: 0.3 # Margin of triplet loss
 
 dataset:

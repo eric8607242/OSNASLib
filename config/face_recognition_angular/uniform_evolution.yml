@@ -2,7 +2,7 @@ agent:
     main_agent: "FRSearchAgent"
     training_strategy_agent: "UniformSampler"
     search_strategy_agent: "EvolutionSearcher"
-    search_space_agent: "FBNetL"
+    search_space_agent: "SGNAS"
 
     criterion_agent: "FaceCELoss"
 
@@ -60,7 +60,7 @@ logs_path:
 
 
 experiment_path:
-    resume_path: "./checkpoints/search_1.pth"
+    resume_path: "./checkpoints/search_9.pth"
     checkpoint_root_path: "./checkpoints/"
     best_checkpoint_path: "./best_checkpoint.pth"
 

@@ -1,13 +1,13 @@
 agent:
     main_agent: "CFEvaluateAgent"
-    search_space_agent: "ProxylessNAS"
+    search_space_agent: "SPOS"
     criterion_agent: "LabelSmoothingCrossEntropy"
 
 train:
     resume: False
-    random_seed: 42
+    random_seed: 1234
     device: "cuda"
-    ngpu: 2
+    ngpu: 1
     epochs: 150
 
     bn_track_running_stats: True
@@ -22,8 +22,8 @@ dataset:
     input_size: 32
 
     batch_size: 128
-    num_workers: 0
-    train_portion: 0.8
+    num_workers: 4
+    train_portion: 1
 
 optim:
     optimizer: "sgd"
