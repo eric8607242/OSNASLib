@@ -39,7 +39,7 @@ optional arguments:
 ```
 ### Classification
 ``` python3 
-python3 main.py -c ./config/classification/uniform_evolution.py --title uniform_sampling_evolution_search
+python3 main.py -c ./config/classification/uniform_evolution.yml --title uniform_sampling_evolution_search
 ```
 
 ### Face Recognition
@@ -49,7 +49,7 @@ bash ./script/facedata_download.sh
 ```
 > Thanks to Johnnylord for the support of face recognition training pipeline.
 ```bash
-python3 main.py -c ./config/face_recognition/uniform_evolution.py --title uniform_sampling_evolution_search
+python3 main.py -c ./config/face_recognition/uniform_evolution.yml --title uniform_sampling_evolution_search
 ```
 
 OSNASLib provides several example configurations for utilizing different baseline components. Please refer to `./config/` for more information about configuration.
