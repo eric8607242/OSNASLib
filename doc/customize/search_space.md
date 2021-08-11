@@ -88,13 +88,14 @@ class [CUSTOMIZE CLASS]Supernet(BaseSupernet):
                 "last": []}
         return macro_cfg, micro_cfg
 
-    def get_model_cfg_shape(self):
-        """ Return the shape of model config for the architecture generator.
+    def get_seach_space_cfg_shape(self):
+        """ Return the shape of search space config for the architecture generator.
 
         Return 
-            model_cfg_shape (Tuple)
+            search_space_cfg_shape (list)
         """
-        return model_cfg_shape
+        search_space_cfg_shape = [(len(macro_cfg), len(micro_cfg)) for macro_cfg, micro_cfg in self.search_space_cfg]
+        return search_space_cfg_shape
 
 ```
 

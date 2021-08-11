@@ -121,7 +121,7 @@ class BaseSupernet(nn.Module):
             bn_momentum=0.1,
             bn_track_running_stats=True):
         super(BaseSupernet, self).__init__()
-        self.macro_cfg, self.micro_cfg = self.get_model_cfg(classes)
+        self.macro_cfg, self.micro_cfg = self.get_search_space_cfg(classes)[0]
 
         self.classes = classes
         self.dataset = dataset
@@ -190,11 +190,11 @@ class BaseSupernet(nn.Module):
         return y
 
     @abstractmethod
-    def get_model_cfg(self, classes):
+    def get_search_space_cfg(self, classes):
         raise NotImplemented
 
     @abstractmethod
-    def get_model_cfg_shape(self):
+    def get_search_space_cfg_shape(self):
         raise NotImplemented
     
 

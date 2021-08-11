@@ -29,3 +29,4 @@ from .spos import SPOSSupernet, SPOSLookUpTable, SPOSModel
 from .proxylessnas import ProxylessNASSupernet, ProxylessNASLookUpTable, ProxylessNASModel
 from .mobilefacenet import MobileFaceNetSupernet, MobileFaceNetLookUpTable, MobileFaceNetModel
 from .sgnas import SGNASSupernet, SGNASLookUpTable, SGNASModel
+from .lighttrack import LightTrackSupernet, LightTrackLookUpTable, LightTrackModel
