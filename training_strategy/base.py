@@ -4,8 +4,8 @@ import torch.nn as nn
 
 class BaseSampler:
     def __init__(self, model):
-        self.macro_len, self.micro_len = model.module.get_model_cfg_shape() if isinstance(model, nn.DataParallel) \
-                    else model.get_model_cfg_shape()
+        self.search_space_cfg_shape = model.module.get_search_space_cfg_shape() if isinstance(model, nn.DataParallel) \
+                    else model.get_search_space_cfg_shape()
         
         self.model = model
 

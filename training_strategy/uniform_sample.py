@@ -1,4 +1,5 @@
-import torch
+import numpy as np
+
 import torch.nn as nn
 
 from .base import BaseSampler
@@ -40,10 +41,13 @@ class UniformSampler(BaseSampler):
         """ Generate the architecture to activate into the supernet.
 
         Return:
-            architecture (torch.Tensor)
+            architecture (list)
         """
-        architecture = torch.randint(
-            low=0, high=self.micro_len, size=(self.macro_len,))
+
+        architecture = []
+        for macro_len, micro_len in self.search_space_cfg_shape:
+            architecture.append(np.random.randint(low=0, high=micro_len, size=(macro_len,))
+
         return architecture
 
 
