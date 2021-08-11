@@ -32,4 +32,4 @@ def build_interface(customize_name, customize_class=None):
     render_file(init_template.render(customize_name=customize_name, customize_class=customize_class), os.path.join(root_path, "__init__.py"))
 
     # Add import in model __init__
-    render_import(f"from .{customize_name} import {customize_class}Supernet, {customize_class}LookUpTable, {customize_class}Model", os.path.join("model", "__init__.py"))
+    render_import(f"from .{customize_name} import {customize_class}Supernet, {customize_class}LookUpTable, {customize_class}Model", os.path.join("search_space", "__init__.py"))
