@@ -7,12 +7,23 @@ class FairnessSampler(BaseSampler):
     def __init__(self, model):
         super(FairnessSampler, self).__init__(model)
         
-        self.architecture_order = [
-            [i for i in range(self.micro_len)] for j in range(self.macro_len)]
+        # The order for training candidate blocks in each layer.
+        self.architecture_order = []
+        for macro_len, micro_len in self.search_space_cfg_shape:
+            self.architecture_order.extend([[i for i in range(micro_len)] * macro_len])
+
         for sub_architecture_order in self.architecture_order:
             random.shuffle(sub_architecture_order)
 
-        self.architecture_index = [0 for i in range(self.macro_len)]
+        # The index of candidate blocks in each layer for training.
+        self.architecture_micro_index = []
+        for macro_len, micro_len in self.search_space_cfg_shape:
+            self.architecture_micro_index.extend([0 for i in range(macro_len)])
+
+        # The length of candidate blocks in each layer.
+        self.architecture_micro_len = []
+        for macro_len, micro_len in self.search_space_cfg_shape:
+            self.architecture_micro_len.extend([micro_len for i in range(macro_len)])
 
 
     def step(self):
@@ -53,13 +64,13 @@ class FairnessSampler(BaseSampler):
         Return:
             architecture (torch.Tensor)
         """
-        architecture = torch.zeros(self.macro_len, dtype=torch.int)
+        architecture = [0 for i in range(self.total_macro_cfg_len))
         for i, a in enumerate(architecture):
-            block_index = self.architecture_order[i][self.architecture_index[i]]
+            block_index = self.architecture_order[i][self.architecture_micro_index[i]]
             architecture[i] = block_index
 
-            self.architecture_index[i] += 1
-            if self.architecture_index[i] == self.micro_len:
-                self.architecture_index[i] = 0
+            self.architecture_micro_index[i] += 1
+            if self.architecture_micro_index[i] == self.architecture_micro_len[i]:
+                self.architecture_micro_index[i] = 0
                 random.shuffle(self.architecture_order[i])
         return architecture

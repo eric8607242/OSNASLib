@@ -46,7 +46,7 @@ class UniformSampler(BaseSampler):
 
         architecture = []
         for macro_len, micro_len in self.search_space_cfg_shape:
-            architecture.append(np.random.randint(low=0, high=micro_len, size=(macro_len,))
+            architecture.extend(np.random.randint(low=0, high=micro_len, size=(macro_len,).tolist())
 
         return architecture
 

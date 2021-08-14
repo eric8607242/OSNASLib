@@ -6,6 +6,8 @@ class BaseSampler:
     def __init__(self, model):
         self.search_space_cfg_shape = model.module.get_search_space_cfg_shape() if isinstance(model, nn.DataParallel) \
                     else model.get_search_space_cfg_shape()
+
+        self.total_macro_cfg_len = sum(macro_len for micro_len, macro_len in self.search_space_cfg_shape))
         
         self.model = model
 
