@@ -1,4 +1,5 @@
 # OSNASLib
+The is the repo for the paper ["OSNASLib: One-Shot NAS Library"](https://neural-architecture-ppf.github.io/papers/00010.pdf), which is accepted to ICCV workshop on Neural Architectures: Past, Present and Future for extend abstract paper.
 
 ## Introduction
 OSNASLib is a general one-shot NAS framework empowering uses to incorporate one-shot NAS methods into various tasks (e.g. face recongition) easily. OSNASLib consists of six major components: criterion, dataflow, training agent, search space, search strategy, and training strategy.
@@ -38,8 +39,14 @@ optional arguments:
     -c, --config            The path to the config file. Refer to ./config/ for serveral example config file.
 ```
 ### Classification
+#### Search
 ``` python3 
 python3 main.py -c ./config/classification/uniform_evolution.yml --title uniform_sampling_evolution_search
+```
+#### Evaluate (Train from scratch)
+Set the search space in `./config/classification/evaluate_classification.yml` for different search space.
+``` python3 
+python3 main.py -c ./config/classification/evaluate_classification.yml --title uniform_sampling_evolution_search
 ```
 
 ### Face Recognition
@@ -48,8 +55,14 @@ Before searching architecture for face recognition, please download the dataset 
 bash ./script/facedata_download.sh
 ```
 > Thanks to Johnnylord for the support of face recognition training pipeline.
+#### Search
 ```bash
 python3 main.py -c ./config/face_recognition/uniform_evolution.yml --title uniform_sampling_evolution_search
+```
+#### Evaluate (Train from scratch)
+Set the search space in `./config/face_recognition/evaluate_classification.yml` for different search space.
+```bash
+python3 main.py -c ./config/face_recognition/evaulate_recognition.yml --title uniform_sampling_evolution_search
 ```
 
 OSNASLib provides several example configurations for utilizing different baseline components. Please refer to `./config/` for more information about configuration.
@@ -82,5 +95,4 @@ In OSNASLib, we provide the example for serveral tasks. Please reference for fol
 * [AutoDL-Projects](https://github.com/D-X-Y/AutoDL-Projects)
 * [Awesome-AutoDL](https://github.com/D-X-Y/Awesome-AutoDL)
 * [AutoML.org](https://www.automl.org/)
-
 
